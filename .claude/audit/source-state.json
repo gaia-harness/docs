@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "captured_at": "2026-10-24",
-  "gaia_commit": "a58b80366f14ce9f6bbca1fb27aea484262bf442",
+  "captured_at": "2026-10-25",
+  "gaia_commit": "512eb69baf3d47f7a91a91f6a4dcc44b2b72a438",
   "items": [
     {
       "kind": "agent",
@@ -210,10 +210,10 @@
         ],
         [
           383,
-          468
+          473
         ]
       ],
-      "content_hash": "bc5009d747cfbd1c42abce204872857f37d023b1793ef25ff6d4da0b87d34b45",
+      "content_hash": "1e053a637b740dc7c1551dfc1069cfaa3267ad1d489f2a6e4b5ae73222d42f82",
       "excluded_from_docs": false
     },
     {
@@ -312,7 +312,7 @@
       "name": "gaia fitness render-card",
       "description": "render-card [--cols N] Render the /gaia-fitness report card from report JSON on stdin (width-aware ASCII).",
       "audience": "adopter",
-      "content_hash": "ffb1b166d257cd36563e395ad76148193486e37356510034dc84b6c9be899c5f",
+      "content_hash": "d6365e3d02012e682f5210e683544fdca1458a88d840a1dd1bc9fefe2e808ed6",
       "excluded_from_docs": false
     },
     {
@@ -384,7 +384,7 @@
       "name": "gaia init strip-branding",
       "description": "strip-branding --title <T> Remove GAIA branding from the project.",
       "audience": "adopter",
-      "content_hash": "50a014d79066acdc4726a26d222ef08e3a4806624195885f32f45251bb71b498",
+      "content_hash": "ccdefd423446bd520bad7c4106ebe640df5af8b24d75f912648b2274176905bd",
       "excluded_from_docs": false
     },
     {
@@ -1005,7 +1005,7 @@
       "name": "/gaia-init",
       "description": "Initializes a new project from the GAIA harness. Renames, strips GAIA branding, configures i18n, and installs Claude skills and plugins.",
       "audience": "adopter",
-      "content_hash": "cef5f8deb2d1a626214d33ed6925ecd4eb01b9882b16dfc097264dc2ec60d134",
+      "content_hash": "ad2098d8172adc10ea39745ca4b71d62b50cb2d1ee49c85d7d9819a7ed039938",
       "excluded_from_docs": false
     },
     {
@@ -1023,7 +1023,7 @@
       "name": "/gaia-release",
       "description": "Maintainer-only. Cuts a new GAIA release. Bumps the version, graduates the CHANGELOG, regenerates the manifest, opens the release PR, then tags on merge.",
       "audience": "contributor",
-      "content_hash": "bfd918f35aa207cb31029aef00a988df680177444d2bfb5a8fbeb162d0f48b5d",
+      "content_hash": "cd6ad4b3ef7121677f8c0b8e835122edde3ba0b74fcd00d1a98c035599aa3248",
       "excluded_from_docs": false
     },
     {
@@ -1391,7 +1391,7 @@
       "name": "pr-merge-audit-check.sh",
       "description": "PreToolUse Bash hook: BLOCK `gh pr merge` until every dispatched Code Audit",
       "audience": "adopter",
-      "content_hash": "8ba6574052cc257654f7c0fec632638e63cb53031c1061e2b419c23e504e0aff",
+      "content_hash": "1cff6cc5566f7285b735647ffdd525b4ba9e0697dfc6a840dcb4b2c619a5b373",
       "excluded_from_docs": false
     },
     {
@@ -1605,7 +1605,7 @@
       "name": "audit-scope.sh",
       "description": "audit-scope.sh: the one ownership classifier for the Code Audit Team.",
       "audience": "adopter",
-      "content_hash": "a1e687e72c10cc461a86741d861e8b0dc2afdd877c2c1bceb5b406a89f9af4ad",
+      "content_hash": "bad41c0b22d93d5c2be636bc62b8f484399925ee46d8e3b9e63b23f1f762ab12",
       "excluded_from_docs": false
     },
     {
@@ -2018,7 +2018,7 @@
           297
         ]
       ],
-      "content_hash": "6337cb2b1c9c64813dfa01bea4b9a0e9bf88bbcf0b83541db9bb20056e32a78b",
+      "content_hash": "70b8aa14ddab4469e38e890995cca2d302a097c12a274910b25fdb3d065b5f6b",
       "excluded_from_docs": false
     },
     {
@@ -2045,7 +2045,7 @@
       "name": "setup/land-decisions",
       "description": "`/setup-gaia` reads this file, whole: Phase 5.5 runs `## Land the decisions` when project decisions may be recorded, and Phase 6 runs `## The setup ping` and then `## The closing message` on every run.",
       "audience": "adopter",
-      "content_hash": "a455eeaefff263065fe354300e2ecb23626c0102afc16a6b9318e9c7e398d349",
+      "content_hash": "381493dc1869154b2d9c522f327bbbf645f218729c879bce7de3b345faa132af",
       "excluded_from_docs": false
     },
     {
@@ -2337,7 +2337,7 @@
       "name": "bats-assertions",
       "description": "Bats Assertion Hygiene (bash 3.2 safe)",
       "audience": "contributor",
-      "content_hash": "7e7acc9e7a6cd558e7253b3dc2b9e9082964a468f376e1a864cc0fa985050f89",
+      "content_hash": "70dd2c1e4262c90747c9a2e1d7924a9846fe549d1273f4662f72ca9f77d5d897",
       "excluded_from_docs": false
     },
     {
@@ -2795,9 +2795,9 @@
       "kind": "skill",
       "path": ".claude/skills/release-notes/SKILL.md",
       "name": "release-notes",
-      "description": "Maintainer-only. Translates a version's GAIA CHANGELOG entries into plain-language public release notes for the marketing site (gaiareact.com), writing a release-data `.ts` file under `../website/src/pages/changelog/releases/` plus an editorial-decisions report for human review. Use when the maintainer wants the public notes for a version (\"write release notes\", \"what's new on the site for v1.5.0\"), right after cutting a release, or to backfill a historical `## [x.y.z]` block. Not for editing `CHANGELOG.md` or cutting a release (`/gaia-release`).",
+      "description": "Maintainer-only. Translates a version's GAIA CHANGELOG entries into plain-language public release notes for the marketing site (gaiaharness.com), writing a release-data `.ts` file under `../website/src/pages/changelog/releases/` plus an editorial-decisions report for human review. Use when the maintainer wants the public notes for a version (\"write release notes\", \"what's new on the site for v1.5.0\"), right after cutting a release, or to backfill a historical `## [x.y.z]` block. Not for editing `CHANGELOG.md` or cutting a release (`/gaia-release`).",
       "audience": "contributor",
-      "content_hash": "8f2bb08616704c067360801ef625a80091ab1eeddc4fc06a3e2af9a54e3761a7",
+      "content_hash": "606656ee648258e83e62d5957056329c61481ca5c0f2a4b800922a0a9b5c8ae4",
       "excluded_from_docs": false
     },
     {
@@ -3330,7 +3330,7 @@
           384
         ]
       ],
-      "content_hash": "8d436e39048effe9526a63e18a6c92a2a57012e25c193858614807134b41fab2",
+      "content_hash": "bd36f7d6e001deb04db1a1e8487f2cde41b06cda9f034c062a7109a3e1349fed",
       "excluded_from_docs": false
     },
     {
@@ -3484,7 +3484,7 @@
           20
         ]
       ],
-      "content_hash": "5bc54a3f0a75edca6209e2e6d79574fa597b7f1f19efd75b8d4c1f52a58073fd",
+      "content_hash": "e7fa51d6fc0c436cb2e21c1b26b101115ac9ea54c7576c147d5b3648973c3a6f",
       "excluded_from_docs": false
     },
     {
@@ -3502,7 +3502,7 @@
       "name": "wiki/concepts/GAIA Init Workflow.md",
       "description": "GAIA Init Workflow",
       "audience": "adopter",
-      "content_hash": "8886a9f578730a25c1cd0e57414666d72ef22a2445c3865bf520a130f38236cb",
+      "content_hash": "a43071354a15fea2496b75420831bffb56d4f198ee56d5dc75eecf242bba3e25",
       "excluded_from_docs": false
     },
     {
@@ -3687,31 +3687,35 @@
           91
         ],
         [
-          101,
-          103
+          93,
+          95
         ],
         [
-          231,
-          233
+          104,
+          106
         ],
         [
-          250,
-          262
+          234,
+          236
         ],
         [
-          266,
-          268
+          253,
+          265
         ],
         [
-          270,
-          283
+          269,
+          271
         ],
         [
-          303,
-          305
+          273,
+          286
+        ],
+        [
+          306,
+          308
         ]
       ],
-      "content_hash": "2407b1f11a926ae1ec2da136299e0538444a89f5098cbde08b5a26103db451b0",
+      "content_hash": "b903a48397a170ef99500f089adb0bc662a520d00740f24e676367e34e02531f",
       "excluded_from_docs": false
     },
     {
@@ -3804,7 +3808,7 @@
       "name": "wiki/concepts/Release Workflow.md",
       "description": "Release Workflow",
       "audience": "contributor",
-      "content_hash": "0030030726ccadbc73ab79f359fbe7f45cb3e89b695c2084976833e8f9794feb",
+      "content_hash": "74ef978040dd47b9b11906f30e28c4b2afb9e1809e7d9b982abff248b4d5707e",
       "excluded_from_docs": false
     },
     {
@@ -3813,7 +3817,7 @@
       "name": "wiki/concepts/Release-Notes.md",
       "description": "Maintainer-only. Translate a version's GAIA CHANGELOG entries into plain-language public release notes for the marketing site.",
       "audience": "contributor",
-      "content_hash": "410177967f85d7f2efcc96ffb4625a56d3320f0dd3e547bb19a6062297263e8b",
+      "content_hash": "78fcdcffd764d0188c5c7ffca2899898c8c1cf7dfb3bf5e6006f21eaeeceef4e",
       "excluded_from_docs": false
     },
     {
@@ -3934,7 +3938,7 @@
           211
         ]
       ],
-      "content_hash": "f362399c67686948b7e16750e6f8dc8c6f2b0a99ddebb9119a668db274e5b5cf",
+      "content_hash": "b29b4481d96f5afa37878bd88d10c5d260ea7b0ba37bf1195e5699cfc4e39a94",
       "excluded_from_docs": false
     },
     {
@@ -3943,7 +3947,7 @@
       "name": "wiki/decisions/Bundle-time Scrub.md",
       "description": "Bundle-time Scrub",
       "audience": "contributor",
-      "content_hash": "0c92794aaccdda42740bf99a88e512ab20a3d9383ba0e2efa17461d8c277db76",
+      "content_hash": "56bfacd8167d94f9ee29f82abf361aab36e0ce27688ea0accdce77df39387715",
       "excluded_from_docs": false
     },
     {
@@ -3952,7 +3956,7 @@
       "name": "wiki/decisions/CLI-Binary-Split.md",
       "description": "CLI Binary Split",
       "audience": "contributor",
-      "content_hash": "ab11b0dcabe339f3029d7d42e1af6acafa14b7e3ad67bda2f6d659b51185bfb9",
+      "content_hash": "8b0523c5f22f31d6b12da96fe180bb1e13de25e32b6fa2c0b095b5036e488297",
       "excluded_from_docs": false
     },
     {
@@ -4140,7 +4144,7 @@
       "name": "wiki/decisions/Sharded CI Test Matrix.md",
       "description": "Decision: Sharded CI Test Matrix",
       "audience": "contributor",
-      "content_hash": "57b6d96bbf1276f8a30d1e854fc31c9919ea21a491ee97c8c8e017d1a74fcce8",
+      "content_hash": "00f7c7cb6f905d0b0ddef456bd403b4a5c7352460d10f7c48e3bf027be97245f",
       "excluded_from_docs": false
     },
     {
@@ -4615,7 +4619,7 @@
       "name": "wiki/log.md",
       "description": "Log",
       "audience": "adopter",
-      "content_hash": "1e40cd3d2cb8587b46009572f906cdd78fc6dcca52dbaea24fcd675dc161f513",
+      "content_hash": "91f052d8e76aa5b8ea084a11efaf353c00b80bcdd0cc256bd3b1d6eb406b158d",
       "excluded_from_docs": false
     },
     {
@@ -4633,7 +4637,7 @@
       "name": "wiki/meta/lint-report.md",
       "description": "Lint Report: 2026-10-24",
       "audience": "contributor",
-      "content_hash": "39a49a11fd4cfb06babb3df523890e3164ccc3cdb0ee19c2b136fe1bcb517087",
+      "content_hash": "8c18675a2ac438e6e6a609e3ec49766beeaa20312aedcfd92e5ab3208435d937",
       "excluded_from_docs": false
     },
     {
@@ -4738,7 +4742,7 @@
       "name": "wiki/modules/Services.md",
       "description": "Services",
       "audience": "adopter",
-      "content_hash": "6c4348ad375cfea023572e90aedd00da7301fdcf1a4e2c5066a9d744b1bd0054",
+      "content_hash": "d526aace286a820f16717b98e3685e98b8ed4ba73c7de02eb8ce35cb517cd548",
       "excluded_from_docs": false
     },
     {
@@ -4819,7 +4823,7 @@
       "name": "audit-ci-tests.yml",
       "description": "GAIA: Audit CI Tests",
       "audience": "contributor",
-      "content_hash": "9429a86459b74a8d3a032fba00f0b05991dcdd50b3a8078037fadfd5ed4810ea",
+      "content_hash": "c84ea48cf6b474968d03d71d045022fdd50bb98bbf506e6e0cadd6f83eb1b295",
       "excluded_from_docs": false
     },
     {
@@ -4837,7 +4841,7 @@
       "name": "cli-tests.yml",
       "description": "GAIA: CLI Tests",
       "audience": "contributor",
-      "content_hash": "7bb1e1a1ff53e4cf402f5a5c200c5a284cd59d7aabfa986f40fc9972319c9ffb",
+      "content_hash": "a6f02e8d6128f8fc09557e8357b5942418f83d253d87b4eb56bba4577b485e98",
       "excluded_from_docs": false
     },
     {
