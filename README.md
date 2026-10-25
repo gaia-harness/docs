@@ -7,19 +7,23 @@ Built with [Starlight](https://starlight.astro.build) on Astro. Deployed to GitH
 ## Local development
 
 ```sh
-npm install
-npm run dev      # localhost:4321
-npm run build    # production build → ./dist
-npm run preview  # preview the build
+pnpm install
+pnpm dev      # localhost:4321
+pnpm build    # production build to ./dist
+pnpm preview  # preview the build
 ```
 
 ## Structure
 
-- `src/content/docs/` — Markdown/MDX content. Each file becomes a route.
-- `src/assets/` — images embedded in content.
-- `public/` — static assets (favicon, `CNAME`, etc.).
-- `astro.config.mjs` — site config, sidebar, Starlight options.
+- `src/content/docs/`: Markdown/MDX content. Each file becomes a route.
+- `src/assets/`: images embedded in content.
+- `public/`: static assets (favicon, `CNAME`, etc.).
+- `astro.config.mjs`: site config, sidebar, Starlight options.
 
 ## Deploy
 
 Pushes to `main` trigger `.github/workflows/deploy.yml`. PRs build but do not deploy.
+
+## License
+
+Code samples, Claude prompts, and the site's source code are MIT. The documentation text and images are [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). See [LICENSE](LICENSE).
