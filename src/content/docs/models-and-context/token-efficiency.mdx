@@ -9,40 +9,40 @@ import BandScale from '../../../components/BandScale.astro';
 
 Everything GAIA adds to a session takes up part of Claude's context window, the fixed amount of text Claude can hold at once. GAIA keeps that part small on purpose. Its rules, skills, and instruction files are cut down to what improves how Claude works. Each instruction lives in one place instead of being repeated across files, and is checked against the code it describes to keep it accurate. Most of it loads only when a task needs it, which leaves more of the window for your work.
 
-The usage figures on this page were measured in a new GAIA 2.0.0 project on Opus 5.5. Percentages are of a 1M-token context window.
+The session-start, task, and skill figures on this page were measured in a new GAIA 2.2.0 project, created with `npx create-gaia@2.2.0`, on Opus 5.5. They count each file the same way every time, so they are not comparable with the figures earlier versions of this page showed. The audit figures come from an earlier measurement, noted where they appear. Percentages are of a 1M-token context window.
 
 ## At session start
 
-GAIA adds 8,365 tokens to a session before you type anything: 0.84% of the window.
+GAIA adds 7,678 tokens to a session before you type anything: 0.77% of the window.
 
 | What loads in every session | Tokens |
 | --- | --- |
-| [Rules](/reference/rules/) that apply everywhere (8 files) | 4,309 |
+| [Rules](/reference/rules/) that apply everywhere (8 files) | 3,705 |
 | Session-start text from GAIA's [hooks](/reference/hooks/) | 1,403 |
-| The root `CLAUDE.md` | 1,108 |
+| The root `CLAUDE.md` | 1,025 |
 | [Skill](/skills/) and command descriptions | 806 |
 | [Agent](/reference/agents/) descriptions (9) | 739 |
-| **Total** | **8,365 (0.84%)** |
+| **Total** | **7,678 (0.77%)** |
 
 The session-start text was measured in a session on a feature branch. On the default branch, the instructions for working on a branch are left out, so the total is lower. The session-start text is added when a session starts, and again after `/clear` or compaction.
 
-A session started from `frontend/` begins at about 11.1k tokens (1.11%). Claude Code still loads everything above, and adds `frontend/CLAUDE.md` (about 1,040) and the descriptions of the 13 frontend skills (1,676).
+A session started from `frontend/` begins at 10,313 tokens (1.03%). Claude Code still loads everything above, and adds `frontend/CLAUDE.md` (959) and the descriptions of the 13 frontend skills (1,676).
 
 Your own setup adds to this: MCP servers, plugins, and your global `~/.claude/CLAUDE.md` load in every project, with or without GAIA.
 
 ## A typical task
 
-Most rules apply only to certain paths, and load only when Claude works on a file they cover. A task that edits one component and one route loaded 10 of the 21 path-scoped rules:
+Most rules apply only to certain paths, and load only when Claude works on a file they cover. A task that edits one component and one route loaded 10 of the 22 path-scoped rules:
 
 | What the task loaded | Tokens |
 | --- | --- |
-| Root rules for specific paths (3 of 8) | 3,655 |
-| Frontend rules (7 of 13) | 5,282 |
+| Root rules for specific paths (3 of 9) | 3,400 |
+| Frontend rules (7 of 13) | 4,763 |
 | Frontend skill descriptions (13) | 2,001 |
 | `frontend/CLAUDE.md` | 917 |
-| **Added by the task** | **11,855 (1.19%)** |
+| **Added by the task** | **11,081 (1.11%)** |
 
-With the startup load, the session held 20,220 tokens of GAIA (2.02%). If every path-scoped rule loaded, root rules would add up to 9.1k and frontend rules up to 13.4k.
+With the startup load, the session held 18,759 tokens of GAIA (1.88%).
 
 ## Skills
 
@@ -74,6 +74,8 @@ Much of GAIA's checking, counting, and grading is done by deterministic scripts:
 When the audit keeps finding the same kind of problem, [`/gaia-codify`](/maintenance/codify/) proposes a guard for it, such as a check, a skill, or a rule, and adds it once you approve.
 
 ## The audit
+
+The audit figures below were measured in a GAIA 2.0.0 project.
 
 The [audit loop](/workflow/code-audit-team/#the-audit-loop) runs its review rounds in sub-agents, outside your main session. Each sub-agent has its own context window, and your session gets back only a short report.
 
