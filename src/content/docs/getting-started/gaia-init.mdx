@@ -7,7 +7,9 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-`/gaia-init` runs automatically during `npx create-gaia`. It renames the project to your title, sets up language support and how routes load data, removes GAIA's own branding, sets up CODEOWNERS and your environment file, registers Claude tools and plugins, verifies the build, and commits the result. You get a project that compiles, lints, and tests cleanly.
+`/gaia-init` runs automatically during `npx create-gaia`. It renames the project to your title, sets up language support and how routes load data, removes GAIA's own branding, sets up CODEOWNERS and your environment file, installs the React Doctor skill, verifies the build, and commits the result. You get a project that compiles, lints, and tests cleanly.
+
+Then it continues straight into [`/setup-gaia`](/getting-started/setup-gaia/) in the same Claude session. Setup installs this machine's other tools, connects the project to GitHub, and finishes onboarding. You never exit or restart Claude along the way.
 
 `/gaia-init` runs only at the root of a project created by `npx create-gaia`, and stops with a message anywhere else.
 
@@ -17,9 +19,10 @@ import { Aside } from '@astrojs/starlight/components';
 
 1. Ensures [pnpm](https://pnpm.io/) is available and new enough. GAIA requires pnpm 12 or later (the version pinned in `package.json` `packageManager`). If pnpm is missing, init enables it with `corepack enable pnpm`, or installs it globally with npm when Corepack isn't available. If an older major version is on your `PATH` (for example 11.x), init asks you to confirm the upgrade first. It stops if an older pnpm still comes first on your `PATH` after the upgrade.
 2. Runs `pnpm install` in the new project.
-3. Installs [Chromium](https://www.chromium.org/), the browser the story and hook tests run in. `pnpm install` installs no browsers, so without this step the build check in step 4 fails. Init installs only Chromium, without the system libraries some Linux machines also need, so it never asks for your password. It finishes at once when Chromium is already installed.
+3. Installs [Chromium](https://www.chromium.org/), the browser the story and hook tests run in. `pnpm install` installs no browsers, so without this step the build check in [section 4](#4-project-files-and-build-check) fails. Init installs only Chromium, without the system libraries some Linux machines also need, so it never asks for your password. It finishes at once when Chromium is already installed.
+4. Installs the [React Doctor](https://github.com/millionco/react-doctor) skill under `frontend/.claude/skills/`. It goes in before anything reads the app's files, because Claude Code lists the skills in that folder the first time a session reads a file there, so React Doctor is ready in this same session. If this install fails, init shows a warning and carries on. `/setup-gaia` tries it again.
 
-If either install fails, the run stops and shows the error with the command to retry. Fix the cause and resume (see [Resuming after a failure](#resuming-after-a-failure)). To install the browsers and the system libraries they need, run `pnpm install:browsers` yourself in a terminal. On Linux it asks for your `sudo` password, which Claude cannot type.
+If the package or Chromium install fails, the run stops and shows the error with the command to retry. Fix the cause and resume (see [Resuming after a failure](#resuming-after-a-failure)). To install the browsers and the system libraries they need, run `pnpm install:browsers` yourself in a terminal. On Linux it asks for your `sudo` password, which Claude cannot type.
 
 Init does not update your dependencies. The project starts on the exact package versions GAIA's own tests ran against. When packages fall behind or have security advisories, the statusline shows [`/update-deps`](/maintenance/update-deps/), and you run it when you are ready.
 
@@ -28,7 +31,7 @@ Init does not update your dependencies. The project starts on the exact package 
 Before it asks about your project, `/gaia-init` asks how you want to answer the setup questions:
 
 - **Interactive** (recommended): GAIA asks each question and waits for your answer.
-- **Automatic**: GAIA picks the recommended default for every question. It shows you the full list of chosen values and then carries on without stopping. You can interrupt it, and you can change any setting afterward.
+- **Automatic**: GAIA picks the recommended default for every question init asks. It shows you the full list of chosen values and then carries on without stopping. You can interrupt it, and you can change any setting afterward. The question in `/setup-gaia` about connecting GitHub is still asked.
 
 Every question is a menu with the recommended option first. In interactive mode it asks:
 
@@ -86,20 +89,7 @@ Removing i18n later deletes those steps too, since adding a language would then 
 - Copies `frontend/.env.example` to `frontend/.env`. The app's environment file lives in the `frontend/` package; [Playwright](https://playwright.dev/) reads the same file.
 - Runs the full quality gate from the repository root, `pnpm typecheck && pnpm lint && pnpm test:ci && pnpm build` (the root scripts run the `frontend` package), and stops if anything fails. This is the same [Quality Gate](/reference/gates/#quality-gate) every later change must pass, so it proves the new project compiles, lints, and tests cleanly. It is the main reason init takes a few minutes.
 
-### 5. Claude tooling
-
-`/gaia-init` sets up the outside tools and plugins GAIA uses. GAIA's skills and rules already ship with the project. You don't run any of this by hand; it is listed for reference. [`/setup-gaia`](/getting-started/setup-gaia/) runs the same steps on every other machine.
-
-**Tools.** Installed on each machine, not tracked in the repo:
-
-- [React Doctor](https://github.com/millionco/react-doctor): installs the `react-doctor` skill under `frontend/.claude/skills/`, so it only loads in sessions that work on the app.
-- [Playwright CLI](https://github.com/microsoft/playwright-cli) binary: `npm install -g @playwright/cli@latest`. The `playwright-cli` skill that ships with GAIA uses it, and [`/update-deps`](/maintenance/update-deps/) reports when it falls behind.
-
-**Plugins.** The TypeScript language server plugin (`typescript-lsp`), so Claude can jump to definitions and see type errors.
-
-After installing, `/gaia-init` checks each one and reports `[ok]` or `[FAIL]` for each. A failure stops the run so you can retry before continuing.
-
-### 6. Team settings
+### 5. Team settings
 
 `/gaia-init` applies GAIA's two team defaults without asking:
 
@@ -108,33 +98,23 @@ After installing, `/gaia-init` checks each one and reports `[ok]` or `[FAIL]` fo
 
 The file is committed and shared with your team, and `/update-gaia` never overwrites it. A repo admin changes either setting later with `/setup-gaia --reconfigure`.
 
-### 7. Commit
+### 6. Commit
 
-`/gaia-init` commits its own changes as one commit on the current branch, `chore: initialize project with /gaia-init`. [`/setup-gaia`](/getting-started/setup-gaia/) pushes only what is committed, and every later branch or worktree starts from the last commit. Committing makes sure nothing init wrote is left behind. If the commit fails, init says so and tells you to review `git status` and commit before running `/setup-gaia`.
+`/gaia-init` commits its own changes as one commit on the current branch, `chore: initialize project with /gaia-init`. [`/setup-gaia`](/getting-started/setup-gaia/) pushes only what is committed, and every later branch or worktree starts from the last commit. Committing makes sure nothing init wrote is left behind. If the commit fails, init stops there instead of continuing into setup. It shows the error and tells you to review `git status`, commit the changes on your default branch, and then type `/setup-gaia`. A project created with `--no-git` stops at the same point, since setup needs a git repository.
 
-## After gaia-init completes
+### 7. Continue into /setup-gaia
 
-Init marks this machine's setup as done and deletes its own one-time setup files. Then it prints:
+Init deletes its own one-time setup files, sends its [usage ping](/reference/telemetry/), and prints:
 
 ```
-<Project Title> is ready for development. Exit Claude, then from your terminal:
-
-cd <project-folder-name>
-
-Then start Claude again, and run /setup-gaia. After your first push, /setup-gaia registers the GAIA-Audit required check.
-
-The statusline shows /update-deps when packages are outdated or have security advisories; run it when you are ready.
+<Project Title> is configured. Setup is now running: GAIA continues with /setup-gaia in this session. After your first push, /setup-gaia registers the GAIA-Audit required check. The statusline shows /update-deps when packages are outdated or have security advisories; run it when you are ready.
 ```
 
-If `.github/CODEOWNERS` still holds the placeholder owner, the message opens with a note that `/setup-gaia` offers to set your handle before its first push (see [step 4](#4-project-files-and-build-check)).
+If `.github/CODEOWNERS` still holds the placeholder owner, a note above it says `/setup-gaia` offers to set your handle before its first push (see [step 4](#4-project-files-and-build-check)).
 
-Exit Claude and relaunch from inside the project folder. New plugins and skills only load in a new session.
+Then Claude runs [`/setup-gaia`](/getting-started/setup-gaia/) in the same session, with no command from you. Setup installs the Playwright CLI and the TypeScript language server plugin, finds React Doctor already in place, and asks how to connect the project to GitHub. That GitHub question is asked even if you chose Automatic for init's questions. While setup runs, the [statusline](/workflow/statusline/) leaves out its setup nudge, since setup is already running.
 
-<Aside type="caution">
-When you exit Claude, your shell returns to the directory you launched from, not the project folder. Run `cd <project-folder-name>` before relaunching, or the new plugins and skills will not load.
-</Aside>
-
-From there you are ready to build. Run `pnpm dev` to start the app locally, or ask Claude to run it. When you are ready for GitHub, run [`/setup-gaia`](/getting-started/setup-gaia/); it creates the GitHub repo for you (or uses one you already created). [Onboarding, as you build](/getting-started/onboarding/) shows what GAIA does as your first commits and pull requests land.
+Setup ends with its [closing message](/getting-started/setup-gaia/#finish), which suggests typing `/clear` to start your first feature with a fresh context. From there you are ready to build. Run `pnpm dev` to start the app locally, or ask Claude to run it. [Onboarding, as you build](/getting-started/onboarding/) shows what GAIA does as your first commits and pull requests land.
 
 ## Resuming after a failure
 
@@ -148,3 +128,7 @@ Init's scripted steps that already finished are skipped, and the rest run again 
 ```text
 Resume /gaia-init from the step that failed.
 ```
+
+After the resume, init runs its remaining steps and continues into `/setup-gaia` as it would on a first run.
+
+A stop after init has handed off to setup is setup's to resume, not init's. The statusline then shows `⚙️ /setup-gaia (Required)`. Fix the cause and type `/setup-gaia`. It picks up at the first unfinished step. The same goes for a setup step that Claude Code's auto mode blocks: type `/setup-gaia` again and approve the action when Claude Code asks. See [On failure: re-run](/getting-started/setup-gaia/#on-failure-re-run).
