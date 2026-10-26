@@ -43,6 +43,33 @@ After the preflight, in outline, it:
 
 A 2.x release ships `gaia-bundle-<tag>.tar.gz` with a `.sha256` asset, and any migration notes it needs travel inside the bundle under `.gaia/migrations/` (see [Migration notes](/maintenance/update-gaia/#migration-notes)). While 1.x projects can still reach a 2.x release, the release body opens with a line that sends a 1.6.1 project to the 2.0.0 migration.
 
+## Test an unreleased build in a project
+
+Before a release, you can try your committed GAIA changes on a real project. Build a bundle from your GAIA checkout, then have `/update-gaia --local` merge it into the project with the same merge code a release update uses.
+
+The builder is `.gaia/tests/distribution/lib/build-local-bundle.sh`. Commit first: it stops on any uncommitted change to a tracked file, because the bundle is named after the commit it was built from. Any branch works. It also stops when the committed CLI bundles are out of date, or when a tarball for the same commit already sits in the output folder. In your GAIA checkout, ask:
+
+```text
+Build a local GAIA bundle from this checkout with .gaia/tests/distribution/lib/build-local-bundle.sh into <output folder>, and tell me the path to the tarball.
+```
+
+The bundle is `gaia-bundle-v<version>-dev.<sha>.tar.gz`. `<version>` is the plain version in `.gaia/VERSION` (unchanged during development) and `<sha>` is the first twelve characters of the commit. The bundle also carries `.gaia/VERSION-dev`, a small file holding `dev.<sha>`, which records which build a project is on. Then, in the project, ask:
+
+```text
+Run /update-gaia --local <path to the tarball>.
+```
+
+The run is a normal update, with these differences:
+
+- **Trust.** The tarball's checksum is computed on your machine and only guards against a corrupted cache. Nothing checks the bundle against a published release, so the run labels it a local, unverified bundle at the start, in the Proceed question, and in the summary.
+- **Version.** A bundle older than the project's GAIA version stops the run before anything changes, and the message names both versions. A bundle with the same build the project already records is reported as already synced. A same-version bundle from a different commit proceeds. That is the normal case.
+- **Base.** When the project already records a build, the merge uses that build as its base, so only your changes since the last sync arrive. That build comes only from this machine's update cache, the folder where `/update-gaia` keeps the bundles it has read. When the build is no longer there, or a migration note has since moved `.gaia/VERSION`, the run falls back to the plain release of the project's version and says so in the Proceed question.
+- **Migration notes.** Notes up to the bundle's version run as usual. A newer note the bundle carries is not run. The Proceed question and the summary name it, so you can ask Claude to follow it as a test.
+- **Branch.** The update branch is `update/v<version>-dev.<sha>-<timestamp>`.
+- **Record.** The project's `.gaia/VERSION` keeps a plain release version, and `.gaia/VERSION-dev` records the build. No usage ping is sent, and the summary shows the build commit instead of a changelog.
+
+The next release update merges against the recorded build while this machine still caches it, then removes `.gaia/VERSION-dev`. To undo a bad sync, revert its update pull request.
+
 ## The two CLI binaries
 
 The CLI bundles two binaries from two entry points. `.gaia/cli/gaia` is the binary every project gets; `.gaia/cli/gaia-maintainer` carries the release surface and is excluded by `.gaia/release-exclude`. esbuild keeps the release code out of the shipped binary, so `gaia` has no way to cut a release. See [CLI surface](/contributors/cli/#build-layout).

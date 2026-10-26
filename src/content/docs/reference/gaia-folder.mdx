@@ -18,6 +18,7 @@ You rarely edit anything here by hand. When you want to change a setting, ask Cl
 | Path | What it is | In git | Written by | `/update-gaia` |
 |---|---|---|---|---|
 | `VERSION` | The GAIA version your project is on | Committed | The release, then `/update-gaia` | Rewritten at the end of an update |
+| `VERSION-dev` | The unreleased GAIA build the project was last synced from. Present only after such a sync | Committed | `/update-gaia --local` | Removed by the next release update |
 | `manifest.json` | The list of files GAIA ships, each with its ownership class | Committed | The release, then `/update-gaia` | Replaced with the new release's copy at the end of an update |
 | `LICENSE` | GAIA's license notice for the files it provides | Committed | The release | Merged |
 | `cli/` | The `gaia` CLI and the templates the scaffolders use | Committed | The release | Merged |
@@ -44,11 +45,13 @@ You rarely edit anything here by hand. When you want to change a setting, ask Cl
 
 These come with every release. Each one, except `VERSION` and `manifest.json`, has a class in `.gaia/manifest.json` that decides how `/update-gaia` merges it; the classes are explained in [How GAIA classes its files](/maintenance/update-gaia/#how-gaia-classes-its-files). Nearly every file in `.gaia/` is `owned` (GAIA maintains it). `audit-ci.yml` is `shared`: GAIA provides the starting version and you customize it.
 
-### VERSION and manifest.json
+### VERSION, VERSION-dev and manifest.json
 
 `.gaia/VERSION` holds the GAIA version your project is on, such as `2.0.0`. `/update-gaia` reads it to find your starting point, and it writes the new version last, after everything else in the update is done. If an update stops partway, the version stays where it was, and re-running `/update-gaia` picks up the same update. See [Stopping and resuming](/maintenance/update-gaia/#stopping-and-resuming).
 
-`.gaia/manifest.json` lists the files the release ships and the class of each one. `/update-gaia` uses the classes to decide how to merge each file. Files that are not in the manifest are yours, and the merge never touches them. `VERSION` and `manifest.json` are not in it either: instead of merging them, `/update-gaia` rewrites both at the end of an update.
+`.gaia/VERSION-dev` exists only in a project synced from an unreleased GAIA build with `/update-gaia --local` (see [Test an unreleased build in a project](/contributors/release/#test-an-unreleased-build-in-a-project)). It names that build, and while it exists the next update starts from that build instead of the release in `VERSION`. The next release update removes it.
+
+`.gaia/manifest.json` lists the files the release ships and the class of each one. `/update-gaia` uses the classes to decide how to merge each file. Files that are not in the manifest are yours, and the merge never touches them. `VERSION` and `manifest.json` are not in it either: instead of merging them, `/update-gaia` rewrites both at the end of an update. `VERSION-dev` is not in it, and no release ships it: a local sync writes it, and the next release update removes it.
 
 Don't edit either file by hand. A wrong version makes the next update compare your files against the wrong release.
 
