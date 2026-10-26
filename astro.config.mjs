@@ -77,7 +77,7 @@ export default defineConfig({
 			// Keep our bespoke src/pages/404.astro; don't let Starlight inject its own.
 			disable404Route: true,
 			editLink: {
-				baseUrl: 'https://github.com/gaia-react/docs/edit/main/src/content/docs/',
+				baseUrl: 'https://github.com/gaia-harness/docs/edit/main/src/content/docs/',
 			},
 			components: {
 				Header: './src/overrides/Header.astro',
@@ -88,7 +88,7 @@ export default defineConfig({
 				{
 					icon: 'github',
 					label: 'GitHub',
-					href: 'https://github.com/gaia-react/gaia',
+					href: 'https://github.com/gaia-harness/gaia',
 				},
 			],
 			plugins: [

@@ -57,7 +57,7 @@ The base is what makes the merge safe. Comparing yours with the base shows what 
 When you both changed a file, `git merge-file` merges the two line by line. Claude then reads your change and GAIA's change side by side, even when the text merged cleanly. Two edits can solve the same problem on different lines and merge without a conflict into duplicate or contradictory instructions, which a line-by-line merge cannot see.
 
 - **Separate concerns that merged cleanly** are written with no question.
-- **Everything else** becomes one question: a text conflict, two changes to the same thing, or changes that contradict each other. The answers are **Combine** (both changes in one version, shown to you first), **Keep mine**, **Take GAIA's**, and **Decide later**, with the recommended one first. When your change covers something GAIA's misses, Claude suggests opening an issue on [gaia-react/gaia](https://github.com/gaia-react/gaia) describing it.
+- **Everything else** becomes one question: a text conflict, two changes to the same thing, or changes that contradict each other. The answers are **Combine** (both changes in one version, shown to you first), **Keep mine**, **Take GAIA's**, and **Decide later**, with the recommended one first. When your change covers something GAIA's misses, Claude suggests opening an issue on [gaia-harness/gaia](https://github.com/gaia-harness/gaia) describing it.
 
 Every file the merge overwrites or deletes is backed up first, under `.gaia-backup/<timestamp>/` in the update worktree (gitignored).
 

@@ -64,7 +64,7 @@ You point it at one specific interaction, like a button click, and it finds the 
 
 ### Tailwind
 
-Every color uses a shadcn role token, a color named for its job rather than its hue (`bg-background`, `text-foreground`, `text-muted-foreground`, `bg-primary`, `border-input`, `text-destructive`). One token covers both the light and dark themes. `@gaia-react/lint` fails raw palette classes (like `bg-blue-500`), color literals, and arbitrary color classes. Other arbitrary values are allowed when no scale step or token fits.
+Every color uses a shadcn role token, a color named for its job rather than its hue (`bg-background`, `text-foreground`, `text-muted-foreground`, `bg-primary`, `border-input`, `text-destructive`). One token covers both the light and dark themes. `@gaia-harness/lint` fails raw palette classes (like `bg-blue-500`), color literals, and arbitrary color classes. Other arbitrary values are allowed when no scale step or token fits.
 
 `cn` (from the `cn` package) is the only helper for combining classes. It joins classes and resolves conflicts between them, so a `className` passed in by the caller comes last and overrides the component's default. Write a conditional class as `cond && 'class'`; lint rejects the object form and ternaries with an empty branch. Variants with several classes use `cva`. Custom sizes use `rem`, never `px`, and a new role token is named for what the element is.
 
