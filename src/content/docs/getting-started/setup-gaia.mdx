@@ -1,21 +1,21 @@
 ---
 title: /setup-gaia
-description: The one setup command for a GAIA project. Run it once after /gaia-init, and again any time. It checks what this clone still needs and runs only those steps.
+description: The one setup command for a GAIA project. /gaia-init runs it on a new project, and you can run it again any time. It checks what this clone still needs and runs only those steps.
 sidebar:
   order: 3
 ---
 
-`/setup-gaia` is the one setup command for a GAIA project. Run it once after `/gaia-init`, and run it again any time. It checks what this clone still needs and runs only those phases:
+`/setup-gaia` is the one setup command for a GAIA project. On a new project, `/gaia-init` runs it for you, and you can run it again any time. It checks what this clone still needs and runs only those phases:
 
 - **Setup for this machine**, which every clone needs: tool installs, plugins, making the statusline scripts executable, `frontend/.env`, the sandbox decision, and, if you have your own global statusline, which statusline draws the left side.
 - **The GitHub repository**: create one, use one you already have, or set one up yourself. Private by default. When you are a repo admin, it also protects the default branch, makes `GAIA-Audit` a required check, and offers squash-only merges.
 - **Team settings** in `.gaia/project.json`: the git isolation policy and the sandbox recommendation. Both come with a default, so a plain run records the default and asks nothing.
 
-It is safe for **any developer** to run at **any time**. You start it by typing it; Claude never starts it on its own. Run it from your main copy of the repo. Inside a worktree it stops and names the main copy; open Claude Code there and run it again.
+It is safe for **any developer** to run at **any time**. You start it by typing it; Claude never starts it on its own or because you asked in plain language. The one exception is a new project: `/gaia-init`, which you started, runs setup as its last step in the same session. Run it from your main copy of the repo. Inside a worktree it stops and names the main copy; open Claude Code there and run it again.
 
 ## When to use this
 
-- After `/gaia-init` on a project you created with `npx create-gaia`.
+- On a new project created with `npx create-gaia`, only if `/gaia-init` stopped before setup finished. Otherwise init has already run it for you.
 - After `git clone`-ing an existing GAIA project, once per machine.
 - Any time the statusline shows a `⚙️ /setup-gaia` nudge, or you want to add GitHub to a project that skipped it earlier.
 
@@ -36,18 +36,22 @@ Four checks run every time:
 
 ## Phase: per-machine setup
 
-Skipped if this clone already finished its machine setup (a new project finishes it inside `/gaia-init`). Otherwise these steps run in order. Each one is recorded when it finishes, so a re-run picks up at the first unfinished step.
+Skipped if this clone already finished its machine setup. Otherwise these steps run in order. Each one is recorded when it finishes, so a re-run picks up at the first unfinished step.
 
 ### Install Tools
 
-Two outside tools, the same as step 5 of [`/gaia-init`](/getting-started/gaia-init/#5-claude-tooling):
+Two outside tools, installed on each machine and not tracked in the repo. Each one installs only when it is missing:
 
-- **[React Doctor](https://github.com/millionco/react-doctor)** skill, installed under `frontend/.claude/skills/`.
-- **Playwright CLI** binary, installed globally.
+- **[React Doctor](https://github.com/millionco/react-doctor)** skill, installed under `frontend/.claude/skills/`, so it only loads in sessions that work on the app. On a new project, `/gaia-init` has already installed it, so setup just records it.
+- **[Playwright CLI](https://github.com/microsoft/playwright-cli)** binary: `npm install -g @playwright/cli@latest`. The `playwright-cli` skill that ships with GAIA uses it, and [`/update-deps`](/maintenance/update-deps/) reports when it falls behind.
+
+Claude Code lists the skills in `frontend/.claude/skills/` the first time a session reads a file in that folder. On a fresh clone where the session read an app file before setup installed React Doctor, the skill appears from your next session.
+
+After installing, setup checks each tool and reports `[ok]` or `[FAIL]`. A failure stops setup so you can fix the cause and run it again.
 
 ### Install Plugins
 
-The TypeScript language server plugin (`typescript-lsp`), so Claude can jump to definitions and see type errors. A plugin that is already installed is left as it is.
+The TypeScript language server plugin (`typescript-lsp`), so Claude can jump to definitions and see type errors. It loads in the session that installs it. A plugin that is already installed is left as it is.
 
 ### Automatic steps
 
@@ -124,12 +128,19 @@ One such step catches a machine up to GAIA 2.0.0. The 2.0.0 migration cleans up 
 
 ## Finish
 
-When a repo admin with `gh` logged in runs setup on the default branch, the team-wide answers from this run are committed and pushed to that branch as `chore(gaia): record setup decisions`, so they reach your team. On any other branch, or for anyone who is not an admin, team answers are not recorded; they stay owed until an admin runs `/setup-gaia` on the default branch. This machine's setup is marked done. Then the command prints one of two closing lines:
+When a repo admin with `gh` logged in runs setup on the default branch, the team-wide answers from this run are committed and pushed to that branch as `chore(gaia): record setup decisions`, so they reach your team. On any other branch, or for anyone who is not an admin, team answers are not recorded; they stay owed until an admin runs `/setup-gaia` on the default branch. This machine's setup is marked done. Then the command prints its closing message. It starts with one of two status lines:
 
 - `You're all set: your GAIA project is ready.` when nothing this machine can do is left.
 - `Setup isn't finished: these project settings are still owed: ...` naming the team settings still to apply, when a GitHub step was refused or skipped. Fix the cause and re-run.
 
-Restart Claude Code so the new plugins and skills load.
+The rest of the message:
+
+- `The sandbox you enabled takes effect from your next Claude Code session.`, only when this run turned the [sandbox](#sandbox-decision) on.
+- `If this session is in auto mode, press Shift+Tab to leave it, or start Claude with plain claude next time.` Every run prints this line, since setup does not check which permission mode the session is in.
+- `Type /clear to start your first feature with a fresh context.`
+- A link to [Onboarding, as you build](/getting-started/onboarding/).
+
+There is no restart: the plugin and tools setup installed are already loaded in this session. `/clear` keeps Claude running and only empties the conversation, so your first feature starts without setup's history in context.
 
 ## Reconfiguring
 
@@ -149,3 +160,5 @@ It never sets up the repo again or changes branch protection.
 ## On failure: re-run
 
 Every step is safe to run again, even after a run that stopped partway. After fixing the cause (not logged in, a network error, a bad config), run `/setup-gaia` again. Each phase checks what it already finished and picks up at the first unfinished step.
+
+This also covers a setup that `/gaia-init` started on a new project. If Claude Code's auto mode blocks a setup step, Claude stops, names the step, and asks you to type `/setup-gaia` again. Approve the action when Claude Code asks.

@@ -438,7 +438,7 @@ Gaps in coverage do not stop the audit: a file no member covers goes to `code-au
 
 ### eslint-disable reason
 
-- **Stops:** an `eslint-disable` comment with no `-- reason` after it (`@gaia-react/lint` 3.0.0).
+- **Stops:** an `eslint-disable` comment with no `-- reason` after it (`@gaia-harness/lint`).
 - **Why:** a later reader, human or agent, needs to know why the rule was turned off at that spot. Without the reason, nobody can tell whether the disable is still needed or safe to remove.
 - **When:** at lint, so at `git commit` through the pre-commit hook and in the Quality Gate.
 - **Who acts:** Claude. Nothing for you to do.

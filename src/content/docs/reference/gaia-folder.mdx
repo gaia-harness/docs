@@ -19,6 +19,7 @@ You rarely edit anything here by hand. When you want to change a setting, ask Cl
 |---|---|---|---|---|
 | `VERSION` | The GAIA version your project is on | Committed | The release, then `/update-gaia` | Rewritten at the end of an update |
 | `manifest.json` | The list of files GAIA ships, each with its ownership class | Committed | The release, then `/update-gaia` | Replaced with the new release's copy at the end of an update |
+| `LICENSE` | GAIA's license notice for the files it provides | Committed | The release | Merged |
 | `cli/` | The `gaia` CLI and the templates the scaffolders use | Committed | The release | Merged |
 | `scripts/` | Scripts that hooks, commands, and skills run | Committed | The release | Merged |
 | `statusline/` | The statusline scripts | Committed | The release | Merged |
@@ -50,6 +51,12 @@ These come with every release. Each one, except `VERSION` and `manifest.json`, h
 `.gaia/manifest.json` lists the files the release ships and the class of each one. `/update-gaia` uses the classes to decide how to merge each file. Files that are not in the manifest are yours, and the merge never touches them. `VERSION` and `manifest.json` are not in it either: instead of merging them, `/update-gaia` rewrites both at the end of an update.
 
 Don't edit either file by hand. A wrong version makes the next update compare your files against the wrong release.
+
+### LICENSE
+
+`.gaia/LICENSE` is GAIA's license notice. It says that every file GAIA provides, wherever it sits in your project, is under the MIT License, and that your project's own license covers everything else. The MIT text follows.
+
+Keep the file in your project. Put your own license in a `LICENSE` file at the project root. GAIA never writes there.
 
 ### cli/
 
