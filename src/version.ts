@@ -1,2 +1,2 @@
 // Current GAIA release. Bump on each GAIA release.
-export const GAIA_VERSION = '2.1.1';
+export const GAIA_VERSION = '2.2.0';
