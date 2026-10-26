@@ -40,7 +40,7 @@ GAIA has two audiences and the docs must keep them strictly separate:
 
 **The inverse rule (softer):** a contributor docs page should not duplicate what's already in the adopter docs. Cross-link instead.
 
-## GAIA's actual surface (verified against gaia `4ef5660c` (v2.1.1 tag), 2026-10-24, GAIA 2.1.1; volatile, re-check before publishing)
+## GAIA's actual surface (verified against gaia `6ceed273` (v2.2.0 tag), 2026-10-26, GAIA 2.2.0; volatile, re-check before publishing)
 
 GAIA 2.0.0 is a pnpm workspace: the shared harness at the root (`.claude/`, `.gaia/`, `.githooks/`, `.github/`, `wiki/`, root `CLAUDE.md`) and the React app plus its frontend-only harness in `frontend/` (`frontend/app/`, `frontend/.claude/{rules,skills,agents}`, `frontend/CLAUDE.md`). Every 1.x `app/...` path is now `frontend/app/...`. Releases ship as `gaia-bundle-<tag>.tar.gz` with a `.sha256`.
 
@@ -70,7 +70,7 @@ spec-kit is gone: no `.specify/`, no `speckit.*` commands. The spec lifecycle li
 | Agents (`.claude/agents/`) | `code-audit-frontend` (+ `frontend/.claude/agents/code-audit-frontend/` extensions), `code-audit-github-workflows`, `audit-loop-unit`, `audit-light-reviewer`, `audit-refuter`, `audit-rule-specialist`, `worthiness-evaluator`, `uat-fidelity-judge`, `fitness-judge` | `code-audit-maintainer-node`, `code-audit-maintainer-shell` |
 | CI workflows (`.github/workflows/`) | `tests.yml`, `chromatic.yml`, `pr-conventions.yml` (advisory) | `release.yml`, `cli-tests.yml`, `audit-ci-tests.yml`, `shell-lint.yml`, `forensics-triage.yml`. No Claude-on-Actions workflow exists any more (GAIA CI is removed). |
 | Wiki (`gaia/wiki/`) | most of `modules/`, `concepts/`, `decisions/` | `entities/`, `meta/`, and the individual pages `.gaia/release-exclude` lists (Release Workflow, Release-Notes, Bundle-time Scrub, CLI-Binary-Split, Folding Shell Scripts into the CLI Binary, Forensics Triage Workflow, Sharded CI Test Matrix, Shell Guard Fixture Discrimination, Local Test Runtime, Dependabot as a Data Source), plus every `gaia:maintainer-only` block |
-| Governance | `.gaia/templates/README.md` (regenerated at scaffold), `.gaia/LICENSE` (GAIA's MIT notice, scoped to GAIA-provided files; next release, #3065) | repo `README.md`, `CHANGELOG.md`, `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORTERS.md`, `.github/CODEOWNERS`, `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`, `.github/FUNDING.yml`, `.gaia/project.json` |
+| Governance | `.gaia/templates/README.md` (regenerated at scaffold), `.gaia/LICENSE` (GAIA's MIT notice, scoped to GAIA-provided files; from 2.2.0) | repo `README.md`, `CHANGELOG.md`, `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORTERS.md`, `.github/CODEOWNERS`, `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`, `.github/FUNDING.yml`, `.gaia/project.json` |
 
 **Things that are protected by obscurity (do NOT document anywhere public):** CLI subcommand names beginning `_internal-`, and the `gaia-maintainer release*` subcommand list. The mentorship layer is removed in 2.0.0, so its old protections are moot. See `docs/.claude/audit/do-not-document.yml`.
 
