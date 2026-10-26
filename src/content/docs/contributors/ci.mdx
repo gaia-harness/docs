@@ -35,6 +35,12 @@ Its jobs run on pull requests to `main` and on `workflow_dispatch` (a run starte
 - **Distribution harness** (advisory): the distribution tests that need neither Docker nor a token.
 - **Shipped-surface leak check** (advisory): builds the release tree, then checks that no shipped file names a contributor-only path and that removing the maintainer-only blocks leaves no partial marker behind.
 
+The fitness step also enforces the root `CLAUDE.md`'s 400-line split threshold on GAIA's own harness code: the scripts (`.sh`, `.bash`, `.js`, `.cjs`, `.mjs`, `.ts`) under `.claude/`, `.gaia/`, `.github/`, and `frontend/.claude/`, plus the workflow and action YAML under `.github/`, leaving out tests and test fixtures. It runs only in the GAIA repo, never in a project. Files that were already over 400 lines when the check arrived are recorded in `.claude/maintainers/line-limit-ceilings.json`, each at its exact line count (its ceiling). The required check fails on a new file over 400 lines, and on a recorded file that grows past its ceiling. The CI log names the file and the rule, `authoring.harness.max-lines`. A new file has to be split. A recorded file can instead have its ceiling raised in the same pull request, with the reason stated there. When a recorded file drops to 400 lines or fewer, a warning stays until its entry is removed. To fix a failure, ask:
+
+```text
+Run the fitness check the way the cli-tests.yml workflow does and fix any authoring.harness.max-lines finding: split the file, or if it is already listed in .claude/maintainers/line-limit-ceilings.json, raise its entry and tell me why.
+```
+
 A commit pushed by a GitHub Actions bot, using the workflow's own token, starts no pull-request run. The required `Vitest (.gaia/cli)` check then never appears, and the merge stays blocked. The fix is to start the workflow by hand, which takes write access to the GAIA repo. An outside contributor on a fork cannot, so mention it on the pull request instead. With write access, ask:
 
 ```text
