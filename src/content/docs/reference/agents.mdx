@@ -5,12 +5,13 @@ sidebar:
   order: 3
 ---
 
-GAIA ships nine [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.claude/agents/`. You never start one yourself: a workflow starts each one when it needs it. Each sub-agent starts with a fresh context, so a reviewer judges the work without the reasoning of the session that wrote it, and its reading stays out of your session's context. Each agent uses a [fixed model](/models-and-context/model-choice/) and runs at your session's `/effort` level, so a low-effort session audits at low and a high one at high. To fix the level on one machine, set the `CLAUDE_CODE_EFFORT_LEVEL` environment variable; see [Effort](/models-and-context/model-choice/#effort). Each agent can use only the tools listed in its definition, which keeps what it starts with small.
+GAIA ships ten [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.claude/agents/`. You never start one yourself: a workflow starts each one when it needs it. Each sub-agent starts with a fresh context, so a reviewer judges the work without the reasoning of the session that wrote it, and its reading stays out of your session's context. Each agent uses a [fixed model](/models-and-context/model-choice/) and runs at your session's `/effort` level, so a low-effort session audits at low and a high one at high. To fix the level on one machine, set the `CLAUDE_CODE_EFFORT_LEVEL` environment variable; see [Effort](/models-and-context/model-choice/#effort). Each agent can use only the tools listed in its definition, which keeps what it starts with small.
 
 | Agent | Model | Started by | Edits files? |
 |---|---|---|---|
 | [`code-audit-frontend`](#code-audit-frontend) | Opus | the audit loop | No |
 | [`code-audit-github-workflows`](#code-audit-github-workflows) | Opus | the audit loop | No |
+| [`code-audit-shell`](#code-audit-shell) | Opus | the audit loop | No |
 | [`audit-rule-specialist`](#audit-rule-specialist) | Haiku | `code-audit-frontend` | No (read-only) |
 | [`audit-refuter`](#audit-refuter) | Sonnet | `code-audit-frontend` | No (read-only) |
 | [`audit-loop-unit`](#audit-loop-unit) | Opus | the merge workflow | Commits fix rounds |
@@ -50,6 +51,10 @@ Tries to disprove one Critical or Major finding from `code-audit-frontend`. It r
 ### code-audit-github-workflows
 
 Responsible for `.github/workflows/*.yml` and `.github/actions/**/*.yml`. Reviews workflow YAML for script injection, unsafe `pull_request_target` use, unpinned third-party actions, over-broad permissions, and secret handling.
+
+### code-audit-shell
+
+Responsible for every `.sh` and `.bats` file, `.claude/hooks/**`, and `.githooks/**`. Reviews the shell you write, and your own edits to shell GAIA ships, for unquoted variables, failures that pass silently, guards that allow when they should block, and code that breaks on macOS's bash 3.2 or its versions of `sed` and `date`. For a Claude hook, it also checks that the hook reads its input safely and never breaks your session on its own error. For a bats test, it checks for assertions that can never fail and for tests weakened or skipped without a reason. A change that comes from applying a GAIA update skips GAIA's own shell files. Light review is on for changes up to 30 lines, except Claude hooks, git hooks, and bats tests. See [Code Audit Team](/workflow/code-audit-team/#members).
 
 ### audit-loop-unit
 

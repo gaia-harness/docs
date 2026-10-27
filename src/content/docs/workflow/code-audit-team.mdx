@@ -72,14 +72,17 @@ The gate is a rule Claude follows, not a hook. The pre-commit hook is the part t
 
 ## Members
 
-The list of members (the roster) lives in `.gaia/audit-ci.yml` under `auditors:`. Each entry assigns a set of file patterns (globs) to a member. You change the roster by asking Claude, not by hand ([Covering new code](#covering-new-code)). Two members ship:
+The list of members (the roster) lives in `.gaia/audit-ci.yml` under `auditors:`. Each entry assigns a set of file patterns (globs) to a member. You change the roster by asking Claude, not by hand ([Covering new code](#covering-new-code)). Three members ship:
 
 | Member | Owns | Reviews for |
 |---|---|---|
 | `code-audit-frontend` (the default member) | The app and its tooling: `frontend/app/**`, `frontend/test/**`, `frontend/.storybook/**`, `frontend/.playwright/**`, the package manifests and lockfile, build and lint configs, `frontend/.claude/**`, `frontend/CLAUDE.md`, and root tooling such as `.npmrc` and `.nvmrc` | Security, performance, fit with the existing architecture, edge cases, accessibility, and maintainability: problems that take understanding what the code is meant to do and how data moves through it, beyond what lint and types catch. Library-specific rules for [shadcn/ui](https://ui.shadcn.com/), `cn`, [Conform](https://conform.guide/), the form components, React patterns, and react-i18next load from `frontend/.claude/agents/code-audit-frontend/`. |
 | `code-audit-github-workflows` | `.github/workflows/*.yml` and `.github/actions/**/*.yml` | Workflow YAML problems: unsafe third-party actions, script injection, too-broad permissions, and mishandled secrets. |
+| `code-audit-shell` | Every shell script and [bats](https://github.com/bats-core/bats-core) test file (`**/*.sh`, `**/*.bats`) anywhere in the repository, your Claude hooks (`.claude/hooks/**`), and your git hooks (`.githooks/**`) | Shell bugs: unquoted variables, failures that pass silently, a guard that allows when it should block, and scripts that break on macOS's older bash or its versions of `sed` and `date`. For a hook: that it reads its input safely and never breaks your Claude session on its own error. For a bats test: an assertion that can never fail, or a test weakened or skipped without a reason. |
 
-Each file goes to the first member whose pattern matches it, and the default member's patterns are checked last, so a workflow file belongs to `code-audit-github-workflows`.
+Each file goes to the first member whose pattern matches it, and the default member's patterns are checked last. So a workflow file belongs to `code-audit-github-workflows`, and a shell script under `frontend/` or `.github/actions/` belongs to `code-audit-shell`.
+
+`code-audit-shell` reviews the shell you write and your own edits to shell scripts GAIA ships. It skips GAIA's own files when the change comes from applying a GAIA update (the pull request changes `.gaia/VERSION`), so an update does not send GAIA's shell to it for review.
 
 `code-audit-frontend` also runs three tools and lists what they find in its report, as advice that never blocks approval:
 
@@ -98,7 +101,7 @@ Members only report problems. They never edit a file. A separate fixer makes the
 - **Give it its own member.** A member is a [Claude Code sub-agent](https://code.claude.com/docs/en/sub-agents) file in `.claude/agents/` that says what to review for, plus an entry under `auditors:` that gives the member's name and file patterns. This is the better choice for code in another language or stack.
 - **Add its patterns to an existing member** whose review fits the code.
 
-Until you do one of these, the new files are not skipped. A file no member covers goes to `code-audit-frontend`, the default member, so the merge still waits for a review, but one written for a React app. Only a pull request whose every file is outside the audit's scope (wiki pages, files in the root `.claude/` folder, GAIA's own `.gaia/` files, `docs/`, and Markdown files at the root; `frontend/.claude/` is in scope) merges with no member's review.
+Until you do one of these, the new files are not skipped. A file no member covers goes to `code-audit-frontend`, the default member, so the merge still waits for a review, but one written for a React app. Only a pull request whose every file is outside the audit's scope (wiki pages, files in the root `.claude/` folder, GAIA's own `.gaia/` files, `docs/`, and Markdown files at the root; `frontend/.claude/` is in scope) merges with no member's review. A file there that a member covers still gets that member's review: a shell script under `.claude/` or `.gaia/`, or anything under `.claude/hooks/`, goes to `code-audit-shell`.
 
 ### Adding a member
 
@@ -126,7 +129,9 @@ The roster check compares the roster with the files in your repository, and also
 
 The `unowned:` list in `.gaia/audit-ci.yml` holds paths you have decided no member needs to review, such as root Markdown files or images. Only the roster check reads it, to tell a deliberate gap from a forgotten one. Listing a path there does not skip review. A file no member covers still goes to `code-audit-frontend`.
 
-GAIA's own folders, `.claude/`, `.gaia/`, `.githooks/`, and `.github/audit/`, need no entry: the roster check does not report a file there that no member covers, including one you added yourself, such as your own hook or rule. To have such a file reviewed, add its pattern to one of your members.
+GAIA's own folders, `.claude/`, `.gaia/`, `.githooks/`, and `.github/audit/`, need no entry: the roster check does not report a file there that no member covers, including one you added yourself, such as your own rule. Your own hooks are already covered: `code-audit-shell` reviews `.claude/hooks/` and `.githooks/`. To have any other such file reviewed, add its pattern to one of your members.
+
+A new member can take over paths you had listed in `unowned:`. The roster check fails an `unowned:` entry that matches a file a member now covers. When an update adds a member, `/update-gaia` removes those entries and lists each one in its summary ([What it does](/maintenance/update-gaia/#what-it-does)).
 
 To check the roster on its own, ask:
 
@@ -162,7 +167,7 @@ A member sent back to review looks only at what changed since its last approval 
 
 ### Light review
 
-A small change since a member's last full review can go to a cheaper Sonnet reviewer. `code-audit-frontend` has this on by default. Some changes always get a full review, whatever their size: build and lint configs, `package.json` and the lockfile, tests and stories, CI workflows, and the Claude setup files in your repository (`CLAUDE.md` and `.claude/`). Whenever GAIA cannot confirm a change qualifies, the full member runs. The settings are in [Agents](/reference/agents/#audit-light-reviewer).
+A small change since a member's last full review can go to a cheaper Sonnet reviewer. `code-audit-frontend` has this on by default for changes up to 50 lines, and `code-audit-shell` for changes up to 30 lines. A change to a Claude hook, a git hook, or a bats test always gets the full shell review. For `code-audit-frontend`, some changes always get a full review, whatever their size: build and lint configs, `package.json` and the lockfile, tests and stories, CI workflows, and the Claude setup files in your repository (`CLAUDE.md` and `.claude/`). Whenever GAIA cannot confirm a change qualifies, the full member runs. The settings are in [Agents](/reference/agents/#audit-light-reviewer).
 
 The same reviewer can also take a first review. When a small frontend change is purely presentational (copy edits, swapping one HTML tag for another, static class changes, translation text with the same keys), a script checks the shape of the change and sends it to the quick reviewer instead of the full `code-audit-frontend` review. The quick reviewer answers one question: does anything here need to block the merge? It checks accessibility, translations, and theme color names (design tokens). When the answer is yes, or it is not sure, the full member reviews the change.
 

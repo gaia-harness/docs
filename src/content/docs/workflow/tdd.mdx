@@ -100,7 +100,12 @@ When you build from a [SPEC](/workflow/spec/), its acceptance tests become Playw
 
 ## Testing another stack
 
-The loop works for any language. The React specifics live in a separate skill, `tdd-react`, that the `tdd` skill reads before the first test. When you add a backend or another package, give Claude the equivalent reference for it:
+The loop works for any language. Before the first test, the `tdd` skill reads the reference for the stack it is testing. Two ship:
+
+- **React**: the `tdd-react` skill, for the app in `frontend/`.
+- **Shell**: for the shell scripts your own skills and hooks run, tested with [bats](https://github.com/bats-core/bats-core). Tests go in `tests/shell/`, one file per script, and `pnpm test:shell` runs them. GAIA installs bats as a dev dependency, so there is nothing else to install. The runner refuses to start under a bash older than 4, because bash 3.2 (the default on macOS) lets some failing tests pass. On a Mac, ask Claude to put a newer bash first on your `PATH`. The `bats-assertions` [rule](/reference/rules/#path-scoped-root) loads whenever Claude edits a `.bats` file, so it writes checks that can actually fail. The Tests workflow runs the suites on pull requests that change shell (see [GitHub workflows that ship](/workflow/git-conventions/#github-workflows-that-ship)).
+
+When you add a backend or another package, give Claude the equivalent reference for it:
 
 ```text
 Add a TDD stack reference for <stack> in <folder>, following the pattern of the tdd-react skill: test layers, where each kind of test lives, what to mock, and good and bad examples. Then point the tdd skill's stack list at it.
