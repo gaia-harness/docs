@@ -113,7 +113,7 @@ Register the finding classes my <member> audit member reports in .gaia/finding-c
 
 ### Unclassified findings
 
-A finding recorded as `holistic/unclassified`, or with a class no list registers, is never a candidate, because there is no single kind of problem to write a guard for. When unclassified findings recur on 3 or more pull requests within 90 days, the run shows them as one extra row, marked as not a candidate, and records a suppression on this machine so the signal stays quiet until it rises noticeably. When the same kind of problem keeps landing here, the class list may be missing a class for it, or the cluster needs looking into on its own. `/gaia-codify` points this out but never adds a class itself. Registering a class later also counts findings that already recorded that exact class. Findings recorded as `holistic/unclassified` stay unclassified until they age out of the 90-day window.
+A finding recorded as `holistic/unclassified`, or with a class no list registers, is never a candidate, because there is no single kind of problem to write a guard for. When unclassified findings recur on 3 or more pull requests within 90 days, the run shows them as one extra row, marked as not a candidate. With your yes, it records a suppression the same way as a [decline](#decline-and-defer), shared with the team once its pull request merges, so the signal stays quiet until it rises noticeably or the suppression is older than 90 days. When the same kind of problem keeps landing here, the class list may be missing a class for it, or the cluster needs looking into on its own. `/gaia-codify` points this out but never adds a class itself. Registering a class later also counts findings that already recorded that exact class. Findings recorded as `holistic/unclassified` stay unclassified until they age out of the 90-day window.
 
 ## How it judges the form
 
@@ -137,12 +137,19 @@ A written rule is the weakest option: it advises instead of enforcing, and Claud
    - **Change some**: pick rows, then choose **approve**, **decline**, **defer**, or **redirect** (a different form) for each
    - **Stop without changes**: nothing is authored or recorded
 4. **Apply** your choice for each candidate. Approved rule edits land in the working tree on the run's own branch.
-5. **Publish** approved changes as one pull request at the end, merged only on your answer.
+5. **Publish** the run's changes as one pull request at the end, merged only on your answer. A run that only declines, or only records the unclassified suppression, opens one too.
 
 ### Decline and defer
 
-- **Decline** records, on this machine only, that you are not acting on the pattern. It comes back only if the pattern keeps growing noticeably: at least 3 more pull requests, and a clearly larger share of audited pull requests than when you declined. It also comes back once after a GAIA update changes how findings are counted, so you can decide again on the new numbers. The record lives in `.gaia/local/codify/` and is never shared, so a teammate still sees the nudge.
+- **Decline** records, for your whole team, that you are not acting on the pattern. Each decline is a small file in the committed `.gaia/codify-declines/` folder, and it reaches your teammates through the run's pull request. Once that merges, the pattern stops showing up as a candidate for each teammate as soon as they pull it, so nobody reviews it again. Until then, your own manual `/gaia-codify` runs still list it. A decline lapses on its own in three cases:
+  - the pattern keeps growing noticeably: at least 3 more pull requests, and a clearly larger share of audited pull requests than when you declined.
+  - a GAIA update changes how findings are counted, so you can decide again on the new numbers.
+  - the decline is older than 90 days, the same window the count covers. A pattern that keeps recurring comes back for review once per window, and one teammate declining it again covers the whole team.
+
+  A decline made before GAIA 2.3.0 stays on the machine where it was made and keeps working there until it is older than 90 days.
 - **Defer** records nothing of its own. The candidate still appears in the next review; the nudge stays quiet until the pattern grows or the counting changes.
+
+Whenever your team has declined a pattern, the run lists it in a short **Declined by the team** section, apart from the candidates. They never count toward the statusline nudge. If you disagree with a decline, pick that row and approve it: under **Change some**, or **Reconsider some** when there are no other candidates. Nothing edits or deletes a decline: an approved written rule takes over once it merges, and any other approved change takes effect while the decline lapses on its own.
 
 ## Promoted rules
 
