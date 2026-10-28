@@ -89,7 +89,7 @@ A snooze ends after 14 days, or sooner when a newer version of the group ships. 
 1. **Override check.** Each `overrides:` entry is tested by removing it. It stays removed only when that causes no peer-dependency error **and** no new advisory, so an override that blocks a vulnerable version is never dropped by accident.
 2. **Minor and patch updates.**
 3. **Major updates**, one group at a time, each with its migration. If the quality gate still fails after one attempt to fix it, that group is undone and reported as skipped.
-4. **Sub-dependencies** (the packages your packages depend on) refresh to the newest versions their parents allow, skipping releases too new to trust. If the quality gate fails, this whole step is undone.
+4. **Sub-dependencies** (the packages your packages depend on) refresh to the newest versions their parents allow, skipping releases too new to trust. If the quality gate fails, this whole step is undone. If GAIA cannot first save the current lockfile to undo it from, the step changes nothing and is reported as `Not run (snapshot failed: <reason>)`. The rest of the run goes on.
 5. **Security fixes**, then the override check again.
 6. **Quality gate**: `pnpm typecheck`, `pnpm lint`, `pnpm test --run`, `pnpm pw`, and `pnpm build`.
 7. **Publish**: one commit, `chore(deps): ...` (`chore(deps-dev):` when only devDependencies moved), a draft pull request, merged once checks are green, then local cleanup.

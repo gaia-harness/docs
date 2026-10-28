@@ -35,7 +35,7 @@ To replace your own label colors with GAIA's, say so in the same request. A labe
 | <LabelPill name="debt:spec-pending" /> | Handed to `/gaia-spec`; on hold until the SPEC starts |
 | <LabelPill name="debt:spec-active" /> | A SPEC is in progress for this issue, or is keeping it open until a recorded condition is met |
 
-Every issue carries `tech-debt`, a severity, and a footprint. A difficulty is added only when the filer read the cited code, so an issue without one is normal. At most three `severity:investigate` issues can be open at once. When three are open, Claude does not file a fourth as `investigate`: it grades that finding itself from the code, or resolves one of the open ones first by answering its question and re-grading it ([how](/workflow/debt/#labels)).
+Every issue carries `tech-debt`, a severity, and a footprint. A difficulty is added only when the filer read the cited code, so an issue without one is normal. For an issue the [Code Audit Team](/workflow/code-audit-team/) files, the member that found the problem grades the difficulty, because it read the code. When it cannot settle the grade, the issue is filed without one. At most three `severity:investigate` issues can be open at once. When three are open, Claude does not file a fourth as `investigate`: it grades that finding itself from the code, or resolves one of the open ones first by answering its question and re-grading it ([how](/workflow/debt/#labels)).
 
 ## Work in progress
 

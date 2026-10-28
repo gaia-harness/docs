@@ -9,40 +9,40 @@ import BandScale from '../../../components/BandScale.astro';
 
 Everything GAIA adds to a session takes up part of Claude's context window, the fixed amount of text Claude can hold at once. GAIA keeps that part small on purpose. Its rules, skills, and instruction files are cut down to what improves how Claude works. Each instruction lives in one place instead of being repeated across files, and is checked against the code it describes to keep it accurate. Most of it loads only when a task needs it, which leaves more of the window for your work.
 
-The session-start, task, and skill figures on this page were measured in a new GAIA 2.2.0 project, created with `npx create-gaia@2.2.0`, on Opus 5.5. They count each file the same way every time, so they are not comparable with the figures earlier versions of this page showed. The audit figures come from an earlier measurement, noted where they appear. Percentages are of a 1M-token context window.
+The session-start, task, and skill figures on this page were measured in a new GAIA 2.3.0 project, created with `npx create-gaia@2.3.0`, on Opus 5.5. They count each file the same way every time, so they are not comparable with the figures earlier versions of this page showed. The audit figures come from an earlier measurement, noted where they appear. Percentages are of a 1M-token context window.
 
 ## At session start
 
-GAIA adds 7,678 tokens to a session before you type anything: 0.77% of the window.
+GAIA adds 8,196 tokens to a session before you type anything: 0.82% of the window.
 
 | What loads in every session | Tokens |
 | --- | --- |
-| [Rules](/reference/rules/) that apply everywhere (8 files) | 3,705 |
+| [Rules](/reference/rules/) that apply everywhere (9 files) | 4,132 |
 | Session-start text from GAIA's [hooks](/reference/hooks/) | 1,403 |
 | The root `CLAUDE.md` | 1,025 |
 | [Skill](/skills/) and command descriptions | 806 |
-| [Agent](/reference/agents/) descriptions (9) | 739 |
-| **Total** | **7,678 (0.77%)** |
+| [Agent](/reference/agents/) descriptions (10) | 830 |
+| **Total** | **8,196 (0.82%)** |
 
 The session-start text was measured in a session on a feature branch. On the default branch, the instructions for working on a branch are left out, so the total is lower. The session-start text is added when a session starts, and again after `/clear` or compaction.
 
-A session started from `frontend/` begins at 10,313 tokens (1.03%). Claude Code still loads everything above, and adds `frontend/CLAUDE.md` (959) and the descriptions of the 13 frontend skills (1,676).
+A session started from `frontend/` begins at 10,867 tokens (1.09%). Claude Code still loads everything above, and adds `frontend/CLAUDE.md` (987) and the descriptions of the 13 frontend skills (1,684).
 
 Your own setup adds to this: MCP servers, plugins, and your global `~/.claude/CLAUDE.md` load in every project, with or without GAIA.
 
 ## A typical task
 
-Most rules apply only to certain paths, and load only when Claude works on a file they cover. A task that edits one component and one route loaded 10 of the 22 path-scoped rules:
+Most rules apply only to certain paths, and load only when Claude works on a file they cover. A task that edits one component and one route loaded 10 of the 23 path-scoped rules:
 
 | What the task loaded | Tokens |
 | --- | --- |
-| Root rules for specific paths (3 of 9) | 3,400 |
+| Root rules for specific paths (3 of 10) | 3,400 |
 | Frontend rules (7 of 13) | 4,763 |
-| Frontend skill descriptions (13) | 2,001 |
-| `frontend/CLAUDE.md` | 917 |
-| **Added by the task** | **11,081 (1.11%)** |
+| Frontend skill descriptions (13) | 2,009 |
+| `frontend/CLAUDE.md` | 945 |
+| **Added by the task** | **11,117 (1.11%)** |
 
-With the startup load, the session held 18,759 tokens of GAIA (1.88%).
+With the startup load, the session held 19,313 tokens of GAIA (1.93%).
 
 ## Skills
 
@@ -50,12 +50,12 @@ Until a skill is used, it costs only its description. When it is used, Claude re
 
 | Skill | Description | `SKILL.md` | Extra files | Most when used |
 | --- | --- | --- | --- | --- |
-| `new-component` | 167 | 1,434 | none | 1,434 (0.14%) |
-| `tdd` | 75 | 4,282 | 416 (3 files) | 4,698 (0.47%) |
-| `tdd-react` | 173 | 303 | 7,491 (1 file) | 7,794 (0.78%) |
-| `react-code` | 207 | 5,880 | 9,061 (4 files) | 14,941 (1.49%) |
+| `new-component` | 167 | 1,515 | none | 1,515 (0.15%) |
+| `tdd` | 75 | 4,377 | 1,464 (4 files) | 5,841 (0.58%) |
+| `tdd-react` | 181 | 311 | 7,552 (1 file) | 7,863 (0.79%) |
+| `react-code` | 207 | 5,774 | 9,035 (4 files) | 14,809 (1.48%) |
 
-For the larger skills, a description costs 1% to 2% of the full skill. A small skill like `new-component` costs more by share (12%), but little in tokens.
+For the larger skills, a description costs 1% to 3% of the full skill. A small skill like `new-component` costs more by share (11%), but little in tokens.
 
 ## Hooks
 

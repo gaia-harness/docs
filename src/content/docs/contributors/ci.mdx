@@ -11,7 +11,11 @@ None of these workflows runs the pre-merge audit. The audit runs locally, throug
 
 ## release.yml
 
-Triggers on `v*.*.*` tag pushes. Builds and publishes the release bundle.
+Triggers on `v*.*.*` tag pushes. Builds and publishes the release bundle. It can also be started by hand against a tag that already exists, as a dry run: it rebuilds and checks that tag's bundle and composes its release body, but publishes nothing. That proves a change to GitHub's runner image before the next real tag meets it. To start one, ask:
+
+```text
+Start a dry run of the GAIA: Release workflow for tag <vX.Y.Z> and tell me whether it passes.
+```
 
 1. **Checkout** at the tag with full history, and derive the version.
 2. **Verify `.gaia/VERSION` matches the tag**, so a stray tag cannot publish.
@@ -23,16 +27,16 @@ Triggers on `v*.*.*` tag pushes. Builds and publishes the release bundle.
 8. **Verify runtime dependencies** against the staged tree.
 9. **Distribution test gate**: runs the distribution tests against the staged tree. They check that the expected files are present, that the maintainer-only blocks were stripped cleanly, that the tree unpacks and installs with only Node and the base system tools on the path, and that the bundled `gaia` CLI still runs key project flows against it (for example `gaia init strip-branding`). A failure stops the release before anything publishes.
 10. **Build** `gaia-bundle-<tag>.tar.gz` and its `.sha256`. The `gaia-bundle-` prefix is deliberate. A 1.6.1 `/update-gaia` looks for `gaia-<tag>.tar.gz`, so the new name makes it fail at the download instead of misreading the new folder layout.
-11. **Compose the release body**, starting with the line that sends 1.6.1 projects to the 2.0.0 migration, then **create the GitHub Release** with both files.
+11. **Compose the release body**, starting with the line that sends 1.6.1 projects to the 2.0.0 migration. A dry run stops here.
+12. **Create the GitHub Release** with both files, in a separate job that runs only on a tag push.
 
-The job holds a `contents: write` token and keeps it tight. The checkout does not save the token to git config, the CLI workspace install runs with `--ignore-scripts` so no package install script runs there, and of the later steps only **Create GitHub Release** receives the token.
+The steps run in two jobs. **Build release bundle** (steps 1 to 11) has a read-only token, so a dry run never holds a write token. Only **Publish GitHub release** (step 12) can write to the repository, and it does nothing but download the build's files and create the release, under a 10-minute limit.
 
 ## cli-tests.yml
 
-Its jobs run on pull requests to `main` and on `workflow_dispatch` (a run started by hand). The workflow also lists pushes to `main` as a trigger, but every job skips on a push. Three jobs:
+Its jobs run on pull requests to `main` and on `workflow_dispatch` (a run started by hand). The workflow also lists pushes to `main` as a trigger, but every job skips on a push. Two jobs:
 
 - **Vitest (`.gaia/cli`)** (required): for the CLI, typecheck, lint, and the Vitest tests. It also runs the bats tests that check GAIA's readers of [generated-region](/contributors/cli/#generated-regions) markers agree with each other, checks that the committed CLI bundles match a fresh build from source, runs the [`/gaia-fitness`](/maintenance/fitness/) linter over GAIA's own rules, skills, and other Claude files, checks that the label tables in `wiki/concepts/GitHub Labels.md` match `.gaia/labels.json` (see [`gaia labels`](/contributors/cli/#gaia-labels)), and checks that the third-party skills copied into the repo (vendored skills) match the hashes recorded under `.gaia/vendor`. On a pull request, most steps run only when the change touches the files they cover; a `workflow_dispatch` run runs every step.
-- **Distribution harness** (advisory): the distribution tests that need neither Docker nor a token.
 - **Shipped-surface leak check** (advisory): builds the release tree, then checks that no shipped file names a contributor-only path and that removing the maintainer-only blocks leaves no partial marker behind.
 
 The fitness step also enforces the root `CLAUDE.md`'s 400-line split threshold on GAIA's own harness code: the scripts (`.sh`, `.bash`, `.js`, `.cjs`, `.mjs`, `.ts`) under `.claude/`, `.gaia/`, `.github/`, and `frontend/.claude/`, plus the workflow and action YAML under `.github/`, leaving out tests and test fixtures. It runs only in the GAIA repo, never in a project. Files that were already over 400 lines when the check arrived are recorded in `.claude/maintainers/line-limit-ceilings.json`, each at its exact line count (its ceiling). The required check fails on a new file over 400 lines, and on a recorded file that grows past its ceiling. The CI log names the file and the rule, `authoring.harness.max-lines`. A new file has to be split. A recorded file can instead have its ceiling raised in the same pull request, with the reason stated there. When a recorded file drops to 400 lines or fewer, a warning stays until its entry is removed. To fix a failure, ask:
@@ -47,9 +51,16 @@ A commit pushed by a GitHub Actions bot, using the workflow's own token, starts 
 The required Vitest (.gaia/cli) check is missing on PR #<N>. Start the GAIA: CLI Tests workflow on its branch with workflow_dispatch and wait for it to report.
 ```
 
+## distribution-harness.yml
+
+Runs the distribution tests that need neither Docker nor a token, the same tests `release.yml` runs before it publishes: they check that the shipped tree is complete, that no contributor-only content leaks, and that a project's key flows still work against it. A change that breaks the shipped bundle is caught on its pull request instead of at release time.
+
+- **On a pull request**, the fast tests run whenever the change touches code, and each slow test only when a path it covers changed, so most pull requests skip the slow ones. The check is advisory.
+- **On every push to `main`**, and on a run started by hand, every test runs. While that run fails, a job keeps one `ci-red-main` issue open, and [`/gaia-release`](/contributors/release/) will not release.
+
 ## audit-ci-tests.yml
 
-Runs GAIA's bats tests for the shipped scripts and hooks (`.gaia/scripts/tests/`, `.github/audit/tests/`, `.gaia/tests/`), split across parallel jobs (shards). It runs on pull requests to `main`, on every push to `main`, and on `workflow_dispatch`. On a pull request, each shard runs only the suites the change can affect, plus the tests marked to run on every change; a change to the test machinery itself runs the whole shard. A push to `main` and a run started by hand run every shard in full. The full run on `main` catches whatever the narrower pull-request runs missed: while it fails, a `Report main status` job keeps one `ci-red-main` issue open, and [`/gaia-release`](/contributors/release/) will not merge or tag a release. It also runs the [commitlint](https://commitlint.js.org/) tests and the tests for the RED gate (the check that a test was seen failing first) that need Node or Chromium. A final `Audit CI Tests` job passes only when every shard passes, so one required check covers them all. A bot-pushed commit leaves that check missing in the same way as `Vitest (.gaia/cli)`, and the same by-hand run fixes it.
+Runs GAIA's bats tests for the shipped scripts and hooks (`.gaia/scripts/tests/`, `.github/audit/tests/`, `.gaia/tests/`), split across parallel jobs (shards). It runs on pull requests to `main`, on every push to `main`, and on `workflow_dispatch`. On a pull request, each shard runs only the suites the change can affect, plus the tests marked to run on every change; a change to the test machinery itself runs the whole shard. A push to `main` and a run started by hand run every shard in full. A push run runs at most six jobs at a time, so it does not take most of the account's job slots while other branches wait. A pull-request run runs them all at once. The full run on `main` catches whatever the narrower pull-request runs missed: while it fails, a `Report main status` job keeps one `ci-red-main` issue open, and [`/gaia-release`](/contributors/release/) will not merge or tag a release. It also runs the [commitlint](https://commitlint.js.org/) tests and the tests for the RED gate (the check that a test was seen failing first) that need Node or Chromium. A final `Audit CI Tests` job passes only when every shard passes, so one required check covers them all. A bot-pushed commit leaves that check missing in the same way as `Vitest (.gaia/cli)`, and the same by-hand run fixes it.
 
 Projects get these scripts as code GAIA controls and never edit, so the tests only need to catch changes made on the GAIA repo.
 

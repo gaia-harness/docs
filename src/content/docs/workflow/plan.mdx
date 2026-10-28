@@ -135,7 +135,7 @@ A plan generated before a GAIA update keeps the steps it was generated with unti
 | Route | When | How it is tested |
 | --- | --- | --- |
 | End-to-end | The outcome needs a route, navigation, a loader or action, a session, language detection, or mocked server data | A [Playwright](https://playwright.dev/) test, rendered before Phase 1 (below) |
-| Story | The outcome can be seen on one component given its props | An acceptance criterion in the task that owns it, tested with a [Storybook](https://storybook.js.org/) story |
+| Story | The outcome can be seen on one component given its props | An acceptance criterion in the task that owns it, tested with a test attached to a [Storybook](https://storybook.js.org/) story |
 | Non-UI | Harness, script, or documentation behavior | Assigned to the phase that owns it |
 
 Each UAT routed to an end-to-end test is turned into a Playwright test under `frontend/.playwright/e2e/` **before Phase 1**. It is committed on its own and marked as expected to fail (`test.fail()`). The phase responsible for a test cannot commit until that test passes. Sub-agents are told not to change a test's assertions to make it pass, because the test is what the SPEC promised.
