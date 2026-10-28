@@ -11,7 +11,7 @@ Files and folders under `app/components`, `app/pages`, and `app/hooks` are kebab
 
 ## New Component
 
-It first checks whether [shadcn/ui](https://ui.shadcn.com/) already offers the component (a dialog, tabs, a popover). If it does, it runs `pnpm shadcn add <name>`, which copies the component's source into your project as a single file, `app/components/ui/<name>.tsx`; GAIA never edits those files. Otherwise it creates a component folder: `app/components/<name>/index.tsx` and `tests/index.stories.tsx`, a story whose play function is the component's test. There is no separate test file.
+It first checks whether [shadcn/ui](https://ui.shadcn.com/) already offers the component (a dialog, tabs, a popover). If it does, it runs `pnpm shadcn add <name>`, which copies the component's source into your project as a single file, `app/components/ui/<name>.tsx`; GAIA never edits those files. Otherwise it creates a component folder: `app/components/<name>/index.tsx` and `tests/index.stories.tsx`, with a starter test attached to a story. As you ask for each new behavior, Claude adds a test for it. There is no separate test file.
 
 **Confirms:** name (kebab-case or PascalCase; the folder uses the kebab-case form), parent folder (default `app/components/`), and props.
 
@@ -33,7 +33,7 @@ Creates a custom React hook, `app/hooks/use-<name>.ts` (named export `useName`),
 
 ## New Route
 
-Creates a route file, `app/routes/<group>.<name>.tsx` (named with the flat file convention of `@react-router/fs-routes`), and its page, `app/pages/<name>/page.tsx`, with `tests/page.stories.tsx`. The story is the page's test. The route file stays small (`loader`, `action`, `meta`, and a one-line default export); the UI lives in the page.
+Creates a route file, `app/routes/<group>.<name>.tsx` (named with the flat file convention of `@react-router/fs-routes`), and its page, `app/pages/<name>/page.tsx`, with `tests/page.stories.tsx`. Its story carries the page's tests: a starter test that checks for one top-level heading and one main landmark. For a route connected to a service, the starter test also checks that the loaded data shows, and a route with a form gets a second test that the submitted form sends the right data. The route file stays small (`loader`, `action`, `meta`, and a one-line default export); the UI lives in the page.
 
 When you connect it to a service, it writes everything from loading the data to showing it on the page. Ask for the data to load in one of three ways:
 

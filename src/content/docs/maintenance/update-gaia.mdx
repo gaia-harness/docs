@@ -117,6 +117,22 @@ A release can ship migration notes in its bundle, under `.gaia/migrations/<versi
 - **After-merge** notes run after the merge and before the version write. They are safe to repeat.
 - **Blocking** notes stop the update before anything is branched or merged. `/update-gaia` names the note and asks whether to follow it now. Following the note brings you to that note's version; re-run `/update-gaia` afterwards to get anything newer.
 
+### Stories in 2.3.0
+
+GAIA 2.3.0 moves stories to Storybook's CSF Next format, where each behavior is a test attached to a story (see [Stories are the component tests](/workflow/tdd/#where-tests-go)). Its migration note converts every story file in your project with `gaia migrate-csf4`, then typechecks, lints, and runs the stories. It needs network access, because it fetches Storybook's own converter. Your story logic stays the same. Only its shape changes.
+
+- **Each converted story test needs a new review.** Converting renames every story test, so the update's pull request needs a fresh [worthiness review](/workflow/tdd/#everything-else-the-worthiness-review) for each one before it merges. Claude runs it.
+- **Open branches that touch stories** need the conversion too. Finish each one, or bring it up to date with the update, then ask Claude to convert its stories and review its tests again.
+- **A plan written before 2.3.0** that is not finished yet fails the plan check until its `Story play-function criterion` lines are renamed to `Story test criterion`. Ask Claude to rename them.
+- **If the conversion stops before writing anything**, Claude tells you why. It stops, for example, when your Storybook version is not 10.6 or Storybook's converter cannot be downloaded. A story file in Storybook's oldest format (`storiesOf` or `Template.bind`) has to be moved to the previous format first with Storybook's `csf-2-to-3` converter. Claude never discards an uncommitted change of yours. It asks you how to proceed.
+- **If a converted story fails**, the converted files stay in place. Claude shows you which story files failed and works through them with you. The conversion prints a command that undoes it, and Claude runs it only if you say so.
+
+If you brought in GAIA 2.3.0 without `/update-gaia`, the conversion has not run, and a story file in the old format is sent back with the command that converts it. The conversion stops if anything in the repo is uncommitted, so commit your work first. Then ask Claude:
+
+```text
+Convert my stories to CSF Next with gaia migrate-csf4, then show me the report.
+```
+
 ## Gotchas
 
 - Run it from the main checkout. Inside any other linked worktree it stops and tells you whether an update is pending; open Claude Code in the main checkout and run it there.

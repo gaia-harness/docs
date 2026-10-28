@@ -194,11 +194,11 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 ### Worthiness verdict
 
-- **Stops:** `gh pr merge` when a test the pull request changed has no worthiness record for its current content. This covers stories, Playwright tests, and component and page tests the classifier finds have no predictable result. An exact rename is skipped.
+- **Stops:** `gh pr merge` when a test the pull request changed has no worthiness record for its current content. This covers stories, Playwright tests, and component and page tests the classifier finds have no predictable result. An exact rename is skipped. A story file in the old format, from before GAIA 2.3.0, also stops it, with the command that converts it, and so does a story file whose shape the check cannot read.
 - **Why:** these tests cannot be reliably watched failing first, so a [worthiness review](/workflow/tdd/#everything-else-the-worthiness-review) of each one takes the place of the RED gate. The hook checks only that a record exists for the test's current content; it does not read the verdict or prove how the review was done.
 - **When:** before `gh pr merge` runs (`worthiness-presence-check`).
 - **Who acts:** Claude. Nothing for you to do.
-- **Clear it:** Claude runs the worthiness review on the changed tests and retries the merge.
+- **Clear it:** Claude runs the worthiness review on the changed tests and retries the merge. For an old-format story file, Claude converts it first.
 
 ### Hand-rolled merge wait
 

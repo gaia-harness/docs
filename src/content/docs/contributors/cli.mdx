@@ -102,6 +102,10 @@ Every region must be registered in `.gaia/cli/src/release/region-registry.ts`. N
 
 The steps behind [`/update-deps`](/maintenance/update-deps/): `run` (finds what is outdated and sorts it into update waves), `decline` (snoozes an update), `global-tools`, `advisories`, `advisory-landed`, `dismiss-alert`, `write-security-cache`, and `check-security-override`.
 
+### `gaia migrate-csf4`
+
+Converts a project's Storybook stories from CSF3 to CSF Next (2.3.0). It runs Storybook's own converter at the installed version, repairs what that misses (the preview, `.storybook/main.ts`, `package.json`, and story exports built by a factory function, which it inlines into direct `meta.story({...})` calls), then typechecks, lints, and runs the stories. It prints a per-file report ending with a command that undoes the conversion. `--update-merge` runs it on the uncommitted tree an `/update-gaia` merge leaves behind, and `--json` prints the report as one object. Exit 0 means converted and verified, 1 a failed verification, 2 a usage error, and 3 a refusal before anything was written (a CSF2 file or a story file it cannot classify, uncommitted changes anywhere in the tree or, with `--update-merge`, only in the paths it writes, a Storybook version outside 10.6, a TypeScript it cannot resolve, or a converter it cannot fetch). See [Stories in 2.3.0](/maintenance/update-gaia/#stories-in-230).
+
 ### `gaia fitness`
 
 The [`/gaia-fitness`](/maintenance/fitness/) linter: `check` (the rule catalog and grade), `rules`, `inventory` (also used by `/gaia-cleanse`), `builtins`, `apply` (the only subcommand that writes a fix, and only to a file you own that has not changed since the check), and `render-card`.
