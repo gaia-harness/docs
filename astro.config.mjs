@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import llmsTxt from 'starlight-llms-txt';
 import rehypeExternalLinks from 'rehype-external-links';
+import { cfBeaconAttrs } from './src/analytics.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -73,6 +74,7 @@ export default defineConfig({
 				{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
 				{ tag: 'meta', attrs: { property: 'og:image:alt', content: 'GAIA' } },
 				{ tag: 'meta', attrs: { name: 'twitter:image', content: 'https://docs.gaiaharness.com/og-image.png' } },
+				...(cfBeaconAttrs ? [{ tag: 'script', attrs: cfBeaconAttrs }] : []),
 			],
 			// Keep our bespoke src/pages/404.astro; don't let Starlight inject its own.
 			disable404Route: true,

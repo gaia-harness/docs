@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import gaiaLogo from '../assets/gaia-logo.svg';
+import { cfBeaconAttrs } from '../analytics.mjs';
 
 const WEB = 'https://gaiaharness.com';
 const NAV = [
@@ -16,8 +17,9 @@ const NAV = [
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>404 — GAIA Docs</title>
+		<title>404 | GAIA Docs</title>
 		<meta name="robots" content="noindex" />
+		{cfBeaconAttrs && <script is:inline {...cfBeaconAttrs} />}
 	</head>
 	<body>
 		<header>
