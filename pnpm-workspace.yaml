@@ -1,6 +1,7 @@
 allowBuilds:
   esbuild: true
   sharp: true
+  workerd: true
 
 overrides:
   js-yaml: ^4.3.0

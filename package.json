@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@astrojs/markdown-remark": "^7.3.3",
-    "rehype-external-links": "^3.0.0"
+    "rehype-external-links": "^3.0.0",
+    "wrangler": "^4.153.0"
   }
 }

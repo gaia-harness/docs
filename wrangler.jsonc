@@ -1,0 +1,13 @@
+// Cloudflare Workers config. Static files only: no Worker script runs.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "gaia-docs",
+	"compatibility_date": "2026-10-28",
+	"assets": {
+		"directory": "./dist",
+		// Serve dist/404.html for unknown paths, with a 404 status.
+		"not_found_handling": "404-page",
+		// /workflow serves /workflow/index.html, matching Astro's output.
+		"html_handling": "auto-trailing-slash"
+	}
+}
