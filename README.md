@@ -2,7 +2,7 @@
 
 Documentation site for [GAIA](https://github.com/gaia-react/gaia), served at [docs.gaiaharness.com](https://docs.gaiaharness.com).
 
-Built with [Starlight](https://starlight.astro.build) on Astro. Deployed to GitHub Pages on every push to `main`.
+Built with [Starlight](https://starlight.astro.build) on Astro. Deployed to Cloudflare Workers (static assets) on every push to `main`.
 
 ## Local development
 
@@ -17,7 +17,7 @@ pnpm preview  # preview the build
 
 - `src/content/docs/`: Markdown/MDX content. Each file becomes a route.
 - `src/assets/`: images embedded in content.
-- `public/`: static assets (favicon, `CNAME`, etc.).
+- `public/`: static assets (favicon, `_headers`, etc.).
 - `astro.config.mjs`: site config, sidebar, Starlight options.
 
 ## Deploy
