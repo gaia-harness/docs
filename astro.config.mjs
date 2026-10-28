@@ -28,7 +28,7 @@ export default defineConfig({
 			],
 		],
 	},
-	// Old 1.x URLs. GitHub Pages serves static files only, so Astro emits a
+	// Old 1.x URLs. The site is static files only, so Astro emits a
 	// meta-refresh page at each old path.
 	redirects: {
 		'/commands': '/workflow/',

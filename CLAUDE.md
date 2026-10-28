@@ -1,6 +1,6 @@
 # GAIA Docs
 
-Public technical documentation for GAIA. Starlight (Astro). Served at docs.gaiaharness.com. Deployed to GitHub Pages on push to `main`.
+Public technical documentation for GAIA. Starlight (Astro). Served at docs.gaiaharness.com. Deployed to Cloudflare Workers (static assets, `wrangler.jsonc`) on push to `main`.
 
 ## Response style
 
@@ -147,7 +147,7 @@ If a claim can't be grounded in the source, don't write it. Open a question inst
 - Sidebar registered in `astro.config.mjs`. Adding a new page means adding a sidebar entry; don't rely on autogenerate unless you've configured it.
 - Frontmatter follows Starlight's `docsSchema()` (`src/content.config.ts`). At minimum: `title`, `description`. Use `sidebar.order` for explicit ordering when needed.
 - Asides: `tip` (green, shield icon) is reserved for safety and privacy callouts. Use `note` for ordinary tips and `caution` for warnings.
-- Images go in `src/assets/` and are imported. Static files (favicon, `CNAME`) go in `public/`.
+- Images go in `src/assets/` and are imported. Static files (favicon, `_headers` for response headers) go in `public/`.
 - Site config: `astro.config.mjs`. `site` is `https://docs.gaiaharness.com`; don't change without coordination.
 
 ## Local commands
@@ -159,7 +159,7 @@ pnpm build    # production build → ./dist
 pnpm preview  # preview the build
 ```
 
-Pushes to `main` deploy via `.github/workflows/deploy.yml`. PRs build but do not deploy.
+Pushes to `main` deploy via `.github/workflows/deploy.yml`. PRs from this repo upload a Cloudflare preview version; they never touch the live site.
 
 ## When in doubt
 

@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Workers
 
 on:
   push:
@@ -9,45 +9,16 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: deploy-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Build
-        uses: withastro/action@v6
-        with:
-          node-version: 22
-
-  deploy:
-    needs: build
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
-
-  # Runs beside GitHub Pages until docs.gaiaharness.com moves to Cloudflare.
   # main deploys the live Worker; a PR from this repo uploads a preview version.
-  cloudflare:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+  # A PR from a fork has no secrets, so it only builds.
+  deploy:
     runs-on: ubuntu-latest
-    concurrency:
-      group: cloudflare-${{ github.ref }}
-      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -74,9 +45,9 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      # A preview is a nice-to-have; it cannot upload before the first main deploy creates the Worker.
+      # A preview is a nice-to-have, so a failed upload does not fail the PR.
       - name: Upload Cloudflare preview
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         continue-on-error: true
         run: pnpm exec wrangler versions upload --preview-alias pr-${{ github.event.pull_request.number }}
         env:

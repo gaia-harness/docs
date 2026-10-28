@@ -3,6 +3,9 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "gaia-docs",
 	"compatibility_date": "2026-10-28",
+	// Keep gaia-docs.<account>.workers.dev and per-PR preview URLs.
+	"workers_dev": true,
+	"preview_urls": true,
 	"assets": {
 		"directory": "./dist",
 		// Serve dist/404.html for unknown paths, with a 404 status.
