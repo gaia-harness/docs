@@ -20,7 +20,8 @@
 	--gaia-line: #3d3d3a;
 	--gaia-line-soft: #2e2e2b;
 
-	--gaia-font-display: 'Fraunces', Georgia, serif;
+	/* Georgia, not the website's Fraunces: it reads better at docs heading sizes. */
+	--gaia-font-display: Georgia, serif;
 	--gaia-font-body: ui-sans-serif, system-ui, sans-serif;
 	--gaia-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -73,7 +74,7 @@
 	}
 }
 
-/* Display font for headings: matches website. */
+/* Display font for headings. */
 h1,
 h2,
 h3 {
@@ -88,6 +89,9 @@ body {
 	background-color: var(--gaia-canvas);
 	color: var(--gaia-ink);
 	font-family: var(--gaia-font-body);
+	/* Same text rendering as gaiaharness.com; without it macOS draws text heavier. */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 /* Header backdrop blur: mirror website's translucent bar. */
