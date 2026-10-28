@@ -96,7 +96,7 @@ Every source files through the same `file-tech-debt` skill. You can trigger it y
 - **Prevents duplicates.** Each issue carries a hidden key naming the kind of finding, the file, and the line. A finding that already has an open issue, or one closed as not planned or labelled `wontfix`, is not filed again.
 - **Labels the issue** with `tech-debt`, a severity, and a footprint (how much code the fix touches), plus a difficulty when the filer read the cited code. See [Labels](/reference/labels/#tech-debt).
 - **Checks the issue before creating it.** The labels and key are checked first. If they are badly formed, Claude corrects them before the issue is created, instead of leaving it for `/gaia-debt` to trip over later.
-- **Writes a self-contained body**: the file and line, what goes wrong, and a suggested fix.
+- **Writes a self-contained body**: the file and line, then what goes wrong under a `## Problem` heading and the suggested fix under `## Fix`. Each section can hold lists, tables, and steps, such as how to check the fix.
 
 When GitHub has a temporary problem (a timeout or a rate limit), the finding is kept and retried on the next audit round. When there is no issue tracker to file to (no GitHub repository, `gh` not signed in, Issues turned off, or no write access), nothing is filed, and the run reports it.
 
