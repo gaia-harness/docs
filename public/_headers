@@ -1,5 +1,6 @@
 # Response headers for Cloudflare Workers static assets.
-# Starlight uses inline scripts and Pagefind search uses WebAssembly.
+# Starlight emits a few inline scripts: scripts/csp-hashes.mjs swaps 'unsafe-inline'
+# below for their sha256 hashes at build time. Pagefind search uses WebAssembly.
 /*
   Strict-Transport-Security: max-age=31536000
   X-Content-Type-Options: nosniff
