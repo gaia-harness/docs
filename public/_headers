@@ -11,3 +11,7 @@
 # Astro fingerprints these file names, so they never change in place.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Agent discovery (RFC 8288): the homepage points agents at the plain-text docs.
+/
+  Link: </llms.txt>; rel="describedby"; type="text/plain"
