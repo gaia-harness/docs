@@ -37,7 +37,7 @@ After the preflight, in outline, it:
 - Graduates the CHANGELOG's `## [Unreleased]` section into a dated `## [X.Y.Z]` entry
 - Resets `wiki/log.md`, so new projects start with a clean log
 - Regenerates `.gaia/manifest.json` and rebuilds the bundled CLIs
-- Commits on a `release/vX.Y.Z` branch and opens a pull request, which passes the same checks and the same [Code Audit Team](/workflow/code-audit-team/) audit as any other
+- Commits on a `release/vX.Y.Z` branch and opens a pull request, which takes the [release fast path](/contributors/ci/#release-fast-path): when its whole change is version bookkeeping, no Code Audit Team member needs to review it, and when it was also cut from the current, green head of `main`, CI runs one release consistency check in place of each suite. Anything more runs the same checks and the same [Code Audit Team](/workflow/code-audit-team/) audit as any other pull request
 - Tags the merge commit once it lands, which triggers [release.yml](/contributors/ci/#releaseyml)
 - Then brings `create-gaia`, the website, and these docs in line with the release
 

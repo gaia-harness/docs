@@ -9,6 +9,20 @@ These workflows run only on the GAIA repo; `.gaia/release-exclude` keeps them ou
 
 None of these workflows runs the pre-merge audit. The audit runs locally, through the [Code Audit Team](/workflow/code-audit-team/).
 
+## Release fast path
+
+A release pull request from [`/gaia-release`](/contributors/release/) changes only version bookkeeping, over a tree `main` has already tested. When that is all it changes, the full suites would only repeat what `main` already passed, so they step aside for one release consistency check that takes about a minute.
+
+A change counts as release bookkeeping only when every changed file is one of `.gaia/VERSION`, `.gaia/manifest.json`, `package.json`, `frontend/package.json`, and `CHANGELOG.md`, plus at most `wiki/.state.json` and `wiki/log.md`. All five must change, and each file differs from its base only in the way a release changes it (a version bump, the CHANGELOG entry moving under its release heading, the wiki log reset). `.gaia/scripts/release-bookkeeping-check.sh` makes that call from the diff alone, never from the branch name or the pull request title.
+
+CI adds one more condition: the commit the release was cut from must still be the head of `main` and green there. For the workflows that also run on a push to `main`, their own push run on that commit must have passed too. When both hold, the jobs that run a suite skip it:
+
+- `Vitest (.gaia/cli)` and the distribution harness run the release consistency check in place of their tests.
+- Audit CI Tests runs the check once, in a `Release bookkeeping check` job, and skips every shard. The `Audit CI Tests` job counts the skipped shards as passing.
+- In the GAIA repo, the shipped workflows' `Vitest and Playwright` job and Chromatic do the same. `Shellcheck and bats` is unchanged.
+
+The push run when the release lands on `main` as one squash commit takes the same path. A release consistency check that fails fails the job. Any other changed file, a change to the bookkeeping check itself, a base that has moved or is not green, or any signal the check cannot read runs every gate as usual. `release.yml`'s own distribution tests before it publishes do not change.
+
 ## release.yml
 
 Triggers on `v*.*.*` tag pushes. Builds and publishes the release bundle. It can also be started by hand against a tag that already exists, as a dry run: it rebuilds and checks that tag's bundle and composes its release body, but publishes nothing. That proves a change to GitHub's runner image before the next real tag meets it. To start one, ask:
