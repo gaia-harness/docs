@@ -79,6 +79,7 @@ These hooks never turn anything back. They record what happened (test failures, 
 - **Native git hooks** in `.githooks/`: `pre-commit` (typecheck, [lint-staged](https://github.com/lint-staged/lint-staged), tests) and `commit-msg` ([commitlint](https://commitlint.js.org/)). Both also catch [machine-local references](/reference/gates/#machine-local-references). They run on every commit, Claude's or yours: Claude fixes what they report and commits again, and when you commit by hand you can ask Claude to fix it. See [Git hooks and conventions](/workflow/git-conventions/).
 - **Permission rules** in `.claude/settings.json`: for example, Claude cannot edit `pnpm-lock.yaml` directly; `pnpm install` regenerates it.
 - **The `GAIA-Audit` required check** on GitHub, registered by [`/setup-gaia`](/getting-started/setup-gaia/). Claude posts it on every merge it runs, so it meets you only when you merge with the button on github.com.
+- **The CI required checks** (`Vitest and Playwright`, `Shellcheck and bats`) on GitHub, also registered by `/setup-gaia`. A pull request with failing lint, typecheck, tests, or shellcheck cannot merge. See [CI required checks](/reference/gates/#ci-required-checks).
 
 ## Adding your own
 

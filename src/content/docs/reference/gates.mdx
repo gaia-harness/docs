@@ -184,6 +184,14 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 - **Who acts:** Claude, and you only when you merge on github.com yourself.
 - **Clear it:** Claude posts the status on every merge it runs, so this check meets you only when you click merge on github.com. Ask Claude to merge it instead. When no audit member needs to review a pull request, the merge hook posts the status as `skipped:`.
 
+### CI required checks
+
+- **Stops:** merging a pull request on GitHub until the [Tests workflow](/workflow/git-conventions/#github-workflows-that-ship)'s `Vitest and Playwright` and `Shellcheck and bats` checks pass on its latest commit.
+- **Why:** `GAIA-Audit` shows that the audit ran, not that the code passes. A commit that skipped the local [Quality Gate](/workflow/code-audit-team/#quality-gate) could otherwise merge with failing lint, typecheck, tests, or shellcheck.
+- **When:** on GitHub, at merge. Set up by [`/setup-gaia`](/getting-started/setup-gaia/#recommended-defaults-admin-only), from GAIA 2.3.1.
+- **Who acts:** Claude.
+- **Clear it:** when a check fails, Claude's merge wait stops and reports which check failed. The merge stays queued and lands once the check passes, so ask Claude to fix the failure and push. Each check passes when nothing it covers changed.
+
 ### Audit checkpoint
 
 - **Stops:** the next round of the audit loop.

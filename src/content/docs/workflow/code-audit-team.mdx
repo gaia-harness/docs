@@ -274,7 +274,7 @@ Many teams run review, lint, and tests only on CI. GAIA runs them on your machin
 
 This was true before AI coding tools, and it matters more with them: Claude writes changes faster than a CI round trip can report on them.
 
-CI still runs. The [Tests workflow](/workflow/git-conventions/#github-workflows-that-ship) runs the test suites again on every pull request, and the `GAIA-Audit` required check confirms the local audit ran. CI is the last check on work that should already be good.
+CI still runs. The [Tests workflow](/workflow/git-conventions/#github-workflows-that-ship) runs lint and the test suites again on every pull request, and once a repo admin has run `/setup-gaia`, its two checks are required, so failing code cannot merge. The `GAIA-Audit` required check confirms the local audit ran. CI is the last check on work that should already be good.
 
 ## Why not Claude Code's built-in review
 
