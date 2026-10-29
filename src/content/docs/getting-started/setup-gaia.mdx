@@ -127,14 +127,15 @@ A later GAIA release can add a setup step. `/setup-gaia` runs any new step this 
 
 One such step catches a machine up to GAIA 2.0.0. The 2.0.0 migration cleans up only the machine that ran it, so on any other clone that was on GAIA 1.x, setup finds what 1.x left behind and fixes it. See [Every other machine](/getting-started/upgrading/#every-other-machine). On a machine that was never on 1.x, the step finds nothing and records that.
 
-Another, from GAIA 2.3.1, makes the [CI checks required](#recommended-defaults-admin-only) on a project set up before then. It needs a repo admin. When an admin runs [`/update-gaia`](/maintenance/update-gaia/), the update applies it. When anyone else runs either command, it names the step as owed by an admin and changes nothing. An admin applies it with `/update-gaia`, or with `/setup-gaia` on the default branch.
+Another, from GAIA 2.3.1, makes the [CI checks required](#recommended-defaults-admin-only) on a project set up before then. It needs a repo admin. An admin applies it by running `/setup-gaia` on the default branch, or with the next [`/update-gaia`](/maintenance/update-gaia/) they run when an update is available. When someone who is not an admin runs either command, it skips the step and names it as waiting for a repo admin. An admin who runs `/setup-gaia` on another branch sees it in the `Setup isn't finished` line instead. Only an admin's statusline shows it in the `⚙️ /setup-gaia` nudge.
 
 ## Finish
 
-When a repo admin with `gh` logged in runs setup on the default branch, the team-wide answers from this run are committed and pushed to that branch as `chore(gaia): record setup decisions`, so they reach your team. On any other branch, or for anyone who is not an admin, team answers are not recorded; they stay owed until an admin runs `/setup-gaia` on the default branch. This machine's setup is marked done. Then the command prints its closing message. It starts with one of two status lines:
+When a repo admin with `gh` logged in runs setup on the default branch, the team-wide answers from this run are committed and pushed to that branch as `chore(gaia): record setup decisions`, so they reach your team. On any other branch, or for anyone who is not an admin, team answers are not recorded; they stay owed until an admin runs `/setup-gaia` on the default branch. This machine's setup is marked done. Then the command prints its closing message. It starts with one of three status lines:
 
-- `You're all set: your GAIA project is ready.` when nothing this machine can do is left.
+- `You're all set: your GAIA project is ready.` when no setting is left to apply.
 - `Setup isn't finished: these project settings are still owed: ...` naming the team settings still to apply, when a GitHub step was refused or skipped. Fix the cause and re-run.
+- `Your part of setup is done, but these project settings still need a repository admin: ...` when setup has confirmed you are not a repo admin, nothing else is left for you, and a setting only an admin can apply, such as the [required CI checks](#recommended-defaults-admin-only), is still waiting. It stays unapplied until a repo admin runs `/setup-gaia` on the default branch, so ask one to.
 
 The rest of the message:
 
