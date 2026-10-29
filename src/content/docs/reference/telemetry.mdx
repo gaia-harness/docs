@@ -7,10 +7,10 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-GAIA sends one small usage ping when `/gaia-init`, `/setup-gaia`, or `/update-gaia` finishes. This ping is GAIA's only telemetry. It tells GAIA's maintainer how many projects use GAIA, which setup options they choose, and which platforms they run on, so future work goes where it helps the most people.
+GAIA sends one small usage ping when `/gaia-init`, `/setup-gaia`, or `/update-gaia` finishes. This ping is GAIA's only telemetry. It tells GAIA's maintainer how many projects use GAIA, which setup options they choose, and which platforms they run on, so future work goes where it helps the most people. The ping is on by default. To turn it off, see [Turning it off](#turning-it-off).
 
 <Aside type="tip" title="What the ping never contains">
-No code, file names, paths, repository names, GitHub usernames, prompts, or anything you typed. Every field is a fixed choice from a short list, a count, a version number, or the install ID described below. Turning the ping off changes nothing else about GAIA.
+No code, file names, paths, repository names, GitHub usernames, prompts, or anything you typed. Every field is a fixed choice from a short list, a count, a version number, or the random install ID described below. None of them comes from a path, a machine name, or a username. Turning the ping off changes nothing else about GAIA.
 </Aside>
 
 ## The three events
@@ -33,7 +33,9 @@ Besides its event and fields, each ping carries:
 - **A broad platform:** `macos`, `linux`, `windows`, or `other`
 - **An install ID** (`projectId`)
 
-The install ID is pseudonymous: it is the same for every ping from one install, so the three events from one project can be counted together, but it contains nothing readable about you or your project. It identifies an install, not a person.
+The install ID is a random ID that GAIA creates the first time a ping is sent and stores in `.gaia/local/.install-id` in your main checkout, so every worktree of the project shares one ID. It is the same for every ping from one install, so the three events from one project can be counted together. Because it is random, nothing about you, your machine, or your project can be worked out from it. It identifies an install, not a person. With the ping turned off, no ID is created.
+
+Before GAIA 2.3.1, the ID was built from your project's folder path, and a folder path that is easy to guess could be traced back. On the first ping after you update to 2.3.1, GAIA deletes the old `.gaia/local/.project-id` file without reading it and creates a new random ID. Nothing for you to do.
 
 ## How it is sent
 
