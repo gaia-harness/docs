@@ -131,10 +131,11 @@ Another, from GAIA 2.3.1, makes the [CI checks required](#recommended-defaults-a
 
 ## Finish
 
-When a repo admin with `gh` logged in runs setup on the default branch, the team-wide answers from this run are committed and pushed to that branch as `chore(gaia): record setup decisions`, so they reach your team. On any other branch, or for anyone who is not an admin, team answers are not recorded; they stay owed until an admin runs `/setup-gaia` on the default branch. This machine's setup is marked done. Then the command prints its closing message. It starts with one of three status lines:
+When a repo admin with `gh` logged in runs setup on the default branch, the team-wide answers from this run are committed and pushed to that branch as `chore(gaia): record setup decisions`, so they reach your team. On any other branch, or for anyone who is not an admin, team answers are not recorded; they stay owed until an admin runs `/setup-gaia` on the default branch. This machine's setup is marked done. Then the command prints its closing message. It starts with one of four status lines:
 
 - `You're all set: your GAIA project is ready.` when no setting is left to apply.
 - `Setup isn't finished: these project settings are still owed: ...` naming the team settings still to apply, when a GitHub step was refused or skipped. Fix the cause and re-run.
+- `Your part of setup is done, but these project settings are still undecided: ...` when your repository is on GitHub but setup could not check whether you are a repo admin: `gh` is not signed in, GitHub did not answer, or the repository did not exist yet when setup checked. It prints when nothing else is left for you and a setting only an admin can apply is still undecided, and it names those settings. Re-run `/setup-gaia` (after `gh auth login` if `gh` is not signed in), or ask a repo admin to run it on the default branch.
 - `Your part of setup is done, but these project settings still need a repository admin: ...` when setup has confirmed you are not a repo admin, nothing else is left for you, and a setting only an admin can apply, such as the [required CI checks](#recommended-defaults-admin-only), is still waiting. It stays unapplied until a repo admin runs `/setup-gaia` on the default branch, so ask one to.
 
 The rest of the message:
