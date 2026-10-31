@@ -244,6 +244,14 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 - **Who acts:** Claude. Nothing for you to do.
 - **Clear it:** Claude never needs to write it; your files never belong there. `/update-gaia` writes it through a specific exemption.
 
+### Claude settings file
+
+- **Stops:** Claude changing a `.claude/settings.json` file without your approval. This file registers every GAIA hook and permission rule, so an edit to it decides which guards run. Claude's edit tools ask about the root file and any copy in a package or worktree. The exception is `frontend/.claude/settings.json`, which they never edit ([Generated frontend settings](#generated-frontend-settings)). Shell writes ask about all of those, plus your personal `~/.claude/settings.json`. `settings.local.json` is not covered.
+- **Why:** no automatic check can tell an intended change from a guard being switched off. Only you know which one you meant.
+- **When:** before Edit, Write, or MultiEdit runs (a permission rule, in every permission mode), and before a Bash or Monitor command that writes the file through a redirect, `tee`, `sponge`, `sed -i`, or as a `cp` or `mv` destination (`block-settings-write`).
+- **Who acts:** you. This one stops for your answer.
+- **Clear it:** approve the prompt if you meant the change, and deny it otherwise. With nobody there to answer, as in an unattended run, the prompt counts as a denial and the write does not happen. The guard has limits. In `bypassPermissions` mode the edit tools still ask, but a shell write goes through with no prompt, and other ways of writing the file, such as `perl -i` or a short Python script, are not detected. As a second check, `code-audit-shell` reviews any pull request that changes the root file and [lists every hook and permission rule the change removes, weakens, or moves](/workflow/code-audit-team/#members).
+
 ### Generated frontend settings
 
 - **Stops:** direct edits to `frontend/.claude/settings.json`, and a commit when it no longer matches what the generator produces.
@@ -255,6 +263,8 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
   ```text
   Add <setting> to the root .claude/settings.json and regenerate the frontend settings.
   ```
+
+  You approve the edit to the root file when Claude Code asks ([Claude settings file](#claude-settings-file)).
 
 ### Audit markers and loop state
 
@@ -351,6 +361,8 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
   ```text
   I have checked where <package>@<version> came from. Add that exact version to the release-age exception list in pnpm-workspace.yaml, with a comment saying who checked it and why.
   ```
+
+  `/update-deps` honors the same list: a version on it skips the age wait.
 
 ### Trust downgrade
 

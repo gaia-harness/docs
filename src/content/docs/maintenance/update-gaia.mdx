@@ -68,7 +68,7 @@ Every file the merge overwrites or deletes is backed up first, under `.gaia-back
 `.gaia/manifest.json` is GAIA's list of the files it ships. It gives each file one of three classes, which decide the recommended answer when you and GAIA both changed it:
 
 - **`owned`**: GAIA maintains the file. Most of `.claude/`, `.gaia/` and `.githooks/` is owned. A conflict question recommends GAIA's version. If you already had a file of your own at a path a new release starts shipping, yours is backed up and replaced.
-- **`shared`**: GAIA ships a starting version that you are expected to customize, such as `CLAUDE.md`, `.claude/settings.json`, `package.json`, `.gaia/audit-ci.yml`, `frontend/app/styles/theme.css` and the CI workflows. A conflict question recommends keeping yours. If you already had a file at a path a new release starts shipping, you are asked instead of overwritten.
+- **`shared`**: GAIA ships a starting version that you are expected to customize, such as `CLAUDE.md`, `.claude/settings.json`, `package.json`, `.gaia/audit-ci.yml`, `frontend/app/styles/theme.css` and the CI workflows. A conflict question recommends keeping yours. If you already had a file at a path a new release starts shipping, you are asked instead of overwritten. When an update writes `.claude/settings.json` with a copy or an edit, Claude Code asks you first because [GAIA guards that file](/reference/gates/#claude-settings-file). Approve it if it matches the answer you just chose. An automatic merge of the file goes through with no prompt. An unattended run cannot write the file by copy or edit.
 - **`wiki-owned`**: pages in `wiki/` that GAIA ships. They merge like `shared` files, and sections you added to one are kept.
 
 ### What the merge never touches

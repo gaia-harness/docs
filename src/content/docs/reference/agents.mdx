@@ -54,7 +54,7 @@ Responsible for `.github/workflows/*.yml` and `.github/actions/**/*.yml`. Review
 
 ### code-audit-shell
 
-Responsible for every `.sh` and `.bats` file, `.claude/hooks/**`, and `.githooks/**`. Reviews the shell you write, and your own edits to shell GAIA ships, for unquoted variables, failures that pass silently, guards that allow when they should block, and code that breaks on macOS's bash 3.2 or its versions of `sed` and `date`. For a Claude hook, it also checks that the hook reads its input safely and never breaks your session on its own error. For a bats test, it checks for assertions that can never fail and for tests weakened or skipped without a reason. A change that comes from applying a GAIA update skips GAIA's own shell files. Light review is on for changes up to 30 lines, except Claude hooks, git hooks, and bats tests. See [Code Audit Team](/workflow/code-audit-team/#members).
+Responsible for every `.sh` and `.bats` file, `.claude/hooks/**`, `.githooks/**`, and the root `.claude/settings.json`. Reviews the shell you write, and your own edits to shell GAIA ships, for unquoted variables, failures that pass silently, guards that allow when they should block, and code that breaks on macOS's bash 3.2 or its versions of `sed` and `date`. For a Claude hook, it also checks that the hook reads its input safely and never breaks your session on its own error. For a bats test, it checks for assertions that can never fail and for tests weakened or skipped without a reason. A change that comes from applying a GAIA update skips GAIA's own shell files. Light review is on for changes up to 30 lines, except Claude hooks, git hooks, bats tests, and `.claude/settings.json`. See [Code Audit Team](/workflow/code-audit-team/#members).
 
 ### audit-loop-unit
 

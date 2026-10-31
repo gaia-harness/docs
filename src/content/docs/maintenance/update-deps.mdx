@@ -102,7 +102,7 @@ The run ends with a [cost line](/models-and-context/cost/).
 
 ## Release-age window
 
-[pnpm](https://pnpm.io/) will not install a release younger than 3 days (`minimumReleaseAge` in `pnpm-workspace.yaml`), and the setting is strict. `/update-deps` skips those versions on its own and picks them up on a later run once they age. A security fix inside the window is reported as still open, with the date it becomes eligible. **Why:** a compromised package version is usually caught and pulled within days, so waiting keeps a poisoned release out of your lockfile. See the [gate reference](/reference/gates/#release-age-window).
+[pnpm](https://pnpm.io/) will not install a release younger than 3 days (`minimumReleaseAge` in `pnpm-workspace.yaml`), and the setting is strict. `/update-deps` skips those versions on its own and picks them up on a later run once they age. The exception is a package or version on the release-age exception list (`minimumReleaseAgeExclude` in `pnpm-workspace.yaml`): a stable upgrade it covers shows up right away, in the run and in the statusline count. An entry for a whole package covers all its versions. An entry for one version covers only that version, and newer ones still wait. A security fix inside the window is reported as still open, with the date it becomes eligible. **Why:** a compromised package version is usually caught and pulled within days, so waiting keeps a poisoned release out of your lockfile. See the [gate reference](/reference/gates/#release-age-window).
 
 ## Version holds
 

@@ -67,6 +67,14 @@ Every task Claude does for you follows one lifecycle, whether a command drives i
 6. **Merge.** Ad-hoc work waits until you ask. Some commands merge their own pull request as part of the run.
 7. **Clean up** back to a pulled default branch.
 
+When you ask for work without naming a command, Claude first checks whether it deserves a spec or a plan, and it asks only when it does:
+
+- A new feature that adds user-visible rules, data, or flows gets a recommendation for [`/gaia-spec`](/workflow/spec/), even when your request is long and detailed. A SPEC turns those rules into checked acceptance tests.
+- Clear internal work that is worth planning first gets a recommendation for [`/gaia-plan`](/workflow/plan/): several phases, parallel streams, a rollout across many files or targets, or a migration of stored data.
+- A bug fix or a small contained change proceeds with no question.
+
+You answer with the recommended command or `Just do it`, which goes straight to step 1. Claude asks once per task. It does not ask if you already said how to proceed (such as "just fix it"), if the work's branch already exists, if a GAIA command is running, or in an unattended run.
+
 Every task gets a draft pull request, even when you did not ask for one. If you say you will review or commit an edit yourself, Claude leaves it uncommitted on your current branch and none of these steps apply.
 
 <Flowchart {...lifecycle} />
