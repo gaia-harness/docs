@@ -93,6 +93,7 @@ Waiving and recording keep the backlog small enough to work through:
 
 Every source files through the same `file-tech-debt` skill. You can trigger it yourself by asking Claude to file something as tech debt. It:
 
+- **Keeps your branch's own code out of the backlog.** A non-security finding on a line the branch wrote [is not filed](/reference/gates/#tech-debt-on-the-branchs-own-code). Claude fixes it on the branch or records it as an accepted residual.
 - **Prevents duplicates.** Each issue carries a hidden key naming the kind of finding, the file, and the line. A finding that already has an open issue, or one closed as not planned or labelled `wontfix`, is not filed again.
 - **Labels the issue** with `tech-debt`, a severity, and a footprint (how much code the fix touches), plus a difficulty when the filer read the cited code. See [Labels](/reference/labels/#tech-debt).
 - **Checks the issue before creating it.** The labels and key are checked first. If they are badly formed, Claude corrects them before the issue is created, instead of leaving it for `/gaia-debt` to trip over later.

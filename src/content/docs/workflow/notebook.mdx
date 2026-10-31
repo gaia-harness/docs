@@ -44,7 +44,7 @@ The `.notebook/` folder at the root of your main checkout is where GAIA keeps wo
 
 Conceptually, the notebook works the way an engineer's paper notebook does. You keep it at your own desk and write in it while the work is happening. It holds drafts, the plans you are working through, and notes on what you tried. It is not where the finished result lives.
 
-The finished result is the code, the pull request, and the commit history. When a plan's pull request is ready to merge, Claude writes a short summary of what shipped. It can promote that summary into the [project wiki](/maintenance/wiki/) as a commit on the pull request's branch, so the lasting part travels with the code. The notebook entry has done its job after that, and GAIA clears it out.
+The finished result is the code, the pull request, and the commit history. Before a plan's pull request goes to the first audit round, Claude writes a short summary of what shipped. It can promote that summary into the [project wiki](/maintenance/wiki/) as a commit on the pull request's branch, so the lasting part travels with the code. After the audit clears and you confirm the merge, Claude rereads each promoted page against the audited code and commits a fix to any page the audit's changes made wrong. The notebook entry has done its job after that, and GAIA clears it out.
 
 Nothing in the notebook is committed, so drafts, dead ends, and research notes never show up in your repository's history or in a pull request's diff.
 

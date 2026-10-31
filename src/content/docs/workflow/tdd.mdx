@@ -84,7 +84,19 @@ Each test is judged on two questions:
 
 For an interactive component, the reviewer also expects its story tests to drive it from the keyboard and check where focus lands. An accessibility scan of a rendered component tests neither.
 
-Each test gets one verdict: keep, fix, or delete. The reviewer edits nothing itself.
+Each test gets one verdict: keep, fix, or delete. The reviewer edits no test or source file itself.
+
+### The worthiness step
+
+A plan run, a plain request, and `/gaia-debt` each finish this review once the draft pull request is open and before the first audit round. A fix made at this point costs no clearance, because no member has earned one yet. If the branch changed no test of this kind, or every such test already has a verdict, the step ends with no commit.
+
+- **Keep**: nothing more happens. A test that already has a keep for its current content is not reviewed again.
+- **Fix**: a fresh sub-agent fixes the test, Claude commits, and the reviewer judges the changed test once more. If it still gets a fix verdict, or the fixer cannot fix it, it becomes an [accepted residual](/maintenance/residue/#what-a-residual-is). If it now gets a delete verdict, the delete steps below apply. A fix for a test this branch did not change goes to [tech debt](/workflow/tech-debt/) instead.
+- **Delete**: Claude asks you, as described below, and an approved delete goes to the same fixer. A refused delete keeps the test with no residual. In an unattended run, the test stays and a residual is recorded.
+
+An audit fixer can change a test after it was judged, so Claude checks again after a clean audit. If a changed test then gets a fix verdict, Claude asks you. It recommends the fix and tells you it means another review by the member that owns the test and one more CI run. The alternative is an accepted residual.
+
+Claude follows this order from its instructions, and no gate stops an audit that skipped the step. The [worthiness verdict gate](/reference/gates/#worthiness-verdict) still catches a missing review at merge.
 
 ## What you see at the end
 

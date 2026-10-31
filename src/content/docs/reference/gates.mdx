@@ -206,7 +206,15 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 - **Why:** these tests cannot be reliably watched failing first, so a [worthiness review](/workflow/tdd/#everything-else-the-worthiness-review) of each one takes the place of the RED gate. The hook checks only that a record exists for the test's current content; it does not read the verdict or prove how the review was done.
 - **When:** before `gh pr merge` runs (`worthiness-presence-check`).
 - **Who acts:** Claude. Nothing for you to do.
-- **Clear it:** Claude runs the worthiness review on the changed tests and retries the merge. For an old-format story file, Claude converts it first.
+- **Clear it:** Claude normally finishes this review before the first audit round ([the worthiness step](/workflow/tdd/#the-worthiness-step)), so this gate is the backstop. If a record is missing, Claude runs the review on the changed tests and retries the merge. For an old-format story file, Claude converts it first.
+
+### Tech debt on the branch's own code
+
+- **Stops:** filing a `tech-debt` issue for a non-security finding on a line this branch wrote (`refused-authored`). A finding on the whole file counts when the branch changed that file. Security findings skip this check and follow [their own route](/workflow/tech-debt/#security-findings).
+- **Why:** code a branch wrote is that branch's work. The debt backlog should hold only unrelated finds, not problems left behind by the pull request that made them.
+- **When:** when `file-tech-debt` runs, before it reads GitHub. It compares the branch's committed changes with the point where the branch left the default branch, so uncommitted edits do not count and nothing on the default branch counts as written by a branch. If that comparison cannot be made, the issue is filed anyway and the run notes the check did not happen, since losing a finding costs more than one misplaced issue.
+- **Who acts:** Claude. Nothing for you to do.
+- **Clear it:** Claude fixes the finding on the branch or records it as an [accepted residual](/maintenance/residue/#what-a-residual-is). No issue is created.
 
 ### Hand-rolled merge wait
 

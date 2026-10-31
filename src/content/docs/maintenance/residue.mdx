@@ -64,7 +64,7 @@ Going through them is optional tidying. Stopping costs nothing: the run publishe
 
 ## When the nudge can stay up after a run
 
-A promotion that could not file an issue leaves its residual open, so it still counts toward the nudge. That happens when GitHub is unreachable, the filing fails, or the finding is security-sensitive: [security findings are never filed](/workflow/tech-debt/#security-findings) in the public tracker, only kept as a local record.
+A promotion that could not file an issue leaves its residual open, so it still counts toward the nudge. That happens when GitHub is unreachable, the filing fails, you promote from a branch that wrote the cited line (run it again from your default branch), or the finding is security-sensitive: [security findings are never filed](/workflow/tech-debt/#security-findings) in the public tracker, only kept as a local record.
 
 The run does not retry those in the same pass. It ends by saying how many are stuck, that they keep the nudge up, and what you can do:
 

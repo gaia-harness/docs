@@ -16,7 +16,7 @@ GAIA ships ten [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.cla
 | [`audit-refuter`](#audit-refuter) | Sonnet | `code-audit-frontend` | No (read-only) |
 | [`audit-loop-unit`](#audit-loop-unit) | Opus | the merge workflow | Commits fix rounds |
 | [`audit-light-reviewer`](#audit-light-reviewer) | Sonnet | the audit loop, for a light review | No (read-only) |
-| [`worthiness-evaluator`](#worthiness-evaluator) | Opus | the `tdd` skill | No |
+| [`worthiness-evaluator`](#worthiness-evaluator) | Opus | the worthiness step, the `tdd` skill | No |
 | [`uat-fidelity-judge`](#uat-fidelity-judge) | Opus | a SPEC plan's orchestrator | Writes its verdict file only |
 | [`fitness-judge`](#fitness-judge) | Sonnet | `/gaia-fitness` | No (read-only) |
 
@@ -76,9 +76,9 @@ How these two fit into building with tests is described in [Test-driven developm
 
 ### worthiness-evaluator
 
-The advisory reviewer for tests the RED gate does not cover: stories, component interaction tests, and Playwright tests. The `tdd` skill starts it in a fresh context once the tests pass, since the test's author would share its own blind spots. It reads only the tests the work changed plus the test files next to them, and reads source code only to judge whether a test goes through the public interface. It edits nothing.
+The reviewer for tests the RED gate does not cover: stories, component interaction tests, and Playwright tests. It always starts in a fresh context, since the test's author would share its own blind spots. The `tdd` skill starts it once the tests pass, and its verdicts are advice there. The [worthiness step](/workflow/tdd/#the-worthiness-step) starts it before the first audit round and acts on its verdicts. It reads only the tests the work changed plus the test files next to them, and reads source code only to judge whether a test goes through the public interface. It edits no test or source file. The only file it writes is its list of verdicts.
 
-It judges each test on honesty and worthiness (see [the worthiness review](/workflow/tdd/#everything-else-the-worthiness-review)) and returns one verdict per test: `keep`, `fix`, or `delete`. Every `fix` or `delete` carries evidence: the defect for a fix, and for a delete the redundant assertion and the test that already covers it. A delete whose cited assertion it cannot find in the sibling file is downgraded, never proposed. The `tdd` skill records each verdict, keyed to the test's current content, and the [worthiness verdict](/reference/gates/#worthiness-verdict) gate checks that record at merge.
+It judges each test on honesty and worthiness (see [the worthiness review](/workflow/tdd/#everything-else-the-worthiness-review)) and returns one verdict per test: `keep`, `fix`, or `delete`. Every `fix` or `delete` carries evidence: the defect for a fix, and for a delete the redundant assertion and the test that already covers it. A delete whose cited assertion it cannot find in the sibling file is downgraded, never proposed. Each verdict is recorded, keyed to the test's current content, and the [worthiness verdict](/reference/gates/#worthiness-verdict) gate checks that record at merge.
 
 ### uat-fidelity-judge
 
