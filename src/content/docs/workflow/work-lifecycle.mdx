@@ -250,7 +250,7 @@ Who decides when to merge depends on what started the work:
 | [`/gaia-residue`](/maintenance/residue/), [`/gaia-codify`](/maintenance/codify/), [`/gaia-fitness`](/maintenance/fitness/) | The command asks before it merges, and you can leave the pull request open instead. |
 | [`/update-gaia`](/maintenance/update-gaia/) | It opens a draft pull request and stops. You merge it when you are ready. |
 
-Claude squash-merges, then waits for the merge to land. The wait ends with one result (`MERGED`, `CONFLICTING`, `CHECK_FAILED`, `TIMEOUT`, `CLOSED`). It stops as soon as the pull request has a conflict or a required check fails, instead of waiting forever. Cleanup runs only after `MERGED`. A hook blocks Claude from writing its own wait loop for the same reason: a loop that waits only for `MERGED` never ends once the merge can no longer happen.
+Claude squash-merges, then waits for the merge to land. Claude queues the merge with GitHub's auto-merge, and GitHub completes it once the required checks pass. On a repository with auto-merge off (see [`/setup-gaia`](/getting-started/setup-gaia/#recommended-defaults-admin-only)), Claude first waits for the required checks to pass, then merges. The wait ends with one result (`MERGED`, `CONFLICTING`, `CHECK_FAILED`, `TIMEOUT`, `CLOSED`). It stops as soon as the pull request has a conflict or a required check fails, instead of waiting forever. Cleanup runs only after `MERGED`. A hook blocks Claude from writing its own wait loop for the same reason: a loop that waits only for `MERGED` never ends once the merge can no longer happen.
 
 ## 7. Clean up
 

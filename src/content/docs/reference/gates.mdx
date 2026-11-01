@@ -20,7 +20,7 @@ A gate is not a judgment of you or of Claude. Each one exists because the proble
 | [Secrets and protected files](#secrets-and-protected-files) | Keep secrets out of what Claude reads and writes, protect the files GAIA generates and the records of audit approvals, and keep Claude from destructive deletes. |
 | [Worktrees and parallel work](#worktrees-and-parallel-work) | Keep each session in its own checkout and on its own ports, keep maintenance commands in the main checkout, and pause new work while your GAIA version is behind. |
 | [Dependencies](#dependencies) | Keep out package versions that are too new or less trusted than earlier ones, and keep the lockfile machine-written. |
-| [Updates and setup](#updates-and-setup) | Check each GAIA update against its checksum, keep two updates from running at once, run setup only where it belongs, and hold Claude's guarded calls until `jq` is installed. |
+| [Updates and setup](#updates-and-setup) | Check each GAIA update against its checksum, keep two updates from running at once, run setup only where it belongs, check the tool versions GAIA needs, and hold Claude's guarded calls until `jq` is installed. |
 | [Tests and lint](#tests-and-lint) | Require the audit's list of members, a reason on every lint rule that is turned off, and an accessibility check on every story. |
 
 The rest of this page lists every gate: what it stops, why, when it runs, who acts, and how it clears. **Who acts** reads "Claude" when there is nothing for you to do, "You" when the step is yours, and names the one case that reaches you when it is both. **Clear it** says what Claude does and spells out only the steps that are yours. A name in parentheses after **When** is the hook that enforces the gate; see [Hooks](/reference/hooks/).
@@ -439,6 +439,14 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 - **When:** at `/gaia-init`'s first `gaia init` step, which runs after pnpm, the dependency install, and your answers to the setup questions.
 - **Who acts:** You, since you started the command.
 - **Clear it:** run it in a project created with `npx create-gaia`.
+
+### Tool versions
+
+- **Stops:** [`/setup-gaia`](/getting-started/setup-gaia/#prerequisites-every-run) when git is missing or older than 2.40, jq is missing or older than 1.6, or `lsof` (macOS) or `ss` (Linux) is missing. [`/update-gaia`](/maintenance/update-gaia/#what-it-does) when jq or pnpm is missing, jq is older than 1.6, or pnpm is older than 12, measured against the new release's own list; the other tools only get a warning there.
+- **Why:** below these versions part of GAIA breaks or quietly does less. GAIA's hooks and scripts read JSON with jq, and it installs, tests, and builds with pnpm. Below git 2.40 every audit runs a full review, never the cheaper light one, and without `lsof` or `ss` GAIA cannot find your running dev server.
+- **When:** at the start of `/setup-gaia`, and in `/update-gaia` before its **Proceed** question, before anything is branched or merged.
+- **Who acts:** You. GAIA cannot install these tools for you, and installing them can ask for your password. pnpm is the exception: setup installs it when it is missing, and updates it after asking when it is too old.
+- **Clear it:** follow the update steps the message shows for your system. They always go to the latest release of the tool. Then run the command again.
 
 ### jq not installed
 

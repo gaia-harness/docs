@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-`/gaia-init` runs automatically during `npx create-gaia`. It renames the project to your title, sets up language support and how routes load data, removes GAIA's own branding, sets up CODEOWNERS and your environment file, installs the React Doctor skill, verifies the build, and commits the result. You get a project that compiles, lints, and tests cleanly.
+`/gaia-init` runs automatically during `npx create-gaia`. It renames the project to your title, sets up language support and how routes load data, removes GAIA's own branding, sets up CODEOWNERS, installs the React Doctor skill, verifies the build, and commits the result. You get a project that compiles, lints, and tests cleanly.
 
 Then it continues straight into [`/setup-gaia`](/getting-started/setup-gaia/) in the same Claude session. Setup installs this machine's other tools, connects the project to GitHub, and finishes onboarding. You never exit or restart Claude along the way.
 
@@ -17,7 +17,7 @@ Then it continues straight into [`/setup-gaia`](/getting-started/setup-gaia/) in
 
 ### 1. Dependencies
 
-1. Ensures [pnpm](https://pnpm.io/) is available and new enough. GAIA requires pnpm 12 or later (the version pinned in `package.json` `packageManager`). If pnpm is missing, init enables it with `corepack enable pnpm`, or installs it globally with npm when Corepack isn't available. If an older major version is on your `PATH` (for example 11.x), init asks you to confirm the upgrade first. It stops if an older pnpm still comes first on your `PATH` after the upgrade.
+1. Ensures [pnpm](https://pnpm.io/) is available and new enough. GAIA requires pnpm 12 or later (the version pinned in `package.json` `packageManager`). If pnpm is missing, init installs it globally with `npm install -g pnpm@latest` and tells you it is doing so; pnpm then switches itself to the pinned version. If an older version is on your `PATH` (for example 11.x), init asks you to confirm the update first. Init does not use Corepack, because the Corepack that comes with Node 22.22 leaves pnpm broken: when Corepack is installed, init only removes Corepack's `pnpm` command first. It stops if an older pnpm, installed another way such as Homebrew, still comes first on your `PATH` after the update, and shows its path.
 2. Runs `pnpm install` in the new project.
 3. Installs [Chromium](https://www.chromium.org/), the browser the story and hook tests run in. `pnpm install` installs no browsers, so without this step the build check in [section 4](#4-project-files-and-build-check) fails. Init installs only Chromium, without the system libraries some Linux machines also need, so it never asks for your password. It finishes at once when Chromium is already installed.
 4. Installs the [React Doctor](https://github.com/millionco/react-doctor) skill under `frontend/.claude/skills/`. It goes in before anything reads the app's files, because Claude Code lists the skills in that folder the first time a session reads a file there, so React Doctor is ready in this same session. If this install fails, init shows a warning and carries on. `/setup-gaia` tries it again.
@@ -86,7 +86,6 @@ Removing i18n later deletes those steps too, since adding a language would then 
   Set my GitHub handle in CODEOWNERS. My handle is <your-handle>.
   ```
 
-- Copies `frontend/.env.example` to `frontend/.env`. The app's environment file lives in the `frontend/` package; [Playwright](https://playwright.dev/) reads the same file.
 - Runs the full quality gate from the repository root, `pnpm typecheck && pnpm lint && pnpm test:ci && pnpm build` (the root scripts run the `frontend` package), and stops if anything fails. This is the same [Quality Gate](/reference/gates/#quality-gate) every later change must pass, so it proves the new project compiles, lints, and tests cleanly. It is the main reason init takes a few minutes.
 
 ### 5. Team settings
@@ -112,7 +111,7 @@ Init deletes its own one-time setup files, sends its [usage ping](/reference/tel
 
 If `.github/CODEOWNERS` still holds the placeholder owner, a note above it says `/setup-gaia` offers to set your handle before its first push (see [step 4](#4-project-files-and-build-check)).
 
-Then Claude runs [`/setup-gaia`](/getting-started/setup-gaia/) in the same session, with no command from you. Setup installs the Playwright CLI and the TypeScript language server plugin, finds React Doctor already in place, and asks how to connect the project to GitHub. That GitHub question is asked even if you chose Automatic for init's questions. While setup runs, the [statusline](/workflow/statusline/) leaves out its setup nudge, since setup is already running.
+Then Claude runs [`/setup-gaia`](/getting-started/setup-gaia/) in the same session, with no command from you. Setup checks the tools GAIA needs but cannot install (git, jq, and `lsof` or `ss`), installs the Playwright CLI and the TypeScript language server plugin, finds React Doctor already in place, creates `frontend/.env` from `frontend/.env.example`, and asks how to connect the project to GitHub. That GitHub question is asked even if you chose Automatic for init's questions. While setup runs, the [statusline](/workflow/statusline/) leaves out its setup nudge, since setup is already running.
 
 Setup ends with its [closing message](/getting-started/setup-gaia/#finish), which suggests typing `/clear` to start your first feature with a fresh context. From there you are ready to build. Run `pnpm dev` to start the app locally, or ask Claude to run it. [Onboarding, as you build](/getting-started/onboarding/) shows what GAIA does as your first commits and pull requests land.
 
