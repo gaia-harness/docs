@@ -103,9 +103,9 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 ### Test seen failing first (RED gate)
 
-- **Stops:** `git commit` of a new test for code with predictable output (utilities, parsers, hooks) when that test has never been seen failing in its current form.
+- **Stops:** `git commit` of a new test for code with predictable output (utilities, parsers, hooks), or a new route test, when that test has never been seen failing in its current form.
 - **Why:** a test that passed from the start may not test anything. See [Proving a test can fail](/workflow/tdd/#proving-a-test-can-fail).
-- **When:** before `git commit` (`red-verify-commit-check`). Only tests that are new in the commit need a recorded failure; editing or renaming a test that already exists never does. Exempt: stories and [Playwright](https://playwright.dev/) tests, type-only tests, tests whose title is computed (a template literal or a `test.each` row), tests the classifier finds have no predictable result (component interaction, async work, layout), and test files that arrive unchanged from a GAIA release. A component or page test the classifier exempts goes through the [worthiness check](#worthiness-verdict) instead.
+- **When:** before `git commit` (`red-verify-commit-check`). Only tests that are new in the commit need a recorded failure; editing or renaming a test that already exists never does. Exempt: stories and [Playwright](https://playwright.dev/) tests, type-only tests, tests whose title is computed (a template literal or a `test.each` row), tests the classifier finds have no predictable result (component interaction, async work, layout), test files that arrive unchanged from a GAIA release, and a route test rendered from a SPEC's UAT while it is still marked `test.fails`, until its phase turns it into a plain test. A component or page test the classifier exempts goes through the [worthiness check](#worthiness-verdict) instead.
 - **Who acts:** Claude. Nothing for you to do.
 - **Clear it:** while the test fails, Claude runs that one test file as a command of its own, so the failure is recorded, then makes it pass. A failure is recorded only when Claude runs the test. A command that also puts the implementation back records nothing.
 
@@ -202,7 +202,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 ### Worthiness verdict
 
-- **Stops:** `gh pr merge` when a test the pull request changed has no worthiness record for its current content. This covers stories, Playwright tests, and component and page tests the classifier finds have no predictable result. An exact rename is skipped. A story file in the old format, from before GAIA 2.3.0, also stops it, with the command that converts it, and so does a story file whose shape the check cannot read.
+- **Stops:** `gh pr merge` when a test the pull request changed has no worthiness record for its current content. This covers stories, Playwright tests, route tests, and component and page tests the classifier finds have no predictable result. An exact rename is skipped. A story file in the old format, from before GAIA 2.3.0, also stops it, with the command that converts it, and so does a story file whose shape the check cannot read.
 - **Why:** these tests cannot be reliably watched failing first, so a [worthiness review](/workflow/tdd/#everything-else-the-worthiness-review) of each one takes the place of the RED gate. The hook checks only that a record exists for the test's current content; it does not read the verdict or prove how the review was done.
 - **When:** before `gh pr merge` runs (`worthiness-presence-check`).
 - **Who acts:** Claude. Nothing for you to do.

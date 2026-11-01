@@ -157,6 +157,7 @@ A step not listed here runs on your session's model. That covers `/gaia-debt`, `
 | [`/gaia-plan`](/workflow/plan/) | The planner | Opus or Fable. On Opus or Fable it keeps your model. Otherwise Claude asks: Opus (recommended), Fable, or your model. Auto mode uses Opus without asking. |
 | | Each phase's task sub-agents | Sonnet. The planner can raise a phase to Opus when it judges that phase to be deep design work, and names the phase and the reason in the plan. |
 | | [`uat-fidelity-judge`](/reference/agents/#uat-fidelity-judge) | Opus |
+| | [`overlap-evaluator`](/reference/agents/#overlap-evaluator) | Opus |
 | [Code Audit Team](/workflow/code-audit-team/) | [`audit-loop-unit`](/reference/agents/#audit-loop-unit), which runs the rounds | Opus |
 | | Members: [`code-audit-frontend`](/reference/agents/#code-audit-frontend), [`code-audit-github-workflows`](/reference/agents/#code-audit-github-workflows), [`code-audit-shell`](/reference/agents/#code-audit-shell) | Opus |
 | | [`audit-rule-specialist`](/reference/agents/#audit-rule-specialist), started by `code-audit-frontend` | Haiku |

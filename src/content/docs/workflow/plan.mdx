@@ -116,7 +116,7 @@ The orchestrator runs in the fresh session:
 - **Where it runs** follows your team's [isolation policy](/workflow/work-lifecycle/#3-isolate): a separate worktree by default. The branch is named `<type>/spec-<nnn>-<slug>` for a SPEC's plan or `<type>/plan-<nnn>-<slug>` otherwise, where `<type>` is the Conventional Commits type of the change. The PR Conventions check expects the pull request title's type to match.
 - **Each phase** hands its tasks to sub-agents, Sonnet by default. Sub-agents only edit files: they never commit, push, or run git commands that change the shared checkout. The orchestrator commits each phase after the Quality Gate passes. See [Who does what](/workflow/work-lifecycle/#who-does-what).
 - **A task whose context reaches the red band** hands off to a fresh sub-agent on its own ([how](/models-and-context/token-efficiency/#sub-agents)). A task that would need a third handoff stops the plan and tells you.
-- **The pull request** opens as a draft. The orchestrator finishes the [worthiness step](/workflow/tdd/#the-worthiness-step) and the wiki promotion before the first [Code Audit Team](/workflow/code-audit-team/) round, so neither normally restarts CI or owes another audit after clearance. Once every member has cleared it, the orchestrator prints a summary and the cost of the whole implementation, then asks you before it merges.
+- **The pull request** opens as a draft. The orchestrator finishes the [worthiness step](/workflow/tdd/#the-worthiness-step), the [overlap pass](/workflow/tdd/#the-overlap-pass), and the wiki promotion before the first [Code Audit Team](/workflow/code-audit-team/) round, so neither normally restarts CI or owes another audit after clearance. Once every member has cleared it, the orchestrator prints a summary and the cost of the whole implementation, then asks you before it merges.
 
 ### Resuming a plan
 
@@ -130,16 +130,17 @@ A plan generated before a GAIA update keeps the steps it was generated with unti
 
 ### UAT specs
 
-[`/gaia-spec`](/workflow/spec/#uats) writes the UATs. For a plan from a SPEC, the planner routes each one to the place that will test it:
+[`/gaia-spec`](/workflow/spec/#uats) writes the UATs. For a plan from a SPEC, the planner routes each one to the lowest layer that can show its outcome, because a browser is the slowest and most expensive way to check anything:
 
 | Route | When | How it is tested |
 | --- | --- | --- |
-| End-to-end | The outcome needs a route, navigation, a loader or action, a session, language detection, or mocked server data | A [Playwright](https://playwright.dev/) test, rendered before Phase 1 (below) |
 | Story | The outcome can be seen on one component given its props | An acceptance criterion in the task that owns it, tested with a test attached to a [Storybook](https://storybook.js.org/) story |
+| Route | A request to a route shows it: a status, a redirect, returned data, a validation error, an authorization outcome, or a side effect | A [Vitest](https://vitest.dev/) route test that calls the route's loader or action, rendered before Phase 1 (below) |
+| End-to-end | The outcome needs the live server (one request check per guarded route, or a forged request) or something only a browser shows: hydration, focus, client navigation, or a journey across pages | A [Playwright](https://playwright.dev/) test, rendered before Phase 1 (below). A browser test covers one user flow. |
 | Non-UI | Harness, script, or documentation behavior | Assigned to the phase that owns it |
 
-Each UAT routed to an end-to-end test is turned into a Playwright test under `frontend/.playwright/e2e/` **before Phase 1**. It is committed on its own and marked as expected to fail (`test.fail()`). The phase responsible for a test cannot commit until that test passes. Sub-agents are told not to change a test's assertions to make it pass, because the test is what the SPEC promised.
+Each UAT routed to an end-to-end test is turned into a Playwright test under `frontend/.playwright/e2e/` **before Phase 1**, and each one routed to a route test into a Vitest test under `frontend/app/route-tests/<feature>/tests/`. They are committed on their own and marked as expected to fail (`test.fail()` in Playwright, `test.fails` in Vitest). The phase responsible for a test cannot commit until that test passes. A phase that owns only route tests checks them in seconds, without starting a browser. A plan that routes an authorization UAT to a route test also gets one live-server check per guarded route module, because only the real server shows the status it sends back. Sub-agents are told not to change a test's assertions to make it pass, because the test is what the SPEC promised.
 
-Before the audit, the orchestrator checks that every one of these tests still tests what the SPEC says (an `uat-fidelity-judge` agent reads each one). When the code and a UAT no longer agree, the plan stops so the SPEC can be [reopened](/workflow/spec/#reopening-a-saved-spec), instead of quietly changing what was agreed.
+Before the audit, the orchestrator checks that every one of these tests still tests what the SPEC says (an `uat-fidelity-judge` agent reads each one, and counts a test that mocks the guard its task names as no longer matching). When the code and a UAT no longer agree, the plan stops so the SPEC can be [reopened](/workflow/spec/#reopening-a-saved-spec), instead of quietly changing what was agreed.
 
 The SPEC is closed out after its implementation merges.
