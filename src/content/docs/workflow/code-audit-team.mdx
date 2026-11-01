@@ -66,7 +66,7 @@ Before any commit that stages source code (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`,
 | Dev server | This checkout's own dev server starts and its home page loads. Claude stops only the server it started, so it never stops a server another session is using. |
 | Build (`pnpm build`) | The production build succeeds. |
 
-Claude fixes every warning, not only errors, before it reports. It then shows you a table of the results and asks whether to commit or hold the change for your review. Inside a workflow that commits on its own (the audit's fix round, [`/gaia-debt`](/workflow/debt/), and a plan's phase commits), a clean gate commits without asking, because that workflow has its own point where you review.
+Claude fixes every warning, not only errors, before it reports. It then shows you a table of the results and asks whether to commit or hold the change for your review. Inside a workflow that commits on its own (the audit's fix round, [`/gaia-debt`](/workflow/debt/), and a plan's phase commits), a clean gate commits without asking, because that workflow has its own point where you review. An audit fix round whose fixes are all Minor, non-security findings runs a smaller gate: every step except the end-to-end tests, the dev server check and the build. Those three run once on the finished change before Claude posts `GAIA-Audit` (see [Posting GAIA-Audit](#posting-gaia-audit)).
 
 The gate is a rule Claude follows, not a hook. The pre-commit hook is the part that runs no matter what ([gate reference](/reference/gates/#pre-commit-floor)). The shipped gate checks only `frontend/`. A package you add beside it, such as a backend, needs a gate of its own ([The backend is left to you](/getting-started/project-layout/#the-backend-is-left-to-you)).
 
@@ -183,7 +183,7 @@ Every finding is graded on one scale:
 
 A fourth grade, `severity:investigate`, marks a tech-debt issue whose severity cannot be judged yet. See [Investigate issues](/workflow/tech-debt/#investigate-issues).
 
-Every finding, Minor included, gets an outcome. By default it is fixed. Otherwise it is accepted as a known trade-off (a [residual](/maintenance/residue/#what-a-residual-is)), waived, or filed as an issue, each with a reason. Findings about architecture come to you to decide. A non-security finding on a line the branch wrote cannot become an issue: [it is fixed or accepted](/reference/gates/#tech-debt-on-the-branchs-own-code).
+Every finding, Minor included, gets an outcome. By default it is fixed. Otherwise it is waived, filed as an issue, or accepted as a known trade-off (a [residual](/maintenance/residue/#what-a-residual-is)), each with a reason. Only the loop's own stop or you can accept a residual (see [the branch checkpoint](#the-branch-checkpoint)). Findings about architecture come to you to decide. A non-security finding on a line the branch wrote cannot become an issue: [it is fixed or accepted](/reference/gates/#tech-debt-on-the-branchs-own-code).
 
 **Out-of-scope findings** (problems the audit notices outside the pull request's own change) are filed as `tech-debt` issues through the [`file-tech-debt`](/workflow/tech-debt/#how-an-issue-is-filed) skill. A non-security finding in a file the pull request already changes can instead be recorded as waived in the pull request body, but only when this change did not cause it and does not point to it in a comment as handled elsewhere. See [What gets recorded instead of filed](/workflow/tech-debt/#what-gets-recorded-instead-of-filed). **Security findings are never filed publicly.** They become issues only when the repository is private. Otherwise they stay in a local record, with secrets removed, under `.gaia/local/audit/security/`, and you are told only how many there were and where the records are.
 
@@ -195,7 +195,9 @@ The loop needs **Claude Code 2.1.287 or later**. Run `claude update` if a unit s
 
 ### The branch checkpoint
 
-Each round's fixes need reviewing in the next round, so left alone the loop would never stop. A hook limits it on each branch. It checks in with you when any of these happens:
+Each round's fixes need reviewing in the next round, so the loop needs a point where it stops. From round 3 through round 9 it stops on its own when every member in a round reviewed only what changed since its last review and found nothing but ordinary Minor findings: none Critical, Major, or security-related, and none that repeats, moves, or brings back an earlier finding. Those findings are recorded as accepted residuals, the loop makes no further commit, and every commit it made has been reviewed. In an interactive run Claude then lists them and asks once, before it posts `GAIA-Audit`: **Merge** or **Fix chosen ones**. The ones you choose are fixed first in a reopened round, then reviewed like any other fix. An unattended run does not ask, and [`/gaia-residue`](/maintenance/residue/) is where you decide them later.
+
+For everything else, a hook limits the loop on each branch. It checks in with you when any of these happens:
 
 - Your session's context reaches the [red band](/workflow/statusline/#the-context-bar) on the statusline's context bar
 - Rounds stop making progress (the number of findings caused by the branch stops going down, or each repair causes new findings on the lines it wrote)
@@ -225,7 +227,7 @@ You can also type `audit-accept` on purpose to accept when the menu does not off
 
 ## Posting GAIA-Audit
 
-Claude posts the `GAIA-Audit` success status last: once every member involved has approved the current change, every finding from every round is fixed or recorded, and the last push has landed. Posting it any earlier would mark the pull request done while findings were still being decided. Posting success also marks the draft pull request ready for review.
+Claude posts the `GAIA-Audit` success status last: once every member involved has approved the current change, every finding from every round is fixed or recorded, the steps a [smaller gate](#what-it-checks) skipped have passed on the finished change, and the last push has landed. If one of those steps fails, the loop reopens a round to fix it, or stops and names the step when no fix round can run. If the dev server check finds its port held by another process, Claude asks you before going on. Posting it any earlier would mark the pull request done while findings were still being decided. Posting success also marks the draft pull request ready for review.
 
 A member's refusal (it will not approve the change until a finding is dealt with) posts a `GAIA-Audit` failure straight away. That cancels any earlier success for the same commit, so GitHub's auto-merge cannot merge the pull request anyway.
 

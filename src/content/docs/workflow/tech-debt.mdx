@@ -74,7 +74,7 @@ The audit only files problems in files it opened to review the change, such as a
 
 Not every finding outside the change becomes an issue. Two kinds are recorded in the pull request's description instead, so the backlog does not fill with debt the change itself is about to touch again:
 
-- **Accepted residuals**, under `## Accepted residuals (recorded, not fixed)`: findings in the change's own scope that a reviewer accepted as a known trade-off instead of fixing.
+- **Accepted residuals**, under `## Accepted residuals (recorded, not fixed)`: findings in the change's own scope accepted as a known trade-off instead of fixed, by the [audit loop's own stop](/workflow/code-audit-team/#the-branch-checkpoint) or by you.
 - **Waived findings**, under `## Out-of-scope machinery findings (recorded, not filed)`: a non-security finding in GAIA's own audit files (the scripts, hooks, and reviewer instructions that run the audit), or in a file the pull request already changes. Filing these would only re-surface the same finding on the next pull request that touches the file. A finding the change itself caused is never waived, and neither is one the change points to in a comment as "handled elsewhere".
 
 Both are **residue**. Each entry carries a key, so the same finding is not recorded twice. Once a residual is 30 days old, [`/gaia-residue`](/maintenance/residue/) asks you to dismiss it, keep it for later, or promote it to a `tech-debt` issue.

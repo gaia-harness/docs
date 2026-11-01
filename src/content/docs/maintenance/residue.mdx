@@ -13,7 +13,7 @@ Accepting a trade-off at review keeps a pull request moving, but a trade-off nob
 
 ## What a residual is
 
-When the [Code Audit Team](/workflow/code-audit-team/) clears a pull request, some findings are not fixed. A reviewer can accept one as a known trade-off, or let one pass because it is outside the change, in a file the pull request already touches. These are not lost: as [Tech debt](/workflow/tech-debt/#what-gets-recorded-instead-of-filed) explains, each one is written into the merged pull request's description, under `## Accepted residuals (recorded, not fixed)` or `## Out-of-scope machinery findings (recorded, not filed)`, with a key that keeps it from being counted twice. Each entry is a **residual**.
+When the [Code Audit Team](/workflow/code-audit-team/) clears a pull request, some findings are not fixed. One can be accepted as a known trade-off, by the audit loop's own stop or by you. Another can be let pass because it is outside the change, in a file the pull request already touches. These are not lost: as [Tech debt](/workflow/tech-debt/#what-gets-recorded-instead-of-filed) explains, each one is written into the merged pull request's description, under `## Accepted residuals (recorded, not fixed)` or `## Out-of-scope machinery findings (recorded, not filed)`, with a key that keeps it from being counted twice. Each entry is a **residual**.
 
 `/gaia-residue` reads those entries back and asks you to decide each one:
 
