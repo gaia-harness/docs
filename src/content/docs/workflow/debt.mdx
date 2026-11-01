@@ -1,11 +1,11 @@
 ---
 title: /gaia-debt
-description: Fix the tech-debt backlog, most severe and then oldest first, one issue or a batch of related issues per run, on a fresh branch through the audit, closing the issues when it merges.
+description: Fix the tech-debt backlog, most severe and then oldest first, one issue or a batch of issues per run, on a fresh branch through the audit, closing the issues when it merges.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-`/gaia-debt` fixes the `tech-debt` backlog: the GitHub issues GAIA files for real problems it finds outside the change at hand, during any work. [Tech debt](/workflow/tech-debt/) covers how those issues are created. Each run fixes **one unit** of work: a single issue, or a batch of related issues. It works on its own branch, passes the same audit every feature pull request passes, and merges. The pull request carries one `Closes #N` per issue, so the merge closes them.
+`/gaia-debt` fixes the `tech-debt` backlog: the GitHub issues GAIA files for real problems it finds outside the change at hand, during any work. [Tech debt](/workflow/tech-debt/) covers how those issues are created. Each run fixes **one unit** of work: a single issue, a batch of related issues, or a batch of small unrelated ones. It works on its own branch, passes the same audit every feature pull request passes, and merges. The pull request carries one `Closes #N` per issue, so the merge closes them.
 
 ## When to use it
 
@@ -24,6 +24,8 @@ When open `tech-debt` issues exist, the statusline shows:
 ```
 
 No argument: Claude orders the backlog and offers the top of it as a menu. When the top issue belongs to a group of related issues (the same file, or the same directory and kind of finding), the whole group is offered too.
+
+The menu can also end with a **batch of small issues**: unrelated minor issues (labelled `severity:minor`, or with no severity label), or related groups of them, none graded `difficulty:hard`, fixed together on one branch and one pull request. Claude walks the backlog in order and keeps each issue or group that still fits the same size limit as a batch you name yourself (below), skipping any that would go over. It offers the option only when at least two separate issues or groups fit. It is never the recommended choice; you pick it if you want it. An issue whose cited file no longer exists, or one that needs a SPEC, is left out. On any repository not confirmed private, so are security-sensitive issues, and when Claude cannot tell which issues are security-sensitive there, it does not offer the batch.
 
 ```
 /gaia-debt 142
@@ -58,8 +60,8 @@ Each offer also notes when an issue's cited file no longer exists (`[stale: path
 2. **Re-checks each issue against your code** before creating a branch. Every `file:line` the issue cites must still contain what the issue says, and every count the fix depends on must still be right. Claude also reads each issue's comments; a newer comment that corrects the description wins. If anything doesn't match, Claude releases the claim and stops, because only you can decide whether the issue or the code is wrong. In a batch, a failing issue is dropped and the rest continue.
 3. **Checks for security issues.** On a public or internal repository, a security-sensitive issue is never fixed in a public pull request. It is set aside and its claim released, and you are told only how many there were.
 4. **Checks the size.** An issue big enough to need a design SPEC goes to [`/gaia-spec`](/workflow/spec/) instead. Claude prints what to run next and parks the issue under `debt:spec-pending` (handed off) or `debt:spec-active` (a SPEC is underway).
-5. **Creates a branch** for the fix, `debt/<n>-<slug>` (or `debt/<a>-<b>-batch`), in a worktree by default.
-6. **Fixes** every issue in the unit, runs the Quality Gate once, commits, and opens a draft pull request with one `Closes #N` per issue. The commit type is the type of the change (`fix`, `refactor`, `test`), never `debt`.
+5. **Creates a branch** for the fix, `debt/<n>-<slug>`, or for any batch `debt/<a>-<b>-batch` with every issue number in it, in a worktree by default.
+6. **Fixes** every issue in the unit, runs the Quality Gate once over the whole change, commits, and opens a draft pull request with one `Closes #N` per issue. The commit type is the type of the change (`fix`, `refactor`, `test`), never `debt`. A batch of small issues gets one commit per issue or related group after that one Quality Gate run; parts that touch the same file share a commit.
 7. **Audits and merges** without asking you again, then checks that the merge closed exactly the intended issues, and cleans up.
 
 The claim stays in place when the audit stops at its branch checkpoint, when a merge is still queued, or when a check fails, since the work is not finished. Closing the pull request without merging releases it.
