@@ -442,11 +442,11 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 
 ### Tool versions
 
-- **Stops:** [`/setup-gaia`](/getting-started/setup-gaia/#prerequisites-every-run) when git is missing or older than 2.40, jq is missing or older than 1.6, or `lsof` (macOS) or `ss` (Linux) is missing. [`/update-gaia`](/maintenance/update-gaia/#what-it-does) when jq or pnpm is missing, jq is older than 1.6, or pnpm is older than 12, measured against the new release's own list; the other tools only get a warning there.
-- **Why:** below these versions part of GAIA breaks or quietly does less. GAIA's hooks and scripts read JSON with jq, and it installs, tests, and builds with pnpm. Below git 2.40 every audit runs a full review, never the cheaper light one, and without `lsof` or `ss` GAIA cannot find your running dev server.
+- **Stops:** [`/setup-gaia`](/getting-started/setup-gaia/#prerequisites-every-run) and [`/update-gaia`](/maintenance/update-gaia/#what-it-does) when git is missing or older than 2.40, jq is missing or older than 1.6, or `lsof` (macOS) or `ss` (Linux) is missing. `/update-gaia` also stops when pnpm is missing or older than 12, and measures against the new release's own list. Setup handles pnpm in a later step of its own: it installs a missing pnpm and asks before updating an older one.
+- **Why:** below these versions part of GAIA breaks or quietly does less. GAIA's light audit review needs git 2.40, its hooks and scripts read JSON with jq, it installs, tests, and builds with pnpm, and it finds your running dev server with `lsof` or `ss`.
 - **When:** at the start of `/setup-gaia`, and in `/update-gaia` before its **Proceed** question, before anything is branched or merged.
-- **Who acts:** You. GAIA cannot install these tools for you, and installing them can ask for your password. pnpm is the exception: setup installs it when it is missing, and updates it after asking when it is too old.
-- **Clear it:** follow the update steps the message shows for your system. They always go to the latest release of the tool. Then run the command again.
+- **Who acts:** Claude, with your go-ahead. Claude walks you through the update in the same run, always to the latest release. It asks once before an install it can run, except a missing pnpm, which it installs and tells you. A step that needs your `sudo` password it gives you as `! <command>` to type in the prompt, and an install that is interactive or changes your `PATH` it tells you to run in a fresh terminal.
+- **Clear it:** answer Claude's install question, or run the step it hands you and tell it when it ran. Claude checks again and carries on. After a fresh-terminal install, start Claude Code again from that terminal and run the command again.
 
 ### jq not installed
 
