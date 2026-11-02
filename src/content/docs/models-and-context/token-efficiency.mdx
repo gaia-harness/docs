@@ -26,7 +26,7 @@ GAIA adds 8,196 tokens to a session before you type anything: 0.82% of the windo
 
 The session-start text was measured in a session on a feature branch. On the default branch, the instructions for working on a branch are left out, so the total is lower. The session-start text is added when a session starts, and again after `/clear` or compaction.
 
-A session started from `frontend/` begins at 10,867 tokens (1.09%). Claude Code still loads everything above, and adds `frontend/CLAUDE.md` (987) and the descriptions of the 13 frontend skills (1,684).
+A session started from `apps/web/` begins at 10,867 tokens (1.09%). Claude Code still loads everything above, and adds `apps/web/CLAUDE.md` (987) and the descriptions of the 13 frontend skills (1,684).
 
 Your own setup adds to this: MCP servers, plugins, and your global `~/.claude/CLAUDE.md` load in every project, with or without GAIA.
 
@@ -39,7 +39,7 @@ Most rules apply only to certain paths, and load only when Claude works on a fil
 | Root rules for specific paths (3 of 10) | 3,400 |
 | Frontend rules (7 of 13) | 4,763 |
 | Frontend skill descriptions (13) | 2,009 |
-| `frontend/CLAUDE.md` | 945 |
+| `apps/web/CLAUDE.md` | 945 |
 | **Added by the task** | **11,117 (1.11%)** |
 
 With the startup load, the session held 19,313 tokens of GAIA (1.93%).

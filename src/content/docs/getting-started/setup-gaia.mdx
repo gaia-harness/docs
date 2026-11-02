@@ -7,7 +7,7 @@ sidebar:
 
 `/setup-gaia` is the one setup command for a GAIA project. On a new project, `/gaia-init` runs it for you, and you can run it again any time. It checks what this clone still needs and runs only those phases:
 
-- **Setup for this machine**, which every clone needs: tool installs, plugins, making the statusline scripts executable, `frontend/.env`, the sandbox decision, and, if you have your own global statusline, which statusline draws the left side.
+- **Setup for this machine**, which every clone needs: tool installs, plugins, making the statusline scripts executable, `apps/web/.env`, the sandbox decision, and, if you have your own global statusline, which statusline draws the left side.
 - **The GitHub repository**: create one, use one you already have, or set one up yourself. Private by default. When you are a repo admin, it also protects the default branch, makes `GAIA-Audit` and the two CI checks required, offers auto-merge (on a repo it creates, it turns it on without asking), and offers squash-only merges.
 - **Team settings** in `.gaia/project.json`: the git isolation policy and the sandbox recommendation. Both come with a default, so a plain run records the default and asks nothing.
 
@@ -29,7 +29,7 @@ The command works out which situation your clone is in (a new project with no Gi
 
 Five checks run every time:
 
-- **Tool versions.** Setup first checks the tools GAIA needs but cannot install for you: [git](https://git-scm.com/) 2.40 or later, [jq](https://jqlang.org/) 1.6 or later, and on macOS `lsof`, on Linux `ss`. Each matters for its own reason: GAIA's light [audit](/workflow/code-audit-team/#light-review) review needs git 2.40, GAIA's hooks and scripts read JSON with jq, and `lsof` or `ss` is how GAIA finds your running dev server. If one is missing or too old, setup goes no further, and installs or configures nothing, until it passes. It names the tool, the version you have and the lowest version that works, and says why GAIA needs it. Claude then walks you through the update in the same run. The update always goes to the latest release, not just that lowest version. How it goes depends on the install:
+- **Tool versions.** Setup first checks these tools: [git](https://git-scm.com/) 2.40 or later, [jq](https://jqlang.org/) 1.6 or later, and on macOS `lsof`, on Linux `ss`. Each matters for its own reason: GAIA's light [audit](/workflow/code-audit-team/#light-review) review needs git 2.40, GAIA's hooks and scripts read JSON with jq, and `lsof` or `ss` is how GAIA finds your running dev server. If one is missing or too old, setup goes no further, and installs or configures nothing, until it passes. It names the tool, the version you have and the lowest version that works, and says why GAIA needs it. Claude then walks you through the update in the same run. The update always goes to the latest release, not just that lowest version. How it goes depends on the install:
 
   - **Claude can run it**, for example `brew install git` on macOS when Homebrew is installed. Claude asks once, then runs it.
   - **It needs `sudo`.** Claude cannot type your password, so it gives you the command as `! <command>` to type in the Claude Code prompt, which runs it in this session, and waits for you to say it ran.
@@ -38,7 +38,7 @@ Five checks run every time:
 
   Claude then checks again. When every tool passes, setup carries on in the same run. If a tool still falls short, or you decline the install, setup stops. Run `/setup-gaia` again once the tool is updated. If an install Claude ran succeeded but the old version still shows, an older copy comes first on your `PATH`: Claude shows its path and stops.
 - **Worktree links.** Checks that this copy of the repo can share GAIA's local state with [worktrees](/workflow/work-lifecycle/). If that fails (for example, Windows refuses to create a symlink until Developer Mode is on), setup stops and shows why. Fix the cause and run `/setup-gaia` again.
-- **[pnpm](https://pnpm.io/), node_modules, and Chromium.** GAIA needs pnpm 12 or later. If pnpm is missing, setup installs it globally with `npm install -g pnpm@latest` and tells you it is doing so. pnpm then switches itself to the version pinned in `package.json`. If your pnpm is older, which a clone of an existing project can run into, setup asks before it updates it, and stops if you say no. Setup does not use Corepack, because the Corepack that comes with Node 22.22 leaves pnpm broken: when Corepack is installed, setup only removes Corepack's `pnpm` command first. If an older pnpm installed another way (Homebrew, the standalone installer) still comes first on your `PATH`, setup stops and shows its path, so you can update or remove it. `pnpm install` runs when `node_modules/` is missing. Then setup installs [Chromium](https://www.chromium.org/), the browser the story and hook tests run in, so a fresh clone's first test run and first commit pass. It finishes at once when Chromium is already installed. If it fails, setup stops and shows the command to retry. On Linux, if a browser then fails to start because system libraries are missing, Claude gives you `! pnpm -C frontend exec playwright install-deps chromium` to type in the prompt. It asks for your `sudo` password, which Claude cannot type.
+- **[pnpm](https://pnpm.io/), node_modules, and Chromium.** GAIA needs pnpm 12 or later. If pnpm is missing, setup installs it globally with `npm install -g pnpm@latest` and tells you it is doing so. pnpm then switches itself to the version pinned in `package.json`. If your pnpm is older, which a clone of an existing project can run into, setup asks before it updates it, and stops if you say no. Setup does not use Corepack, because the Corepack that comes with Node 22.22 leaves pnpm broken: when Corepack is installed, setup only removes Corepack's `pnpm` command first. If an older pnpm installed another way (Homebrew, the standalone installer) still comes first on your `PATH`, setup stops and shows its path, so you can update or remove it. `pnpm install` runs when `node_modules/` is missing. Then setup installs [Chromium](https://www.chromium.org/), the browser the story and hook tests run in, so a fresh clone's first test run and first commit pass. It finishes at once when Chromium is already installed. If it fails, setup stops and shows the command to retry. On Linux, if a browser then fails to start because system libraries are missing, Claude gives you `! pnpm -C apps/web exec playwright install-deps chromium` to type in the prompt. It asks for your `sudo` password, which Claude cannot type.
 - **Git hooks.** Checks that the [git hooks](/workflow/git-conventions/#native-git-hooks) are active (git's `core.hooksPath` setting is `.githooks`). A clone where they are not commits with no pre-commit or commit-msg check, and nothing else reports it. When they are off, setup asks to turn them on.
 - **GitHub CLI check (warning only).** If `gh` is missing or not logged in, you get a warning and setup continues. The pull request merge workflow, `/gaia-plan`, and `/gaia-forensics` rely on `gh`, so install it from [cli.github.com](https://cli.github.com/) and run `gh auth login` when you can.
 
@@ -50,10 +50,10 @@ Skipped if this clone already finished its machine setup. Otherwise these steps 
 
 Two outside tools, installed on each machine and not tracked in the repo. Each one installs only when it is missing:
 
-- **[React Doctor](https://github.com/millionco/react-doctor)** skill, installed under `frontend/.claude/skills/`, so it only loads in sessions that work on the app. On a new project, `/gaia-init` has already installed it, so setup just records it.
+- **[React Doctor](https://github.com/millionco/react-doctor)** skill, installed under `apps/web/.claude/skills/`, so it only loads in sessions that work on the app. On a new project, `/gaia-init` has already installed it, so setup just records it.
 - **[Playwright CLI](https://github.com/microsoft/playwright-cli)** binary: `npm install -g @playwright/cli@latest`. The `playwright-cli` skill that ships with GAIA uses it, and [`/update-deps`](/maintenance/update-deps/) reports when it falls behind.
 
-Claude Code lists the skills in `frontend/.claude/skills/` the first time a session reads a file in that folder. On a fresh clone where the session read an app file before setup installed React Doctor, the skill appears from your next session.
+Claude Code lists the skills in `apps/web/.claude/skills/` the first time a session reads a file in that folder. On a fresh clone where the session read an app file before setup installed React Doctor, the skill appears from your next session.
 
 After installing, setup checks each tool and reports `[ok]` or `[FAIL]`. A failure stops setup so you can fix the cause and run it again.
 
@@ -66,7 +66,7 @@ The TypeScript language server plugin (`typescript-lsp`), so Claude can jump to 
 Two steps run with no input from you:
 
 - **Statusline permissions.** Makes the statusline scripts executable again. That permission can be lost when a repo is cloned on a different operating system.
-- **Environment bootstrap.** If `frontend/.env.example` exists and `frontend/.env` does not, a copy is made for you.
+- **Environment bootstrap.** If `apps/web/.env.example` exists and `apps/web/.env` does not, a copy is made for you.
 
 ### Sandbox decision
 

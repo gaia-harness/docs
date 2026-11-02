@@ -5,7 +5,7 @@ sidebar:
   order: 0
 ---
 
-A [skill](https://code.claude.com/docs/en/skills) is a folder of instructions that Claude loads when the task matches it. Each skill has a `SKILL.md`, and some have extra files in `references/` that Claude reads only when it needs them. Until a task needs it, only a skill's short description sits in Claude's context, so GAIA can ship detailed guidance for many tasks without filling every session ([how skills load](https://code.claude.com/docs/en/skills)). GAIA ships skills in two places: the React app's skills in `frontend/.claude/skills/`, which load in sessions working on the app, and project skills in `.claude/skills/` at the project root, which apply anywhere in the repository.
+A [skill](https://code.claude.com/docs/en/skills) is a folder of instructions that Claude loads when the task matches it. Each skill has a `SKILL.md`, and some have extra files in `references/` that Claude reads only when it needs them. Until a task needs it, only a skill's short description sits in Claude's context, so GAIA can ship detailed guidance for many tasks without filling every session ([how skills load](https://code.claude.com/docs/en/skills)). GAIA ships skills in two places: the React app's skills in `apps/web/.claude/skills/`, which load in sessions working on the app, and project skills in `.claude/skills/` at the project root, which apply anywhere in the repository.
 
 ## Frontend skills
 
@@ -33,7 +33,7 @@ A [skill](https://code.claude.com/docs/en/skills) is a folder of instructions th
 | [`update-deps`](/maintenance/update-deps/) | Dependency and security updates, also `/update-deps` |
 | [`update-gaia`](/maintenance/update-gaia/) | GAIA release updates, also `/update-gaia` |
 
-[React Doctor](https://github.com/millionco/react-doctor) is installed on each machine separately, at `frontend/.claude/skills/react-doctor`, and is gitignored.
+[React Doctor](https://github.com/millionco/react-doctor) is installed on each machine separately, at `apps/web/.claude/skills/react-doctor`, and is gitignored.
 
 GAIA's workflow commands (`/gaia-spec`, `/gaia-plan`, and the rest) are slash commands, not skills. There is no `/gaia` skill to call.
 
@@ -57,4 +57,4 @@ Ask Claude to write the skill for you:
 Create a skill that <what it should help with>. It applies to <the whole repository | only the frontend app>. Write a description that names the phrasings that should trigger it.
 ```
 
-A skill for the whole repository goes in `.claude/skills/<name>/`, and one only the app needs goes in `frontend/.claude/skills/<name>/`. To always run the skill on a particular model, say which one in the same request. Claude picks up the new skill in the next session, and [`/gaia-fitness`](/maintenance/fitness/) checks it.
+A skill for the whole repository goes in `.claude/skills/<name>/`, and one only the app needs goes in `apps/web/.claude/skills/<name>/`. To always run the skill on a particular model, say which one in the same request. Claude picks up the new skill in the next session, and [`/gaia-fitness`](/maintenance/fitness/) checks it.

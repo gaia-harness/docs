@@ -110,7 +110,7 @@ A SPEC, UAT, or plan number (such as `SPEC-012`; a UAT is an acceptance test wri
 | Commit messages | The `commit-msg` git hook |
 | Lines a commit adds | The `pre-commit` git hook. It reads prose files in full, and code only in comments that take up a whole line. It skips test files and fixtures. |
 | Pull request and issue titles and bodies | A Claude Code hook on `gh pr create`, `gh pr edit`, `gh issue create`, and `gh issue edit` |
-| [Playwright](https://playwright.dev/) tests | A scan of `frontend/.playwright/` while a plan runs, covering file names, test titles, and comments |
+| [Playwright](https://playwright.dev/) tests | A scan of `apps/web/.playwright/` while a plan runs, covering file names, test titles, and comments |
 
 Paths to a specific run folder under `.gaia/local/runs/` (GAIA's machine-local state) are caught too. Comments on pull requests and issues are not checked. Placeholders such as `SPEC-NNN` pass, and so do plain issue and pull request numbers such as `#142`. When a check catches one, it names the text it matched, and Claude rewrites it to describe what the work does instead of pointing at the document behind it. If you commit by hand and hit it, do the same, or ask Claude to reword the message. Each check is listed in the [gate reference](/reference/gates/#machine-local-references).
 

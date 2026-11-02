@@ -47,7 +47,7 @@ A hook enforces it: Claude cannot merge until every member whose files changed h
 
 ## Quality Gate
 
-The Quality Gate is the full set of checks Claude runs before it commits a change to source code. The [pre-commit hook](/workflow/git-conventions/#native-git-hooks) checks only the files you staged. The gate checks the whole `frontend/` package, so it also catches what a change breaks somewhere else.
+The Quality Gate is the full set of checks Claude runs before it commits a change to source code. The [pre-commit hook](/workflow/git-conventions/#native-git-hooks) checks only the files you staged. The gate checks every package in your workspace, so it also catches what a change breaks somewhere else.
 
 ### When it runs
 
@@ -61,14 +61,14 @@ Before any commit that stages source code (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`,
 | Localization | No user-facing text is hardcoded, and no translation key is missing its value. |
 | Typecheck (`pnpm typecheck`) | There are zero errors. |
 | Lint (`pnpm lint`) | There are zero errors and zero warnings. Lint also fixes formatting, because [Prettier](https://prettier.io/) runs as an ESLint rule. |
-| Unit tests (`pnpm test --run`) | Every test passes with zero console warnings. Stories and hook tests run in headless Chromium. |
+| Unit tests (`pnpm test:ci`) | Every test passes with zero console warnings, in every package, one package at a time. Stories and hook tests run in headless Chromium. |
 | End-to-end tests (`pnpm pw`) | Every Playwright test passes. |
-| Dev server | This checkout's own dev server starts and its home page answers with HTTP 200. Claude stops only the server it started, so it never stops a server another session is using. Any other result stops the commit, including a check that could not run (no frontend package, no port, or neither `lsof` nor `ss` to see who holds it). When another process holds the port, Claude asks: **Hold the commit** (recommended, since it may be another session's server) or **Stop it**. In an unattended run the workflow stops and names the reason. |
+| Dev server | This checkout's own dev server starts and its home page answers with HTTP 200. Claude stops only the server it started, so it never stops a server another session is using. Any other result stops the commit, including a check that could not run (no web app, no port, or neither `lsof` nor `ss` to see who holds it). When another process holds the port, Claude asks: **Hold the commit** (recommended, since it may be another session's server) or **Stop it**. In an unattended run the workflow stops and names the reason. |
 | Build (`pnpm build`) | The production build succeeds. |
 
 Claude fixes every warning, not only errors, before it reports. It then shows you a table of the results and asks whether to commit or hold the change for your review. Inside a workflow that commits on its own (the audit's fix round, the worthiness step's and overlap pass's fixes, [`/gaia-debt`](/workflow/debt/), and a plan's phase commits), a clean gate commits without asking, because that workflow has its own point where you review. An audit fix round whose fixes are all Minor, non-security findings runs a smaller gate: every step except the end-to-end tests, the dev server check and the build. Those three run once on the finished change before Claude posts `GAIA-Audit` (see [Posting GAIA-Audit](#posting-gaia-audit)).
 
-The gate is a rule Claude follows, not a hook. The pre-commit hook is the part that runs no matter what ([gate reference](/reference/gates/#pre-commit-floor)). The shipped gate checks only `frontend/`. A package you add beside it, such as a backend, needs a gate of its own ([The backend is left to you](/getting-started/project-layout/#the-backend-is-left-to-you)).
+The gate is a rule Claude follows, not a hook. The pre-commit hook is the part that runs no matter what ([gate reference](/reference/gates/#pre-commit-floor)). Type checking, linting, and unit tests run in every package that has a `typecheck`, `lint`, or `test:ci` script, so a package you add, such as a backend, joins the gate through its own scripts ([The backend is left to you](/getting-started/project-layout/#the-backend-is-left-to-you)). Claude warns about a package that has tests but no `test:ci` script, or TypeScript but no `typecheck` script. The E2E tests, dev server, and build steps check the web app only.
 
 ## Members
 
@@ -76,11 +76,11 @@ The list of members (the roster) lives in `.gaia/audit-ci.yml` under `auditors:`
 
 | Member | Owns | Reviews for |
 |---|---|---|
-| `code-audit-frontend` (the default member) | The app and its tooling: `frontend/app/**`, `frontend/test/**`, `frontend/.storybook/**`, `frontend/.playwright/**`, the package manifests and lockfile, build and lint configs, `frontend/.claude/**`, `frontend/CLAUDE.md`, and root tooling such as `.npmrc` and `.nvmrc` | Security, performance, fit with the existing architecture, edge cases, accessibility, and maintainability: problems that take understanding what the code is meant to do and how data moves through it, beyond what lint and types catch. Library-specific rules for [shadcn/ui](https://ui.shadcn.com/), `cn`, [Conform](https://conform.guide/), the form components, React patterns, and react-i18next load from `frontend/.claude/agents/code-audit-frontend/`. |
+| `code-audit-frontend` (the default member) | Every package under `apps/` and `packages/`, which covers the app and its tooling: `apps/web/app/**`, `apps/web/test/**`, `apps/web/.storybook/**`, `apps/web/.playwright/**`, the package manifests and lockfile, build and lint configs, `apps/web/.claude/**`, `apps/web/CLAUDE.md`, and root tooling such as `.npmrc` and `.nvmrc` | Security, performance, fit with the existing architecture, edge cases, accessibility, and maintainability: problems that take understanding what the code is meant to do and how data moves through it, beyond what lint and types catch. Library-specific rules for [shadcn/ui](https://ui.shadcn.com/), `cn`, [Conform](https://conform.guide/), the form components, React patterns, and react-i18next load from `apps/web/.claude/agents/code-audit-frontend/`. |
 | `code-audit-github-workflows` | `.github/workflows/*.yml` and `.github/actions/**/*.yml` | Workflow YAML problems: unsafe third-party actions, script injection, too-broad permissions, and mishandled secrets. |
 | `code-audit-shell` | Every shell script and [bats](https://github.com/bats-core/bats-core) test file (`**/*.sh`, `**/*.bats`) anywhere in the repository, your Claude hooks (`.claude/hooks/**`), your git hooks (`.githooks/**`), and the root `.claude/settings.json` | Shell bugs: unquoted variables, failures that pass silently, a guard that allows when it should block, and scripts that break on macOS's older bash or its versions of `sed` and `date`. For a hook: that it reads its input safely and never breaks your Claude session on its own error. For a bats test: an assertion that can never fail, or a test weakened or skipped without a reason. For `.claude/settings.json`: every hook or permission rule the change removes, weakens, or moves, listed for you to read before you approve the merge, since it cannot tell which removals you intended. |
 
-Each file goes to the first member whose pattern matches it, and the default member's patterns are checked last. So a workflow file belongs to `code-audit-github-workflows`, and a shell script under `frontend/` or `.github/actions/` belongs to `code-audit-shell`.
+Each file goes to the first member whose pattern matches it, and the default member's patterns are checked last. So a workflow file belongs to `code-audit-github-workflows`, and a shell script under `apps/web/` or `.github/actions/` belongs to `code-audit-shell`.
 
 `code-audit-shell` reviews the shell you write and your own edits to shell scripts GAIA ships. It skips GAIA's own files when the change comes from applying a GAIA update (the pull request changes `.gaia/VERSION`), so an update does not send GAIA's shell to it for review. `.claude/settings.json` is not skipped: it is a file you are expected to customize, so every change to it reaches this member.
 
@@ -96,12 +96,12 @@ Members only report problems. They never edit a file. A separate fixer makes the
 
 ### Covering new code
 
-`.gaia/audit-ci.yml` ships with GAIA. Ask Claude to change it when your project grows. When you add code beside `frontend/`, such as a backend, decide who reviews it:
+`.gaia/audit-ci.yml` ships with GAIA. Ask Claude to change it when your project grows. `code-audit-frontend`, the default member, already covers every package under `apps/` and `packages/`. On a package that is not a React app, it skips its React, project-pattern, accessibility, and translation checks and keeps the rest, security included. When you add code in another language or stack, such as a backend, decide whether that review is enough:
 
 - **Give it its own member.** A member is a [Claude Code sub-agent](https://code.claude.com/docs/en/sub-agents) file in `.claude/agents/` that says what to review for, plus an entry under `auditors:` that gives the member's name and file patterns. This is the better choice for code in another language or stack.
 - **Add its patterns to an existing member** whose review fits the code.
 
-Until you do one of these, the new files are not skipped. A file no member covers goes to `code-audit-frontend`, the default member, so the merge still waits for a review, but one written for a React app. Only a pull request whose every file is outside the audit's scope (wiki pages, files in the root `.claude/` folder, GAIA's own `.gaia/` files, `docs/`, and Markdown files at the root; `frontend/.claude/` is in scope) merges with no member's review. A file there that a member covers still gets that member's review: a shell script under `.claude/` or `.gaia/`, or anything under `.claude/hooks/`, goes to `code-audit-shell`.
+Code outside `apps/` and `packages/` is not skipped either. A file no member covers goes to `code-audit-frontend`, the default member, so the merge still waits for a review, but one written for a React app. Only a pull request whose every file is outside the audit's scope (wiki pages, files in the root `.claude/` folder, GAIA's own `.gaia/` files, `docs/`, and Markdown files at the root; `apps/web/.claude/` is in scope) merges with no member's review. A file there that a member covers still gets that member's review: a shell script under `.claude/` or `.gaia/`, or anything under `.claude/hooks/`, goes to `code-audit-shell`.
 
 ### Adding a member
 
@@ -147,12 +147,12 @@ If `.gaia/audit-ci.yml` has no `auditors:` block, the audit stops rather than fa
 
 ### Library rules for code-audit-frontend
 
-`code-audit-frontend` keeps the rules for specific libraries in `frontend/.claude/agents/code-audit-frontend/`, one Markdown file per library. GAIA ships files for `cn`, [Conform](https://conform.guide/), the form components, React buckets, react-i18next, and [shadcn/ui](https://ui.shadcn.com/). When you add, replace, or remove a library whose usage is worth checking in review, add, replace, or delete its file. The agent file itself does not change.
+`code-audit-frontend` keeps the rules for specific libraries in `apps/web/.claude/agents/code-audit-frontend/`, one Markdown file per library. GAIA ships files for `cn`, [Conform](https://conform.guide/), the form components, React buckets, react-i18next, and [shadcn/ui](https://ui.shadcn.com/). When you add, replace, or remove a library whose usage is worth checking in review, add, replace, or delete its file. The agent file itself does not change.
 
 Each file says which [rule specialists](/reference/agents/#audit-rule-specialist) read it: `react-patterns` (`.tsx` files), `typescript` (`.ts` and `.tsx` files), or `translation` (language files and files that call the translation functions). It says so in a `subagents:` line in the header block at the top of the file (its frontmatter), written as a list on one line, such as `subagents: [react-patterns, typescript]`. A file whose list spans several lines, or that has no `subagents:` line, is reported as an error finding in the next review. The rules themselves are plain Markdown. To add a file, give Claude a prompt like this one, with your own library:
 
 ```text
-Add a code-audit-frontend library rule file for TanStack Query in frontend/.claude/agents/code-audit-frontend/. Include the usage mistakes a reviewer should flag, with a bad and a good example for each, and send its rules to the react-patterns and typescript specialists.
+Add a code-audit-frontend library rule file for TanStack Query in apps/web/.claude/agents/code-audit-frontend/. Include the usage mistakes a reviewer should flag, with a bad and a good example for each, and send its rules to the react-patterns and typescript specialists.
 ```
 
 ## Per-member clearance

@@ -17,7 +17,7 @@ React Router isn't tied to one hosting platform. You can deploy it to:
 
 React Router's [deployment guide](https://reactrouter.com/start/framework/deploying) covers each option.
 
-GAIA's app is built for server rendering: on every request, its root loader reads cookies and sets response headers. React Router can also build a single-page app that a static host serves. Switching takes more than turning off `ssr` in `frontend/react-router.config.ts`, so to use that mode, ask Claude to switch the app for you.
+GAIA's app is built for server rendering: on every request, its root loader reads cookies and sets response headers. React Router can also build a single-page app that a static host serves. Switching takes more than turning off `ssr` in `apps/web/react-router.config.ts`, so to use that mode, ask Claude to switch the app for you.
 
 ## Build and start
 
@@ -32,12 +32,12 @@ pnpm start
 
 ## The Dockerfile
 
-GAIA ships `frontend/Dockerfile` as a starting point. Your host may need changes to it, and Claude can make them.
+GAIA ships `apps/web/Dockerfile` as a starting point. Your host may need changes to it, and Claude can make them. It copies only the app, so if the app uses a library from `packages/`, ask Claude to extend it to copy that library too.
 
 Build it from the repository root, so the root lockfile and [pnpm](https://pnpm.io/)'s supply-chain settings apply:
 
 ```bash
-docker build -t my-app -f frontend/Dockerfile .
+docker build -t my-app -f apps/web/Dockerfile .
 docker run -p 3000:3000 \
   -e API_URL=https://api.example.com/ \
   -e SESSION_SECRET=<a long random value> \
@@ -51,11 +51,11 @@ The image:
 - Copies only the production dependencies and the build output into a fresh Node image
 - Runs the server as the unprivileged `node` user, with `pnpm start`
 
-No `.env` file ever enters the image: `frontend/Dockerfile.dockerignore` excludes them, along with the root `.claude/` folder, the wiki, and local GAIA state.
+No `.env` file ever enters the image: `apps/web/Dockerfile.dockerignore` excludes them, along with the root `.claude/` folder, the wiki, and local GAIA state.
 
 ## Environment variables
 
-`frontend/.env` is for local development only. On your host, set these variables in its own environment or secrets settings. The server checks them when it starts (`frontend/app/env.server.ts`) and fails to start if a required one is missing.
+`apps/web/.env` is for local development only. On your host, set these variables in its own environment or secrets settings. The server checks them when it starts (`apps/web/app/env.server.ts`) and fails to start if a required one is missing.
 
 | Variable | Required | What it does |
 |---|---|---|

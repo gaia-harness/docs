@@ -70,7 +70,7 @@ Every file the merge overwrites or deletes is backed up first, under `.gaia-back
 `.gaia/manifest.json` is GAIA's list of the files it ships. It gives each file one of three classes, which decide the recommended answer when you and GAIA both changed it:
 
 - **`owned`**: GAIA maintains the file. Most of `.claude/`, `.gaia/` and `.githooks/` is owned. A conflict question recommends GAIA's version. If you already had a file of your own at a path a new release starts shipping, yours is backed up and replaced.
-- **`shared`**: GAIA ships a starting version that you are expected to customize, such as `CLAUDE.md`, `.claude/settings.json`, `package.json`, `.gaia/audit-ci.yml`, `frontend/app/styles/theme.css` and the CI workflows. A conflict question recommends keeping yours. If you already had a file at a path a new release starts shipping, you are asked instead of overwritten. When an update writes `.claude/settings.json` with a copy or an edit, Claude Code asks you first because [GAIA guards that file](/reference/gates/#claude-settings-file). Approve it if it matches the answer you just chose. An automatic merge of the file goes through with no prompt. An unattended run cannot write the file by copy or edit.
+- **`shared`**: GAIA ships a starting version that you are expected to customize, such as `CLAUDE.md`, `.claude/settings.json`, `package.json`, `.gaia/audit-ci.yml`, `apps/web/app/styles/theme.css` and the CI workflows. A conflict question recommends keeping yours. If you already had a file at a path a new release starts shipping, you are asked instead of overwritten. When an update writes `.claude/settings.json` with a copy or an edit, Claude Code asks you first because [GAIA guards that file](/reference/gates/#claude-settings-file). Approve it if it matches the answer you just chose. An automatic merge of the file goes through with no prompt. An unattended run cannot write the file by copy or edit.
 - **`wiki-owned`**: pages in `wiki/` that GAIA ships. They merge like `shared` files, and sections you added to one are kept.
 
 ### What the merge never touches
@@ -79,8 +79,8 @@ Every file the merge overwrites or deletes is backed up first, under `.gaia-back
 - **`wiki/log.md`, `.gaia/VERSION`, `.gaia/VERSION-dev`, `.gaia/manifest.json` and `.gaia/update-decisions.json`.** The update writes the last three itself. A local sync writes `.gaia/VERSION-dev`, and the next release update removes it.
 - **`.gaia/packages.json`**, the list of packages in your workspace. It is yours from the start.
 - **`.gaia/finding-classes.json`**, your project's own [audit finding classes](/maintenance/codify/#your-own-finding-classes). It ships empty and is yours from the start.
-- **Your design system, once it is established.** After you settle your project's design (the `Design System` wiki page is marked established), that page and `frontend/.claude/rules/design-baseline.md` become yours, and later updates skip both.
-- **`frontend/.claude/settings.json`.** It is never merged. GAIA rebuilds it from the root `.claude/settings.json` plus `frontend/.claude/settings.overlay.json`, so put frontend-only settings in the overlay.
+- **Your design system, once it is established.** After you settle your project's design (the `Design System` wiki page is marked established), that page and `apps/web/.claude/rules/design-baseline.md` become yours, and later updates skip both.
+- **`apps/web/.claude/settings.json`.** It is never merged. GAIA rebuilds it from the root `.claude/settings.json` plus `apps/web/.claude/settings.overlay.json`, so put frontend-only settings in the overlay.
 
 `package.json`, `pnpm-workspace.yaml` and `.gaia/audit-ci.yml` are merged key by key instead of as whole files. A key only you added is never touched, and neither is a key you removed that GAIA later changed. A key GAIA changed that you left alone takes GAIA's value. A key you both changed becomes a question. Your own dependencies, overrides, build approvals and [Code Audit Team](/workflow/code-audit-team/) entries stay as you set them. The one exception is a package GAIA renames: once the new name lands in your `package.json`, the merge deletes the old one from the same section, even if you changed its version. In 2.2.0 this swaps `@gaia-react/lint` for `@gaia-harness/lint`. If the new name ends up in a conflict you have not resolved, the old package stays. Each Code Audit Team reviewer file has a section listing the files that reviewer covers; after the merge, GAIA rebuilds that section from your `.gaia/audit-ci.yml`, so it matches your project and not GAIA's.
 
@@ -123,7 +123,22 @@ A release can ship migration notes in its bundle, under `.gaia/migrations/<versi
 
 GAIA 2.4.0 ships a blocking note, so an update from 2.3.1 or earlier stops at it and asks whether to follow it now. That older `/update-gaia` has no tool check of its own, so the note runs the [tool check](#what-it-does) the newer one runs in step 4. Every tool must pass. Claude walks you through updating any that falls short, as in step 4, except that here it asks before installing a missing pnpm too. Once every tool passes, the update carries on in the same run. If a tool still falls short, or you decline, the update stops before anything is branched or merged. Run `/update-gaia` again once the tool is updated.
 
-When the tools pass, the note does not stop at 2.4.0. It checks the notes of every later release, then carries on with the ordinary update to the latest release in the same run, so you do not need to re-run `/update-gaia` afterwards. The one exception: if a later release also ships a blocking note, the update stops before anything is merged and names that note.
+When the tools pass, the note does not stop at 2.4.0. It checks the notes of every later release, then moves your app and carries on to the latest release in the same run, so you do not need to re-run `/update-gaia` afterwards. The one exception: if a later release also ships a blocking note, the update stops before anything is merged and names that note.
+
+2.4.0 moves the app from `frontend/` to `apps/web/` and renames its package from `frontend` to `web`, so your project can hold more apps under `apps/` and shared libraries under `packages/` ([Project layout](/getting-started/project-layout/)). The note makes the move in your main checkout, on a new update branch, not in a worktree:
+
+1. **Checks first.** Claude asks to remove each of your worktrees before the move. Land your open branches first, or rebase them onto the update once it merges. Your session must be started from the repository root.
+2. **Moves the app** to `apps/web/` with its git history, lists it as `web` in [`.gaia/packages.json`](/reference/gaia-folder/#packagesjson), and adds `apps/*` and `packages/*` to `pnpm-workspace.yaml` beside your own entries.
+3. **Merges the latest release** into the moved files with the usual [three-way merge](#the-three-way-merge), so your changes and earlier answers carry over.
+4. **Finds the old names** in your tracked files: `frontend/` and the old package name in workspace dependencies, `--filter` arguments, workflow path filters, and a `Dockerfile`. It asks about anything unclear, and checks that files git ignored before the move are still ignored at their new paths. It also moves your [Code Audit Team](/workflow/code-audit-team/) file patterns in `.gaia/audit-ci.yml` to the new paths and reports each change.
+5. **Finishes like any update:** it reinstalls dependencies, follows the after-merge notes, runs the Quality Gate, and makes one commit and one pull request.
+
+Restart Claude Code from the repository root before you merge that pull request, because the running session still uses the hook setup from before the move. If the move is interrupted, stay on the update branch and ask Claude to follow the 2.4.0 migration note again. It finishes only what is still owed.
+
+Two steps are yours, because Claude never opens `.env` files:
+
+- **Check your `.env` files** for the old `frontend/` path.
+- **On every other clone**, after pulling the update, move the ignored env files, `frontend/.env*`, into `apps/web/`. Git does not move ignored files, so they stay behind on clones that did not run the update.
 
 ### Stories in 2.3.0
 

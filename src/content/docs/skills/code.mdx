@@ -7,7 +7,7 @@ sidebar:
 
 These skills shape how Claude writes and reviews code. Each one loads automatically when the task matches its trigger, whether the task comes from your request or from work Claude or a sub-agent is already doing. You don't call them by name.
 
-The React app's skills live in `frontend/.claude/skills/` and load in sessions that work on the app. `tdd` and `naming-conventions` live in the root `.claude/skills/` and apply anywhere in the repository.
+The React app's skills live in `apps/web/.claude/skills/` and load in sessions that work on the app. `tdd` and `naming-conventions` live in the root `.claude/skills/` and apply anywhere in the repository.
 
 ## TypeScript
 
@@ -108,4 +108,4 @@ Lint requires every `eslint-disable` comment to give a reason after `--` (`@esli
 
 Fixes specific accessibility errors reported by [axe-core](https://github.com/dequelabs/axe-core), the accessibility checker: `color-contrast`, `label`, `image-alt`, `button-name`, `link-name`, `region`, `heading-order`, the `aria-*` rules, `tabindex`, `duplicate-id`, and others. For an error not on its list, it makes a fix and then re-runs the check to confirm. Fixes use role tokens and the `ui` controls, so they work in both light and dark themes. General guidance lives in the `accessibility` rule; this skill handles the specific fix once an error is reported.
 
-**Triggers** when an axe rule name (like `color-contrast`) appears in the output of a story test under [Vitest](https://vitest.dev/) (`addon-a11y`), the Playwright accessibility helper (`frontend/.playwright/a11y.ts`), or `code-audit-frontend`'s accessibility findings.
+**Triggers** when an axe rule name (like `color-contrast`) appears in the output of a story test under [Vitest](https://vitest.dev/) (`addon-a11y`), the Playwright accessibility helper (`apps/web/.playwright/a11y.ts`), or `code-audit-frontend`'s accessibility findings.

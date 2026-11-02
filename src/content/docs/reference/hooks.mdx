@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-[Hooks](https://code.claude.com/docs/en/hooks) are scripts Claude Code runs at set moments: before or after a tool call, when a session starts or stops, and when you send a message. GAIA registers them in `.claude/settings.json`. The app's `frontend/.claude/settings.json` is generated from the root settings plus an overlay file, so the same hooks run in both places. The scripts live in `.claude/hooks/`.
+[Hooks](https://code.claude.com/docs/en/hooks) are scripts Claude Code runs at set moments: before or after a tool call, when a session starts or stops, and when you send a message. GAIA registers them in `.claude/settings.json`. The app's `apps/web/.claude/settings.json` is generated from the root settings plus an overlay file, so the same hooks run in both places. The scripts live in `.claude/hooks/`.
 
 Unlike [rules](/reference/rules/), which Claude reads and follows, hooks are scripts that always behave the same way. A guard hook turns back one of Claude's tool calls no matter what the model decided. Its message goes to Claude, usually with the allowed form of the command or the next step, and Claude retries that way, with nothing for you to do. Guards act on Claude's tool calls only: a command you run yourself in a terminal never meets them. A permission mode that skips prompts, such as auto mode, does not skip hooks.
 

@@ -153,9 +153,9 @@ The ESLint cap is built into `/update-deps`, so it is not in `gaia.updateDepsHol
 
 ## Where dependencies live
 
-The project is a pnpm workspace with one lockfile at the root. App dependencies are in `frontend/package.json`; harness dependencies and `gaia.updateDepsHold` are in the root `package.json`. `overrides:` and `minimumReleaseAge` are in the root `pnpm-workspace.yaml`. To add a package, ask Claude; it puts app packages in `frontend/package.json` and pins the exact version.
+The project is a pnpm workspace with one lockfile at the root. App dependencies are in `apps/web/package.json`; harness dependencies and `gaia.updateDepsHold` are in the root `package.json`. `overrides:` and `minimumReleaseAge` are in the root `pnpm-workspace.yaml`. To add a package, ask Claude; it puts app packages in `apps/web/package.json` and pins the exact version.
 
-msw (the library that mocks API calls in tests and Storybook) needs a generated file, `frontend/public/mockServiceWorker.js`, that matches the installed version. `/update-deps` regenerates it whenever it moves msw. If a test says the file is out of date, ask Claude to regenerate the msw worker.
+msw (the library that mocks API calls in tests and Storybook) needs a generated file, `apps/web/public/mockServiceWorker.js`, that matches the installed version. `/update-deps` regenerates it whenever it moves msw. If a test says the file is out of date, ask Claude to regenerate the msw worker.
 
 <Aside type="note">
 [`/setup-gaia`](/getting-started/setup-gaia/) leaves Dependabot alerts on and turns Dependabot's own security pull requests off, so `/update-deps` is the one source of dependency pull requests. If your repository has a Dependabot npm entry or a Renovate config, ask Claude to remove the overlap, or both open duplicate pull requests.

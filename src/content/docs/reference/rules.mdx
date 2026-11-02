@@ -12,7 +12,7 @@ Rules are guidance Claude reads; nothing forces Claude to follow them. Anything 
 GAIA ships rules in two places:
 
 - **`.claude/rules/`** at the root: rules for the whole repository. Their file patterns are relative to the repository root.
-- **`frontend/.claude/rules/`**: rules for the React app. They load when the work is under `frontend/`, and their file patterns are relative to `frontend/`.
+- **`apps/web/.claude/rules/`**: rules for the React app. They load when the work is under `apps/web/`, and their file patterns are relative to `apps/web/`.
 
 ## Always loaded (root)
 
@@ -34,16 +34,16 @@ GAIA ships rules in two places:
 |---|---|---|
 | `ambient-context-resolution` | Applies when Claude writes shell scripts or GitHub workflows: a script gets the repository root, base branch, and commit from its input, not from the current folder or `HEAD`. The last two patterns match files a GAIA project does not ship (TypeScript under `.gaia/` and bats test suites), so they apply only if you add such files. | `.gaia/scripts/**/*.sh`, `.claude/hooks/**/*.sh`, `.github/workflows/**/*.yml`, `.gaia/**/*.ts`, `**/*.bats` |
 | `bats-assertions` | Applies when Claude writes [bats](https://github.com/bats-core/bats-core) tests: every assertion must be able to fail. Run bats under bash 4 or later, because bash 3.2 lets some failing checks pass. A check negated with `!` can fail the test only on its last line, so earlier checks are written another way. A test that claims to cover a whole set checks every member of it. | `**/*.bats` |
-| `code-comments` | A comment says something the code itself does not; the merge audit checks comments by the same standard. | app, test, [Playwright](https://playwright.dev/), and [Storybook](https://storybook.js.org/) source under `frontend/`, `.gaia/**/*.ts` and `.sh`, `.claude/hooks/**/*.sh`, `.github/**/*.sh`, and `**/*.bats` |
+| `code-comments` | A comment says something the code itself does not; the merge audit checks comments by the same standard. | app, test, [Playwright](https://playwright.dev/), and [Storybook](https://storybook.js.org/) source under `apps/web/`, `.gaia/**/*.ts` and `.sh`, `.claude/hooks/**/*.sh`, `.github/**/*.sh`, and `**/*.bats` |
 | `file-placement` | New hooks go at the root of `.claude/hooks/`, and how to register one so it keeps working. Project scripts go outside `.gaia/`, never in `.gaia/scripts/`. | `.claude/hooks/**`, `.gaia/scripts/**` |
-| `generated-files` | Names the source to change for a file GAIA or pnpm generates. For `frontend/.claude/settings.json`: the root `.claude/settings.json` or the frontend overlay, then regenerate. For `pnpm-lock.yaml`: pnpm commands, never a hand edit. | `frontend/.claude/settings.json`, `pnpm-lock.yaml` |
+| `generated-files` | Names the source to change for a file GAIA or pnpm generates. For `apps/web/.claude/settings.json`: the root `.claude/settings.json` or the frontend overlay, then regenerate. For `pnpm-lock.yaml`: pnpm commands, never a hand edit. | `apps/web/.claude/settings.json`, `pnpm-lock.yaml` |
 | `guards-must-fail` | A guard and its tests must be seen failing before anyone trusts them. | hooks, scripts, workflows, and Playwright specs |
 | `no-abbreviations` | Descriptive names in every language, alongside the `naming-conventions` skill. | code files in any language |
-| `user-questions` | Ask a choice as an `AskUserQuestion` menu: recommended option first, at most four options, one question per decision. A list of review findings, each with its own recommendation, is one decision: every finding prints as text, then one question asks **Accept all as recommended** or **Revise**. | skills, commands, and agents (root and `frontend/`), plus a few wiki pages about the merge workflow and the Quality Gate |
+| `user-questions` | Ask a choice as an `AskUserQuestion` menu: recommended option first, at most four options, one question per decision. A list of review findings, each with its own recommendation, is one decision: every finding prints as text, then one question asks **Accept all as recommended** or **Revise**. | skills, commands, and agents (root and `apps/web/`), plus a few wiki pages about the merge workflow and the Quality Gate |
 | `wiki-style` | Present-tense prose; no historical phrasing or roadmap stated as current; no SPEC, PR, or commit references in body prose. | `wiki/**/*.md` and the Markdown files for skills, commands, agents, and rules |
 | `working-doc-ids` | No SPEC, plan, or audit IDs, no paths to one machine's [notebook](/workflow/notebook/) or `.gaia/local/` entries, and none of your own issue or PR numbers, in code or prose. Hooks also enforce most of this ([gate](/reference/gates/#machine-local-references)). | app, test, and harness source |
 
-## Frontend (`frontend/.claude/rules/`)
+## Frontend (`apps/web/.claude/rules/`)
 
 | Rule | What it enforces | Loads on |
 |---|---|---|
@@ -66,9 +66,9 @@ GAIA ships rules in two places:
 Ask Claude to write the rule for you. Say what the rule should make Claude do, and which files it applies to, so Claude can scope it with a `paths:` pattern:
 
 ```text
-Add a Claude Code rule that <what Claude should always do>. It applies when working on <which files, for example frontend/app/services/**>. Scope it with a paths: pattern, and keep it short.
+Add a Claude Code rule that <what Claude should always do>. It applies when working on <which files, for example apps/web/app/services/**>. Scope it with a paths: pattern, and keep it short.
 ```
 
-A rule for the whole repository goes under `.claude/rules/`. A rule that only applies to the app goes under `frontend/.claude/rules/`, with patterns relative to `frontend/`. Leave out `paths:` only when the rule truly needs to load in every session, because an always-loaded rule uses up context in every session.
+A rule for the whole repository goes under `.claude/rules/`. A rule that only applies to the app goes under `apps/web/.claude/rules/`, with patterns relative to `apps/web/`. Leave out `paths:` only when the rule truly needs to load in every session, because an always-loaded rule uses up context in every session.
 
 [`/gaia-codify`](/maintenance/codify/) writes path-scoped rules from recurring audit findings, and [`/gaia-cleanse`](/maintenance/cleanse/) and [`/gaia-fitness`](/maintenance/fitness/) keep rules lean.

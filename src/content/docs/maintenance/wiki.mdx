@@ -58,10 +58,10 @@ Sync goes through every commit since the last one the wiki checked, up to `HEAD`
 
 When the wiki is more than 30 commits behind, sync asks first. You can choose to sync only the most recent 20 and treat everything older as done.
 
-Sync decides which commits matter by which files they change. By default it treats files under `frontend/app/` as your source code. If your code also lives elsewhere (for example a backend package), ask Claude:
+Sync decides which commits matter by which files they change. By default it treats each React app's source folder as your source code: `apps/web/app/` in a new project. If your code also lives elsewhere (for example a backend package), ask Claude, and name the folders to keep as well, since your list replaces the default:
 
 ```text
-Make /gaia-wiki treat changes under backend/src as source code too.
+Make /gaia-wiki treat changes under apps/api/src as source code too, keeping apps/web/app/.
 ```
 
 Claude records this under `gaia.wikiClassify` in the root `package.json`, which `/update-gaia` leaves alone.

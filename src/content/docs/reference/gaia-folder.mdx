@@ -112,7 +112,7 @@ These files belong to your project. Commands create them as you work, and `/upda
 
 ### packages.json
 
-The packages in your workspace that GAIA's harness covers, as a list of `{name, path}` entries. A new project lists one, `frontend`. When the file is missing, GAIA assumes `frontend` anyway. Each package's own settings live in its `gaia.package.json`, such as `frontend/gaia.package.json`.
+The packages in your workspace that GAIA's harness covers, as a list of `{name, path}` entries. A new project lists one, `web` at `apps/web`. When the file is missing, GAIA assumes that same entry. Each package's own settings live in its `gaia.package.json`, such as `apps/web/gaia.package.json`: where its source and tests are, and, for a React app, `"stack": "web"`, which gives it GAIA's frontend rules, skills, and checks. [`/gaia-fitness`](/maintenance/fitness/) warns about a workspace package missing from this list. To add a package, ask Claude (see [The backend is left to you](/getting-started/project-layout/#the-backend-is-left-to-you)).
 
 ### project.json
 

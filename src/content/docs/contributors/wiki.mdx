@@ -121,7 +121,7 @@ The shipped file is a subset of the source: the scrub removes the markers and ev
 
 Blocks are stripped only in the files `.gaia/release-scrub.yml` lists:
 
-- HTML-comment markers in `wiki/**/*.md` and `.claude/**/*.md`. The paths are matched from the repo root, so `.claude/**/*.md` does not cover `frontend/.claude/`.
+- HTML-comment markers in `wiki/**/*.md` and `.claude/**/*.md`. The paths are matched from the repo root, so `.claude/**/*.md` does not cover `apps/web/.claude/`.
 - `#` markers in `.prettierignore`, `.gaia/audit-ci.yml`, `.githooks/pre-commit`, and every `*.sh` file.
 
 A block in any other file ships as written, markers included. The marker check then catches it, in the verification runner, the pre-push hook, and the advisory checks on the pull request, because marker text survives in the shipped tree. Claude then moves the block or adds the file to the scrub list. To add a block somewhere new, ask:

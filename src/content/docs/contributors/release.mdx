@@ -33,7 +33,7 @@ The command takes a `patch`, `minor`, or `major` argument. It starts with a pref
 
 After the preflight, in outline, it:
 
-- Bumps the version in `.gaia/VERSION`, `package.json`, and `frontend/package.json`
+- Bumps the version in `.gaia/VERSION`, `package.json`, and `apps/web/package.json`
 - Graduates the CHANGELOG's `## [Unreleased]` section into a dated `## [X.Y.Z]` entry
 - Resets `wiki/log.md`, so new projects start with a clean log
 - Regenerates `.gaia/manifest.json` and rebuilds the bundled CLIs

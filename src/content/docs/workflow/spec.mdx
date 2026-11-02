@@ -193,7 +193,7 @@ If Claude cannot start sub-agents in your session, the audit is skipped, the sel
 
 ## While a spec session runs
 
-- **It writes only to the notebook and GAIA's local files**: `.notebook/specs/`, `.gaia/local/cache/`, and the usage ledger. It never edits `frontend/app/**` or any other source. Because nothing it writes is tracked, you can keep working in other sessions while it runs, on a branch or in a [worktree](/workflow/work-lifecycle/#3-isolate).
+- **It writes only to the notebook and GAIA's local files**: `.notebook/specs/`, `.gaia/local/cache/`, and the usage ledger. It never edits `apps/web/app/**` or any other source. Because nothing it writes is tracked, you can keep working in other sessions while it runs, on a branch or in a [worktree](/workflow/work-lifecycle/#3-isolate).
 - **Project decisions go into the SPEC, the wiki, or `.claude/rules/`**, never into machine-local memory.
 - **Your progress is saved as you go**, after every answer and every gate. To stop, type a save request (such as "save partial" or "resume later") into a question's **Other** answer, or choose to save from inside **Discuss this**. The next `/gaia-spec` offers to resume.
 - **Long sessions** pause when the context reaches the red band, like any other: Claude saves, then you continue here or clear and resume. See [Work lifecycle](/workflow/work-lifecycle/#resuming-long-work).

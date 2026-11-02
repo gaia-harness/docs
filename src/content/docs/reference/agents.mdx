@@ -27,9 +27,9 @@ The audit before each merge is done by a team. Each member is responsible for th
 
 ### code-audit-frontend
 
-The default member. Responsible for the app and its tooling: `frontend/app/**`, tests, [Storybook](https://storybook.js.org/) and [Playwright](https://playwright.dev/) trees, manifests, build and lint configs, root tooling such as `.npmrc`, and `frontend/.claude/**`. It reviews what lint and types cannot: security (a top priority), performance, how well the code fits the architecture, edge cases, accessibility, and maintainability. It also flags slow nested lookups (one loop inside another) that are split across two components or functions, where they are easy to miss.
+The default member. Responsible for every package under `apps/` and `packages/`, which in a new project means the app and its tooling: `apps/web/app/**`, tests, [Storybook](https://storybook.js.org/) and [Playwright](https://playwright.dev/) trees, manifests, build and lint configs, root tooling such as `.npmrc`, and `apps/web/.claude/**`. It reviews what lint and types cannot: security (a top priority), performance, how well the code fits the architecture, edge cases, accessibility, and maintainability. On a package that is not a React app, it skips its React, project-pattern, accessibility, and translation checks and keeps the rest. It also flags slow nested lookups (one loop inside another) that are split across two components or functions, where they are easy to miss.
 
-Line-by-line rule checks go to [`audit-rule-specialist`](#audit-rule-specialist) agents, one per area: React patterns and accessibility, [TypeScript](https://www.typescriptlang.org/) and architecture, and translations. Library-specific rules live in `frontend/.claude/agents/code-audit-frontend/`: `cn`, [Conform](https://conform.guide/), the form components, React buckets, react-i18next, and [shadcn](https://ui.shadcn.com/). It also runs [React Doctor](https://github.com/millionco/react-doctor), [Knip](https://knip.dev/), and a dependency security advisory check, and merges their output into its report in a Tooling table. Those findings are advisory: they never block its approval.
+Line-by-line rule checks go to [`audit-rule-specialist`](#audit-rule-specialist) agents, one per area: React patterns and accessibility, [TypeScript](https://www.typescriptlang.org/) and architecture, and translations. Library-specific rules live in `apps/web/.claude/agents/code-audit-frontend/`: `cn`, [Conform](https://conform.guide/), the form components, React buckets, react-i18next, and [shadcn](https://ui.shadcn.com/). It also runs [React Doctor](https://github.com/millionco/react-doctor), [Knip](https://knip.dev/), and a dependency security advisory check, and merges their output into its report in a Tooling table. Those findings are advisory: they never block its approval.
 
 Before it reports a Critical or Major finding, an [`audit-refuter`](#audit-refuter) tries to disprove it. A finding that does not hold up is dropped or downgraded.
 
@@ -41,7 +41,7 @@ Checks changed files against the line-level rules for one area and reports every
 
 - **React patterns and accessibility**: any changed `.tsx` file.
 - **TypeScript and architecture**: any changed `.ts` or `.tsx` file, language files included.
-- **Translations**: a changed language file under `frontend/app/languages/`, or a changed file that calls the translation functions (`useTranslation`, `<Trans`, `i18n.t(`, or `t(`).
+- **Translations**: a changed language file under `apps/web/app/languages/`, or a changed file that calls the translation functions (`useTranslation`, `<Trans`, `i18n.t(`, or `t(`).
 
 It is given the paths of the library rule files for its area and reads each one in full. It edits nothing. Its reply ends with a `Files reviewed` count, so a specialist that stopped early is caught and run again instead of being read as clean.
 
