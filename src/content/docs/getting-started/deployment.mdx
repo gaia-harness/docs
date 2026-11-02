@@ -47,6 +47,7 @@ docker run -p 3000:3000 \
 
 The image:
 
+- Installs the exact pnpm version `package.json` pins, checking pnpm's package against the pin's hash, so the container starts without reaching the npm registry
 - Installs dependencies from the lockfile exactly as committed, then builds the app
 - Copies only the production dependencies and the build output into a fresh Node image
 - Runs the server as the unprivileged `node` user, with `pnpm start`
