@@ -31,7 +31,7 @@ Before any commit that stages source code (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`,
 | Lint (`pnpm lint`) | Zero errors and zero warnings. Lint also fixes formatting, because [Prettier](https://prettier.io/) runs as an ESLint rule. |
 | Unit tests (`pnpm test:ci`) | Every test passes with zero console warnings, in every package. Stories and hook tests run in headless Chromium. |
 | End-to-end tests (`pnpm pw`) | Every Playwright test passes. |
-| Dev server | This checkout's dev server starts and its home page answers with HTTP 200. When another process holds the port, Claude asks: **Hold the commit** (recommended, since it may be another session's server) or **Stop it**. |
+| Dev server | This checkout's dev server starts and its home page answers with HTTP 200. A home page that redirects within the app, such as to a login page, passes when the page it lands on answers 200. When another process holds the port, Claude asks: **Hold the commit** (recommended, since it may be another session's server) or **Stop it**. |
 | Build (`pnpm build`) | The production build succeeds. |
 
 Claude fixes every warning, not only errors, then shows you the results and asks whether to commit or hold the change. A workflow that commits on its own (an audit fix round, [`/gaia-debt`](/workflow/debt/), a plan's phases) commits a clean gate without asking, because it has its own point where you review. An audit fix round with only Minor, non-security fixes skips the end-to-end tests, dev server, and build; those run once on the finished change before `GAIA-Audit` is posted.
