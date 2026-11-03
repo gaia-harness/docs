@@ -1,0 +1,83 @@
+---
+title: Tools
+description: What GAIA needs on your machine, and how each one gets installed.
+sidebar:
+  order: 4
+---
+
+This page lists every tool a GAIA project needs on your machine, why it needs it, and how it gets installed. You install three of them before you create a project. GAIA installs the rest, or walks you through it.
+
+## Before you start
+
+Install these yourself before running `npx create-gaia`. See [Quick Start](/#prerequisites).
+
+### Node
+
+Node 22.22.0 or later. Check with `node --version`.
+
+### Claude Code
+
+Claude Code 2.1.287 or later, run in a terminal. Run `claude update` to update it. The [Code Audit Team](/workflow/code-audit-team/) needs 2.1.287 because its reviewers start reviewers of their own, which older versions cannot do.
+
+### GitHub CLI
+
+The [GitHub CLI](https://cli.github.com/), `gh`, logged in with `gh auth login`. GAIA uses it to create the repo, open and merge pull requests, and claim issues. `/setup-gaia` warns when it is missing or not logged in, and carries on.
+
+## Checked on every setup and update
+
+`/setup-gaia` checks these at the start of every run. [`/update-gaia`](/maintenance/update-gaia/) checks them against the new release's minimums before it changes anything. When one is missing or too old, the command goes no further until it passes. See the [Tool versions gate](/reference/gates/#tool-versions).
+
+Claude walks you through the update in the same run, always to the latest release, not just the minimum. How it goes depends on the install:
+
+- **Claude can run it**, for example `brew install git` on macOS with Homebrew. Claude asks once, then runs it.
+- **It needs `sudo`.** Claude cannot type your password, so it gives you the command as `! <command>` to type in the Claude Code prompt, and waits for you to say it ran.
+- **It is interactive or changes your `PATH`**, such as the Homebrew installer or `winget` on Windows. Run it in a fresh terminal, start Claude Code again from that terminal, and run the command again.
+- **No single command does it.** Claude shows what to do and waits for you to say it is done.
+
+Then Claude checks again and carries on. If a tool still falls short, or you decline the install, the command stops; run it again once the tool is updated. If an install succeeded but the old version still shows, an older copy comes first on your `PATH`, and Claude shows its path.
+
+### git
+
+2.40 or later. GAIA's [light audit review](/workflow/code-audit-team/#light-review) needs it.
+
+### jq
+
+1.6 or later. GAIA's hooks and scripts read JSON with [jq](https://jqlang.org/). While jq is missing, Claude's guarded tool calls are held, so the guards never switch off quietly. See the [jq not installed gate](/reference/gates/#jq-not-installed).
+
+### lsof or ss
+
+`lsof` on macOS, `ss` on Linux. GAIA uses it to find your running dev server. macOS ships `lsof` at `/usr/sbin/lsof`, so when it is missing, the fix is adding `/usr/sbin` to your `PATH`. Installing it with Homebrew does not help, because Homebrew never puts its `lsof` on your `PATH`.
+
+### pnpm
+
+GAIA installs, tests, and builds with [pnpm](https://pnpm.io/) 12 or later. The exact version is pinned in `package.json`. `npx create-gaia` installs pnpm when it is missing, and `/gaia-init`, `/setup-gaia`, and `/update-gaia` check it again.
+
+- **A missing pnpm** is installed with `npm install -g pnpm@latest`, and Claude tells you it is doing so. pnpm then switches itself to the pinned version.
+- **An older pnpm** is updated only after you confirm. The command stops if you say no.
+- **Corepack is never used.** [Corepack](https://nodejs.org/api/corepack.html), the package-manager launcher that comes with most Node versions, never switches pnpm to the pinned version, and stops with `ERR_PNPM_BAD_PM_VERSION` when it runs a different one. When Corepack is installed, only its `pnpm` command is removed.
+- **npm cannot write to its global folder** (an `EACCES` or `EPERM` error). The command stops and shows the fix, which never needs `sudo`: point npm at a folder you own, or install Node with a version manager such as nvm, fnm, or Volta. Then run the command again.
+- **An older pnpm installed another way**, such as Homebrew or the standalone installer, still comes first on your `PATH`. The command stops and shows its path, so you can update or remove it.
+
+## Installed by GAIA
+
+### Chromium
+
+[Chromium](https://www.chromium.org/) is the browser the story and hook tests run in. `pnpm install` installs no browsers, so `/gaia-init` and `/setup-gaia` install it. They install only Chromium, without the system libraries some Linux machines also need, so the install never asks for your password. It finishes at once when Chromium is already installed. If it fails, the command stops and shows the command to retry.
+
+On Linux, if Chromium then fails to start because system libraries are missing, Claude gives you this to type in the prompt, since it asks for your `sudo` password:
+
+```
+! pnpm -C apps/web exec playwright install-deps chromium
+```
+
+### Playwright CLI
+
+The [Playwright CLI](https://github.com/microsoft/playwright-cli) lets Claude drive a browser through GAIA's `playwright-cli` skill. `/setup-gaia` installs it once per machine with `npm install -g @playwright/cli@latest`, and [`/update-deps`](/maintenance/update-deps/) flags it when a newer release exists and offers to upgrade it.
+
+### React Doctor
+
+The [React Doctor](https://github.com/millionco/react-doctor) skill checks React code. `/gaia-init` installs it under `apps/web/.claude/skills/`, so it loads only in sessions that work on the app. `/setup-gaia` installs it if `/gaia-init` has not. It is per machine and not tracked in the repo.
+
+### TypeScript language server
+
+The `typescript-lsp` Claude Code plugin lets Claude jump to definitions and see type errors. `/setup-gaia` installs it once per machine.

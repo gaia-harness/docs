@@ -200,6 +200,7 @@ export default defineConfig({
 						{ label: 'Hooks', slug: 'reference/hooks' },
 						{ label: 'Rules', slug: 'reference/rules' },
 						{ label: 'Agents', slug: 'reference/agents' },
+						{ label: 'Tools', slug: 'reference/tools' },
 						{ label: 'Labels', slug: 'reference/labels' },
 						{ label: 'Telemetry', slug: 'reference/telemetry' },
 						{ label: '.gaia folder', slug: 'reference/gaia-folder' },

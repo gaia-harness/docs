@@ -442,11 +442,11 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 
 ### Tool versions
 
-- **Stops:** [`/setup-gaia`](/getting-started/setup-gaia/#prerequisites-every-run) and [`/update-gaia`](/maintenance/update-gaia/#what-it-does) when git is missing or older than 2.40, jq is missing or older than 1.6, or `lsof` (macOS) or `ss` (Linux) is missing. `/update-gaia` also stops when pnpm is missing or older than 12, and measures against the new release's own list. Setup handles pnpm in a later step of its own: it installs a missing pnpm and asks before updating an older one.
-- **Why:** below these versions part of GAIA breaks or quietly does less. GAIA's light audit review needs git 2.40, its hooks and scripts read JSON with jq, it installs, tests, and builds with pnpm, and it finds your running dev server with `lsof` or `ss`.
+- **Stops:** [`/setup-gaia`](/getting-started/setup-gaia/#prerequisites-every-run) and [`/update-gaia`](/maintenance/update-gaia/#what-it-does) when git, jq, `lsof` (macOS), or `ss` (Linux) is missing or older than GAIA needs. Both also check pnpm, and `/update-gaia` measures against the new release's own minimums.
+- **Why:** below these versions part of GAIA breaks or quietly does less.
 - **When:** at the start of `/setup-gaia`, and in `/update-gaia` before its **Proceed** question, before anything is branched or merged.
-- **Who acts:** Claude, with your go-ahead. Claude walks you through the update in the same run, always to the latest release. It asks once before an install it can run, except a missing pnpm, which it installs and tells you. A step that needs your `sudo` password it gives you as `! <command>` to type in the prompt, and an install that is interactive or changes your `PATH` it tells you to run in a fresh terminal.
-- **Clear it:** answer Claude's install question, or run the step it hands you and tell it when it ran. Claude checks again and carries on. After a fresh-terminal install, start Claude Code again from that terminal and run the command again.
+- **Who acts:** Claude, with your go-ahead. Claude walks you through the update in the same run, and hands you any step that needs your password or a fresh terminal.
+- **Clear it:** answer Claude's install question, or run the step it hands you and tell it when it ran. See [Tools](/reference/tools/#checked-on-every-setup-and-update) for each tool's minimum, why GAIA needs it, and how the update goes.
 
 ### jq not installed
 
@@ -454,7 +454,7 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 - **Why:** the guard hooks read each call with jq. A guard that cannot read the call would otherwise let it through unchecked, so the guards would quietly switch off.
 - **When:** before the tool call runs, in the guard hooks.
 - **Who acts:** You. jq is a system package, and installing it can ask for your password.
-- **Clear it:** install jq, for example with `brew install jq` on macOS or your Linux package manager, then ask Claude to retry.
+- **Clear it:** install jq, then ask Claude to retry. See [jq](/reference/tools/#jq).
 
 ## Tests and lint
 

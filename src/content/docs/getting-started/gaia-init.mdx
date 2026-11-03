@@ -15,7 +15,7 @@ import { Aside } from '@astrojs/starlight/components';
 
 ### 1. Dependencies
 
-1. Installs [pnpm](https://pnpm.io/) if it is missing, or updates it after you confirm if it is older than GAIA needs. If the install hits a problem, init shows the fix. See [Prerequisites](/getting-started/setup-gaia/#prerequisites-every-run) for the details.
+1. Installs [pnpm](https://pnpm.io/) if it is missing, or updates it after you confirm if it is older than GAIA needs. If the install hits a problem, init shows the fix. See [pnpm](/reference/tools/#pnpm) for the details.
 2. Runs `pnpm install`.
 3. Installs [Chromium](https://www.chromium.org/), the browser GAIA's tests run in.
 4. Installs the [React Doctor](https://github.com/millionco/react-doctor) skill. If this fails, init carries on and `/setup-gaia` tries again.
@@ -36,63 +36,46 @@ Every question is a menu with the recommended option first:
 - **Primary language.** The main language for your app's UI. The first option is the language you have been typing in.
 - **Additional languages.** Keep only the primary language with translation support (i18n) still set up, add more languages now, or remove i18n entirely.
 - **GitHub username for CODEOWNERS.** GAIA offers the handle you are logged in to with the [GitHub CLI](https://cli.github.com/). Choose **Set it later** to fill it in during `/setup-gaia`.
-- **Project title.** Defaults to your folder name in title case, for example `my-cool-app` becomes `My Cool App`. Package names and paths use a slug made from the title.
-- **Backend field casing.** How your backend names JSON fields. Choose `camelCase` (recommended) unless your backend uses `snake_case`, in which case GAIA converts the keys for you.
+- **Project title.** Defaults to your folder name in title case, for example `my-cool-app` becomes `My Cool App`.
+- **API field casing.** How your API names JSON fields. Choose `camelCase` (recommended) unless your API uses `snake_case`, in which case GAIA converts the keys for you.
 - **[TanStack Query](https://tanstack.com/query/latest).** Off by default, since route loaders handle data. Choose **Yes** to install and set it up.
 
 <Aside type="caution">
-Removing i18n is hard to undo. Choose it only if you are certain the app will only ever use one language. Keeping it set up lets you add languages later with no rework.
+Choosing to remove i18n now is hard to undo. Choose it only if you are certain the app will only ever use one language. Keeping it set up lets you add languages later with no rework.
 </Aside>
 
-You can change the two data answers later by asking Claude:
+Init then sets up the project to match your answers and adds the [statusline](/workflow/statusline/).
+
+You can change your answers later by asking Claude:
 
 ```text
-My backend uses snake_case field names. Switch the data layer to convert them.
+Add <language> to the app.
+```
+
+```text
+My API uses snake_case field names. Switch the data layer to convert them.
 ```
 
 ```text
 Turn on TanStack Query for this project.
 ```
 
-### 3. Set up the project
-
-With your answers, init:
-
-- Renames the project to your title
-- Replaces GAIA's branding with your own README and Storybook title
-- Sets up i18n for the languages you chose, or removes it
-- Sets up route data loading for your casing answer, and TanStack Query if you chose it
-- Adds the [statusline](/workflow/statusline/)
-- Creates `.github/CODEOWNERS` with your GitHub handle
-
-To add a language later, ask Claude:
-
-```text
-Add <language> to the app.
-```
-
-### 4. Build check
+### 3. Build check
 
 Init runs the full [Quality Gate](/reference/gates/#quality-gate) (typecheck, lint, tests, and build) and stops if anything fails. This is the same check every later change must pass, and it is why init takes a few minutes.
 
-### 5. Team settings
+### 4. Team settings
 
-Init applies GAIA's two team defaults to `.gaia/project.json` without asking:
+Init applies GAIA's two team defaults to `.gaia/project.json`:
 
 - **Git isolation policy**: always use worktrees, so tasks run side by side without touching each other. See [Work lifecycle](/workflow/work-lifecycle/).
-- **Sandbox**: not recommended. See [Sandbox decision](/getting-started/setup-gaia/#sandbox-decision).
+- **Sandbox**: opt-in. Claude Code's sandbox limits what shell commands can reach, but it blocks `gh` and git over HTTPS until you allow each one. Turn it on if you want the extra safety. See [Sandbox decision](/getting-started/setup-gaia/#sandbox-decision).
 
-A repo admin can change either later with `/setup-gaia --reconfigure`.
+You can change either later with `/setup-gaia --reconfigure`.
 
-### 6. Commit
+### 5. Continue into /setup-gaia
 
-Init commits its changes as `chore: initialize project with /gaia-init`. If the commit fails, or the project was created with `--no-git`, init stops and tells you how to finish.
-
-### 7. Continue into /setup-gaia
-
-Init sends its [usage ping](/reference/telemetry/), then Claude runs [`/setup-gaia`](/getting-started/setup-gaia/) in the same session, with no command from you. Setup installs the rest of this machine's tools and asks how to connect the project to GitHub. That question is asked even if you chose Automatic.
-
-When setup finishes, type `/clear` and start building. [Onboarding, as you build](/getting-started/onboarding/) shows what GAIA does as your first commits and pull requests land.
+After your project is initialized, Claude automatically runs [`/setup-gaia`](/getting-started/setup-gaia/).
 
 ## Resuming after a failure
 
