@@ -32,7 +32,7 @@ On a project that is fully set up, it changes nothing.
 
 Setup checks these every time:
 
-- **Tool versions.** [git](https://git-scm.com/), [jq](https://jqlang.org/), and `lsof` on macOS or `ss` on Linux. If one is missing or too old, Claude walks you through the update before setup goes on. A step that needs your password comes to you as `! <command>` to type in the prompt. See [Tools](/reference/tools/#checked-on-every-setup-and-update).
+- **Tool versions.** [git](https://git-scm.com/), [jq](https://jqlang.org/), and `lsof` on macOS or `ss` on Linux. If one is missing or too old, GAIA walks you through the update before setup goes on. A step that needs your password comes to you as `! <command>` to type in the prompt. See [Tools](/reference/tools/#checked-on-every-setup-and-update).
 - **pnpm and Chromium.** Setup installs [pnpm](https://pnpm.io/) and [Chromium](https://www.chromium.org/), the browser GAIA's tests run in, if they are missing. It asks before updating an older pnpm. See [pnpm](/reference/tools/#pnpm) and [Chromium](/reference/tools/#chromium).
 - **Worktree links.** Checks that this checkout can share GAIA's local state with [worktrees](/workflow/work-lifecycle/). On Windows this can need Developer Mode turned on.
 - **Git hooks.** If GAIA's [git hooks](/workflow/git-conventions/#native-git-hooks) are off, setup asks to turn them on.

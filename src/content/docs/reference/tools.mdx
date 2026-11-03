@@ -27,14 +27,14 @@ The [GitHub CLI](https://cli.github.com/), `gh`, logged in with `gh auth login`.
 
 `/setup-gaia` checks these at the start of every run. [`/update-gaia`](/maintenance/update-gaia/) checks them against the new release's minimums before it changes anything. When one is missing or too old, the command goes no further until it passes. See the [Tool versions gate](/reference/gates/#tool-versions).
 
-Claude walks you through the update in the same run, always to the latest release, not just the minimum. How it goes depends on the install:
+GAIA walks you through the update in the same run, always to the latest release, not just the minimum. How it goes depends on the install:
 
-- **Claude can run it**, for example `brew install git` on macOS with Homebrew. Claude asks once, then runs it.
-- **It needs `sudo`.** Claude cannot type your password, so it gives you the command as `! <command>` to type in the Claude Code prompt, and waits for you to say it ran.
+- **Claude can run it**, for example `brew install git` on macOS with Homebrew. GAIA asks once, then runs it.
+- **It needs `sudo`.** Claude cannot type your password, so GAIA gives you the command as `! <command>` to type in the Claude Code prompt, and waits for you to say it ran.
 - **It is interactive or changes your `PATH`**, such as the Homebrew installer or `winget` on Windows. Run it in a fresh terminal, start Claude Code again from that terminal, and run the command again.
-- **No single command does it.** Claude shows what to do and waits for you to say it is done.
+- **No single command does it.** GAIA shows what to do and waits for you to say it is done.
 
-Then Claude checks again and carries on. If a tool still falls short, or you decline the install, the command stops; run it again once the tool is updated. If an install succeeded but the old version still shows, an older copy comes first on your `PATH`, and Claude shows its path.
+Then GAIA checks again and carries on. If a tool still falls short, or you decline the install, the command stops; run it again once the tool is updated. If an install succeeded but the old version still shows, an older copy comes first on your `PATH`, and GAIA shows its path.
 
 ### git
 

@@ -126,6 +126,12 @@ grep -rniE 'by hand|nothing runs it|run it yourself|you run (it|this|them)|edit 
   grep -rniE '\b(a|the|any) (person|human|user)\b|\bsomeone\b|\bpeople\b' src/content/docs/
   ```
 
+- GAIA or Claude as the actor (advisory, read each hit): when a GAIA rule, hook, gate, or workflow makes the step happen, GAIA is the subject ("GAIA runs the checks"). Claude stays the subject only for what Claude does on its own, such as writing code or taking the safe route after a guard refuses. See "Name who acts, GAIA or Claude" in `VOICE.md`.
+
+  ```sh
+  grep -rnE '\bClaude (runs|re-runs|claims|posts|opens|files|stops|checks|creates|records|merges|names|offers|asks|commits|dispatches|prints|shows|walks|installs|releases|updates)\b' src/content/docs/
+  ```
+
 - Also read for undefined shorthand: a config key, file, script, or internal term a reader meets with no plain explanation on that page or a link to the page that explains it. Grep cannot find these; flag them advisory.
 
 ## Report format
