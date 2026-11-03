@@ -89,7 +89,7 @@ Before a SPEC plan's pull request is audited, it reads the SPEC and each generat
 
 ### overlap-evaluator
 
-Started once by a plan run's [overlap pass](/workflow/tdd/#the-overlap-pass), after the worthiness step. It reads the tests the branch changed, the tests that might already cover the same thing on the same or another layer, and source code only to judge whether a claim holds. For each duplicate it proposes to drop it, merge it, move it to a lower layer, or keep both. It edits no tracked file. The only file it writes is its list of proposals, which a script checks before you approve any of them.
+Started once by a plan run's [overlap pass](/workflow/tdd/#the-overlap-pass), after the worthiness step. It reads the tests the branch changed, the tests that might already cover the same thing on the same or another layer, and source code only to judge whether a claim holds. For each duplicate it proposes to drop it, merge it, move it to a lower layer, or keep both. It also proposes moving a browser test that needs no browser to a real-server test. It edits no tracked file. The only file it writes is its list of proposals, which a script checks before you approve any of them.
 
 ### fitness-judge
 

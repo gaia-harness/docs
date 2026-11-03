@@ -124,9 +124,10 @@ A plan keeps the steps it was generated with, even after a GAIA update, until yo
 | --- | --- | --- |
 | Story | One component, given its props, shows the outcome | An acceptance criterion in the owning task, tested on a [Storybook](https://storybook.js.org/) story |
 | Route | A request to a route shows it: a status, a redirect, returned data, a validation error, an authorization outcome, or a side effect | A [Vitest](https://vitest.dev/) test that calls the route's loader or action |
-| End-to-end | It needs the live server or something only a browser shows: hydration, focus, client navigation, or a journey across pages | A [Playwright](https://playwright.dev/) test covering one user flow |
+| Real server | It needs the live server but no browser: middleware, a refused or forged request, or the HTML the server renders | A [Playwright](https://playwright.dev/) test that sends requests to the dev server and opens no page |
+| Browser | Only a browser shows it: hydration, focus, client navigation, a form submitted in the page, or a journey across pages | A Playwright test that walks one user flow in a real page |
 | Non-UI | Harness, script, or documentation behavior | Assigned to the phase that owns it |
 
-Before Phase 1, each route and end-to-end UAT becomes a test that is expected to fail, under `apps/web/app/route-tests/<feature>/tests/` or `apps/web/.playwright/e2e/`, committed on its own. The phase that owns a test cannot commit until it passes, and sub-agents may not change its assertions to make it pass. A plan with an authorization UAT also gets one live-server check per guarded route.
+Before Phase 1, each route, real-server, and browser UAT becomes a test that is expected to fail, under `apps/web/app/route-tests/<feature>/tests/` or `apps/web/.playwright/e2e/`, committed on its own. The phase that owns a test cannot commit until it passes, and sub-agents may not change its assertions to make it pass. A plan with an authorization UAT also gets one live-server check per guarded route.
 
 Before the audit, the [`uat-fidelity-judge`](/reference/agents/#uat-fidelity-judge) agent checks that each test still tests what the SPEC says. When the code and a UAT no longer agree, the plan stops so you can [reopen the SPEC](/workflow/spec/#reopening-a-saved-spec).
