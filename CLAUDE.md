@@ -98,6 +98,21 @@ Studio's `VOICE.md` covers marketing, docs, and in-app strings together. For doc
 - **Code blocks are honest.** Examples should run. If a snippet won't work as written, it doesn't belong.
 - **No "we" / "our team."** Either declarative ("GAIA installs…") or second-person instructional ("Run `pnpm install`…"). "Built by Steven Sacks" stays in marketing surfaces, not docs.
 
+### Tight pages (load-bearing)
+
+Every page says only what the reader needs, in the fewest words. Draft short, then cut again: a first "tightened" draft still carries too much.
+
+- **GAIA only.** Say what GAIA does with a third-party tool and link to its docs for how the tool works (Claude Code auto mode, the sandbox, Corepack). Never restate them.
+- **One home per explanation.** Getting-started pages stay short and link to the reference page that holds the detail. Tool installs and versions live on `reference/tools.mdx`.
+- **One kind of thing per reference page.** Gates are checks that stop something. Content that is not a gate goes elsewhere; when it has no home, make a page.
+- **Write for a new reader.** Never use a GAIA name (`GAIA-Audit`, "the audit") as if the reader already knows it. Say what it does for them and link the term.
+- **Cut what the reader cannot see or act on.** Internal steps, exact console output, things replaced before the reader ever saw them, rare recovery paths, reassurance clauses.
+- **The reader's words, not the source's.** Numbered steps, not "Phase: x". "Statusline", not "statusline left side". Say "API" when the source says "backend" but means the API.
+- **Never overstate a requirement.** Recommended is not required. Present a default as a tradeoff, not a warning (the sandbox is opt-in, not "not recommended"). Check every "needs" or "requires" against the source.
+- **GAIA leads.** Put what GAIA does first, then the third-party setting it replaces ("GAIA's `/update-deps` fixes vulnerable packages… Dependabot alerts stay on, but…").
+- **A link beats a sentence.** Point at the section that explains why instead of summarizing it.
+- **Same shape across pages.** Command pages walk through numbered steps under `## The flow`.
+
 ## Prompts over terminal commands (load-bearing)
 
 Readers work by asking Claude. They never read GAIA's source or scripts. Every page holds to three rules:

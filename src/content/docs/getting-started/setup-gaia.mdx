@@ -3,6 +3,8 @@ title: /setup-gaia
 description: Set up a GAIA project on your machine and connect it to GitHub. Safe to run again any time.
 sidebar:
   order: 3
+tableOfContents:
+  maxHeadingLevel: 4
 ---
 
 `/setup-gaia` sets up a GAIA project on your machine and connects it to GitHub. On a new project, `/gaia-init` runs it for you. You can run it again any time. It checks what is still needed and runs only those steps.
@@ -24,7 +26,9 @@ Type `/setup-gaia` yourself; Claude does not start it when you ask in plain lang
 
 On a project that is fully set up, it changes nothing.
 
-## Prerequisites (every run)
+## The flow
+
+### 1. Prerequisites
 
 Setup checks these every time:
 
@@ -34,7 +38,7 @@ Setup checks these every time:
 - **Git hooks.** If GAIA's [git hooks](/workflow/git-conventions/#native-git-hooks) are off, setup asks to turn them on.
 - **GitHub CLI.** If `gh` is missing or not logged in, setup warns and carries on. GAIA's pull request workflow needs it, so install it from [cli.github.com](https://cli.github.com/) and run `gh auth login`.
 
-## Phase: per-machine setup
+### 2. Per-machine setup
 
 Runs once per clone:
 
@@ -43,13 +47,13 @@ Runs once per clone:
 - Creates `apps/web/.env` from `apps/web/.env.example`.
 - Asks about the sandbox, if your team recommends it.
 
-### Sandbox decision
+#### Sandbox decision
 
 Claude Code's [sandbox](https://code.claude.com/docs/en/sandboxing) limits what shell commands can reach. GAIA works inside it, but it blocks `gh`, git over HTTPS, and `docker` until you allow each one, so it is opt-in.
 
 Setup asks about it only when your team recommends it. If your machine can't run the sandbox, setup tells you what it needs: WSL2 on Windows, or bubblewrap and socat on Linux. Your answer applies to this machine only and takes effect in your next Claude Code session.
 
-## Phase: GitHub repository
+### 3. GitHub repository
 
 On a new project, this is the first question:
 
@@ -59,7 +63,7 @@ On a new project, this is the first question:
 
 If `.github/CODEOWNERS` still has the placeholder owner from `/gaia-init`, setup offers to fill in your GitHub handle.
 
-### Recommended defaults (admin only)
+#### Recommended defaults (admin only)
 
 If you are a repo admin, setup applies GAIA's recommended repo settings:
 
@@ -73,7 +77,7 @@ On a repo setup just created, it applies them all without asking. On an existing
 
 If you are not an admin, setup skips these and tells you what an admin needs to do. The rest of setup still finishes.
 
-## Phase: team settings
+### 4. Team settings
 
 Two settings are shared with your team through `.gaia/project.json`:
 
@@ -82,25 +86,25 @@ Two settings are shared with your team through `.gaia/project.json`:
 
 `/gaia-init` sets the defaults, so a plain run asks nothing. A repo admin changes them with [`--reconfigure`](#reconfiguring).
 
-## Phase: squash-only merges
+### 5. Squash-only merges
 
-GAIA uses each pull request's title as its commit message, which needs squash as the only merge method. If you are a repo admin, setup sets that up. On a repo it just created, it does so without asking. On an existing repo, it asks.
+Claude always squash-merges, so each pull request lands as one commit titled with the pull request's title. GAIA makes merges on github.com work the same way. If you are a repo admin, setup turns on squash-only merges. On a repo it just created, it does so without asking. On an existing repo, it asks, and you can keep your current merge settings.
 
-## Phase: labels
+### 6. Labels
 
 Setup adds GAIA's [labels](/reference/labels/) to your GitHub repo, leaving your label colors alone. If you can't edit labels, it prints the commands for someone who can, and carries on.
 
-## Phase: statusline left side
+### 7. Statusline
 
-If you have your own statusline, setup asks whether yours or GAIA's [statusline](/workflow/statusline/) draws the left side. GAIA's nudges always appear on the right.
+If you already use your own Claude Code statusline, setup asks how to combine it with GAIA's. See [Using your own statusline](/workflow/statusline/#using-your-own-statusline).
 
-## Phase: new setup steps from later releases
+### 8. New setup steps from later releases
 
 A GAIA release can add a setup step. `/setup-gaia` runs any new step you haven't done yet, so you never set up again from scratch. Some steps need a repo admin. If you are not one, setup says the step is waiting for an admin.
 
 If this machine was on GAIA 1.x, see [Every other machine](/getting-started/upgrading/#every-other-machine).
 
-## Finish
+### 9. Finish
 
 Setup ends by telling you whether anything is left, such as a setting that needs a repo admin. When a repo admin runs it on the default branch, the team's answers are committed and pushed so the whole team gets them.
 
@@ -113,7 +117,7 @@ Type `/clear` to start your first feature with a fresh context. See [Onboarding,
 - The sandbox decision on this machine
 - The team isolation policy (repo admins only)
 - Squash-only merges (repo admins only)
-- The statusline left side
+- How your own statusline combines with GAIA's
 
 ## On failure: re-run
 

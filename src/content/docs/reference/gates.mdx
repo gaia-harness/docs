@@ -442,7 +442,7 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 
 ### Tool versions
 
-- **Stops:** [`/setup-gaia`](/getting-started/setup-gaia/#prerequisites-every-run) and [`/update-gaia`](/maintenance/update-gaia/#what-it-does) when git, jq, `lsof` (macOS), or `ss` (Linux) is missing or older than GAIA needs. Both also check pnpm, and `/update-gaia` measures against the new release's own minimums.
+- **Stops:** [`/setup-gaia`](/getting-started/setup-gaia/#1-prerequisites) and [`/update-gaia`](/maintenance/update-gaia/#what-it-does) when git, jq, `lsof` (macOS), or `ss` (Linux) is missing or older than GAIA needs. Both also check pnpm, and `/update-gaia` measures against the new release's own minimums.
 - **Why:** below these versions part of GAIA breaks or quietly does less.
 - **When:** at the start of `/setup-gaia`, and in `/update-gaia` before its **Proceed** question, before anything is branched or merged.
 - **Who acts:** Claude, with your go-ahead. Claude walks you through the update in the same run, and hands you any step that needs your password or a fresh terminal.

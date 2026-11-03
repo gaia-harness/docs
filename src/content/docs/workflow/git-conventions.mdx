@@ -46,7 +46,7 @@ A squash merge uses the pull request title as the commit's first line on the def
 
 Before `gh pr create` or `gh pr edit` runs with a title, a Claude Code hook checks the title with the same commitlint setup CI uses, and blocks a title that would fail. The refusal tells Claude what failed, so Claude shortens or corrects the title and runs the command again. You don't have to do anything. It also blocks `gh pr create --fill` (and `-f`) with no `--title`, because the title GitHub would fill in cannot be checked in advance. Claude passes `--title` instead.
 
-By default, [`/setup-gaia`](/getting-started/setup-gaia/#phase-squash-only-merges) sets your repository to allow only squash merges, with the PR title as the commit's first line. So the title check covers exactly what lands on the default branch.
+By default, [`/setup-gaia`](/getting-started/setup-gaia/#5-squash-only-merges) sets your repository to allow only squash merges, with the PR title as the commit's first line. So the title check covers exactly what lands on the default branch.
 
 ## Draft pull requests
 

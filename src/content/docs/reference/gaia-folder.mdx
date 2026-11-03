@@ -100,7 +100,7 @@ The types allowed at the start of a commit message or pull request title, such a
 
 ### setup-features.json
 
-The list of setup steps `/setup-gaia` owns. Each step has an id and a decision: `applied`, `declined`, or `not-applicable`. Decisions for project-level steps are committed in `project.json`, and decisions for machine-level steps stay in `.gaia/local/setup-state.json`. When a release adds a step, `/setup-gaia` runs it even on a project whose setup is already complete. See [New setup steps from later releases](/getting-started/setup-gaia/#phase-new-setup-steps-from-later-releases).
+The list of setup steps `/setup-gaia` owns. Each step has an id and a decision: `applied`, `declined`, or `not-applicable`. Decisions for project-level steps are committed in `project.json`, and decisions for machine-level steps stay in `.gaia/local/setup-state.json`. When a release adds a step, `/setup-gaia` runs it even on a project whose setup is already complete. See [New setup steps from later releases](/getting-started/setup-gaia/#8-new-setup-steps-from-later-releases).
 
 ### state-registry.json
 
@@ -118,7 +118,7 @@ The packages in your workspace that GAIA's harness covers, as a list of `{name, 
 
 Team settings and project setup decisions, shared by everyone on the repository:
 
-- `sandbox_recommended` and `isolation_policy`, the two team settings. See [Team settings](/getting-started/setup-gaia/#phase-team-settings).
+- `sandbox_recommended` and `isolation_policy`, the two team settings. See [Team settings](/getting-started/setup-gaia/#4-team-settings).
 - `fitness_commit_threshold`, optional: how many of your team's harness commits since the last `/gaia-fitness` run show its statusline nudge. Without it the count is 15. No command sets it, so ask Claude, for example `Set the /gaia-fitness nudge threshold in .gaia/project.json to <n> commits.` See [The statusline nudge](/maintenance/fitness/#the-statusline-nudge).
 - `shellcheck`, optional: set it to `false` to turn off the shell lint in the Tests workflow's [Shellcheck and bats](/workflow/git-conventions/#github-workflows-that-ship) check. Without it, the lint is on. The workflow reads the value from the pull request itself, so the pull request that sets it is already not linted. The bats run has no setting: it runs only when `tests/shell/` holds a `.bats` suite and the pull request changes shell or that folder. To turn the lint off, ask Claude, for example `Turn off shellcheck in the Tests workflow by setting "shellcheck": false in .gaia/project.json.`
 - `setup_decisions`, the decision recorded for each project-level step in `setup-features.json`.
