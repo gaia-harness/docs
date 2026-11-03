@@ -184,8 +184,6 @@ Cross-reference docs:
 - **DOC-ORPHAN:** every Step 4 hit.
 - **UNDOCUMENTED:** an adopter or mixed item that no adopter page names as a whole word. Rules and skills count as named only in code form, a backtick span that is the name, `/<name>`, `<name>.md`, `frontend:<name>` or a path ending in it: names like `routes`, `ports`, `tdd` or `typescript` are ordinary words, so a prose match proves nothing. Wiki pages, references, skill files, hook libraries, doctrine and the `code-audit-frontend/*` extension files are reached through their command, the wiki or their parent, so they are never flagged. CLI subcommands collapse to one count line: Claude runs them, and pages name one only where the reader needs it.
 
-Known noise, not a docs bug: `getting-started/upgrading.mdx` names retired 1.x commands in its "What changed in the commands" table, so they show as DOC-ORPHAN on every run.
-
 ### Step 7: Print the report
 
 Markdown only, no preamble, empty sections collapse:

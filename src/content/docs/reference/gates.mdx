@@ -408,7 +408,11 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 - **Why:** 2.0.0 moved the app into `frontend/`. Merging that into a 1.x project would make every app file look deleted by GAIA, and the update would offer to delete your app.
 - **When:** before any download or change.
 - **Who acts:** You.
-- **Clear it:** follow [Upgrading from 1.x](/getting-started/upgrading/).
+- **Clear it:** ask Claude:
+
+  ```text
+  Migrate this project to GAIA 2.0.0.
+  ```
 
 ### Notebook not moved
 
@@ -422,7 +426,7 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
   Run GAIA's one-time notebook move and show me the report.
   ```
 
-  The move renames the files into place, merges the old records into the new catalog, keeps the old records as backups, and deletes nothing. If the move itself stops, Claude follows the cause and fix it prints. See [Upgrading from 1.x](/getting-started/upgrading/).
+  The move renames the files into place, merges the old records into the new catalog, keeps the old records as backups, and deletes nothing. If the move itself stops, Claude follows the cause and fix it prints.
 
 ### Teammate's update in progress
 

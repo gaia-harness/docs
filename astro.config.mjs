@@ -45,6 +45,8 @@ export default defineConfig({
 		'/getting-started/setup-gaia-ci': '/getting-started/setup-gaia/',
 		'/getting-started/setup-cloned-gaia-project': '/getting-started/setup-gaia/',
 		'/contributors/health-audit': '/contributors/release/',
+		// Retired with 2.4.0: the 1.x migration page.
+		'/getting-started/upgrading': '/maintenance/update-gaia/',
 	},
 	integrations: [
 		starlight({
@@ -143,7 +145,6 @@ export default defineConfig({
 						{ label: 'Onboarding, as you build', slug: 'getting-started/onboarding' },
 						{ label: 'Project layout', slug: 'getting-started/project-layout' },
 						{ label: 'Deployment', slug: 'getting-started/deployment' },
-						{ label: 'Upgrading from 1.x', slug: 'getting-started/upgrading' },
 					],
 				},
 				{
