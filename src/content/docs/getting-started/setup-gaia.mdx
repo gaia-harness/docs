@@ -59,7 +59,7 @@ Setup asks about it only when your team recommends it. If your machine can't run
 
 On a new project, this is the first question:
 
-- **Create the repo on GitHub** (recommended). You choose your personal account or one of your organizations. The repo is private unless you confirm otherwise. Setup pushes your default branch and turns on GitHub's secret-scanning push protection where GitHub offers it.
+- **Create the repo on GitHub** (recommended). You choose your personal account or one of your organizations. The repo is private unless you confirm otherwise. Setup pushes `main` and turns on GitHub's secret-scanning push protection where GitHub offers it. It then waits up to about 90 seconds for CI to start on that push. GitHub sometimes leaves Actions off on a new repo, so if no run starts, setup asks you to click **Enable Actions** in the repo's Actions tab and, once you confirm, starts the first run itself. If you skip, or no run starts, it gives you the command to start it later.
 - **Use an existing repo.** Nothing is created.
 - **Set one up manually.** Setup prints the commands. Run `/setup-gaia` again once you have pushed.
 
