@@ -132,6 +132,12 @@ grep -rniE 'by hand|nothing runs it|run it yourself|you run (it|this|them)|edit 
   grep -rnE '\bClaude (runs|re-runs|claims|posts|opens|files|stops|checks|creates|records|merges|names|offers|asks|commits|dispatches|prints|shows|walks|installs|releases|updates)\b' src/content/docs/
   ```
 
+- "Default branch" (advisory): say `main` instead. See "Say `main`, not 'default branch'" in `CLAUDE.md`.
+
+  ```sh
+  grep -rniE 'default branch' src/content/docs/
+  ```
+
 - Also read for undefined shorthand: a config key, file, script, or internal term a reader meets with no plain explanation on that page or a link to the page that explains it. Grep cannot find these; flag them advisory.
 
 ## Report format

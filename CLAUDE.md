@@ -111,6 +111,7 @@ Every page says only what the reader needs, in the fewest words. Draft short, th
 - **Never overstate a requirement.** Recommended is not required. Present a default as a tradeoff, not a warning (the sandbox is opt-in, not "not recommended"). Check every "needs" or "requires" against the source.
 - **GAIA leads.** Put what GAIA does first, then the third-party setting it replaces ("GAIA's `/update-deps` fixes vulnerable packages… Dependabot alerts stay on, but…").
 - **GAIA or Claude, by who drives it.** GAIA is the subject when a GAIA rule, hook, gate, or workflow makes the step happen ("GAIA runs the checks"). Claude is the subject only for what Claude does on its own ("everything Claude writes"). Full rule in `VOICE.md`.
+- **Say `main`, not "default branch".** Readers think in `main` (or `master`); "default branch" makes them translate. Name `main` and let `master` users infer it.
 - **A link beats a sentence.** Point at the section that explains why instead of summarizing it.
 - **Same shape across pages.** Command pages walk through numbered steps under `## The flow`.
 

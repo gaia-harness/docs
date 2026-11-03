@@ -25,7 +25,7 @@ Notice that this prompt did not ask for a test. But GAIA enforces [test-driven d
 
 ## Every task follows one lifecycle
 
-Every task, with or without a command, goes through the same [steps](/workflow/work-lifecycle/). GAIA [isolates](/workflow/work-lifecycle/#isolation-policy) the work so tasks running at the same time never touch each other. It commits through the [Quality Gate](/workflow/code-audit-team/#quality-gate), opens a draft pull request, has the [Code Audit Team](/workflow/code-audit-team/) audit it, then merges and cleans up.
+Every task, with or without a command, goes through the same [steps](/workflow/work-lifecycle/). GAIA [isolates](/workflow/work-lifecycle/#isolation-policy) the work so tasks running at the same time never overwrite each other's changes. It commits through the [Quality Gate](/workflow/code-audit-team/#quality-gate), opens a draft pull request, has the [Code Audit Team](/workflow/code-audit-team/) audit it, then merges and cleans up.
 
 The exception is an edit you say you will review or commit yourself: Claude leaves it uncommitted and skips all of this.
 
