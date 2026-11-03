@@ -36,13 +36,13 @@ The project is a pnpm workspace: the shared Claude setup at the root, and the Re
 
 ### Permissions on the first run
 
-When you scaffold a project, `npx create-gaia` runs `claude --permission-mode auto /gaia-init`. That one session runs `/gaia-init` and then `/setup-gaia`: it rewrites files, installs tools, connects GitHub, and sets up the whole project. In [auto mode](https://code.claude.com/docs/en/permission-modes), Claude Code skips routine permission prompts. A separate classifier model checks each action before it runs and blocks risky ones, such as a force push, piping a download into a shell (`curl | bash`), or a production deploy. Your own ask rules still prompt you.
+`npx create-gaia` starts Claude Code in [auto mode](https://code.claude.com/docs/en/permission-modes), which skips routine permission prompts. Setup rewrites files, installs tools, and connects GitHub, so in the default mode it would stop to ask your permission many times. If auto mode is not available to you, setup still runs and asks more often.
 
-If auto mode is not available to you (your organization turned it off, or your model does not support it), the session starts in the normal mode instead. Setup still runs; it just asks your permission more often.
+The session stays in auto mode after setup ends. Press Shift+Tab to leave it. A new session starts in your usual mode.
 
-Nothing stores the mode, but the session keeps it after onboarding ends: setup finishes without a restart and suggests `/clear`, which empties the conversation but leaves the session in auto mode. To approve actions as they happen from then on, press Shift+Tab to leave auto mode, or start Claude with plain `claude` next time. Start it with `claude --permission-mode auto` to keep skipping routine prompts.
+### Guardrails
 
-Either way, GAIA's guardrails stay on. They are hooks that check every action Claude takes, not permission prompts, so a mode that skips prompts doesn't turn them off. Every new project comes with hooks that keep Claude from risky actions, such as:
+Every GAIA project comes with hooks that stop Claude from the risky actions an agent should never take, such as:
 
 - Committing or pushing directly to `main`, or force-pushing it
 - `rm -rf` on dangerous targets (`/`, `~`, `.git`, `.claude`, `node_modules`, the repo root)
@@ -51,7 +51,7 @@ Either way, GAIA's guardrails stay on. They are hooks that check every action Cl
 - Opening a pull request that is not a draft, or whose title is not a Conventional Commit
 - Merging a pull request the [Code Audit Team](/workflow/code-audit-team/) has not cleared
 
-When one fires, Claude takes the allowed route, for example a feature branch instead of `main`, and carries on; there is nothing for you to do. The hooks act on Claude's actions only, so a command you run yourself in a terminal never meets them. They hold in every permission mode. See the [hooks reference](/reference/hooks/) for the full set, and the [gate reference](/reference/gates/) for why each one exists.
+When a GAIA hook blocks an unsafe action, Claude takes the safe route. See the [hooks reference](/reference/hooks/) for the full set.
 
 ## Cloning an existing GAIA project
 
