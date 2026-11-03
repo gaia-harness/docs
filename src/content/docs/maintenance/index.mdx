@@ -9,8 +9,8 @@ GAIA ships commands for doing work and commands for keeping the project in shape
 
 | Command | Nudge | What it does |
 | --- | --- | --- |
-| [`/update-gaia`](/maintenance/update-gaia/) | 🚀 | Pulls the latest GAIA release into your project with a three-way merge, verifying the release bundle first. |
 | [`/update-deps`](/maintenance/update-deps/) | 📦 | Resolves security advisories, then updates outdated packages by group, through one quality gate. |
+| [`/update-gaia`](/maintenance/update-gaia/) | 🚀 | Pulls the latest GAIA release into your project with a three-way merge, verifying the release bundle first. |
 | [`/gaia-cleanse`](/maintenance/cleanse/) | 🔎 | Cleans up Claude's memory and the files it loads at startup: what repeats or disagrees with the wiki, what is out of date, and what makes the startup context too large. Asks before changing anything. |
 | [`/gaia-codify`](/maintenance/codify/) | 🔨 | Turns a problem the Code Audit Team keeps finding into a guard: an automated check, a skill, or a rule for matching files, with your approval. |
 | [`/gaia-residue`](/maintenance/residue/) | 🧹 | Goes through the trade-offs reviewers accepted at merge: dismiss each one, keep it for later, or turn it into a tech-debt issue. Never fixes code. |
@@ -37,7 +37,7 @@ The boundary between `/gaia-cleanse` and `/gaia-wiki` is deliberate. `/gaia-clea
 
 ## How maintenance commands run
 
-Every maintenance command except `/gaia-forensics` (`/update-gaia`, `/update-deps`, `/gaia-cleanse`, `/gaia-codify`, `/gaia-residue`, `/gaia-wiki`, `/gaia-fitness`) follows the same pattern:
+Every maintenance command except `/gaia-forensics` (`/update-deps`, `/update-gaia`, `/gaia-cleanse`, `/gaia-codify`, `/gaia-residue`, `/gaia-wiki`, `/gaia-fitness`) follows the same pattern:
 
 1. **It starts from the main checkout.** Inside a linked worktree it stops and names the main checkout; open Claude Code there and run the command again. The exceptions are `/update-deps` and `/update-gaia`, which also accept their own `deps/` or `update/` worktree, so a re-run continues there.
 2. **It offers to pull first** when your checkout's GAIA version is behind the remote's.

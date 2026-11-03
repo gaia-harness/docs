@@ -175,8 +175,8 @@ export default defineConfig({
 					label: 'Maintenance',
 					items: [
 						{ label: 'Overview', slug: 'maintenance' },
-						{ label: '/update-gaia', slug: 'maintenance/update-gaia' },
 						{ label: '/update-deps', slug: 'maintenance/update-deps' },
+						{ label: '/update-gaia', slug: 'maintenance/update-gaia' },
 						{ label: '/gaia-cleanse', slug: 'maintenance/cleanse' },
 						{ label: '/gaia-codify', slug: 'maintenance/codify' },
 						{ label: '/gaia-residue', slug: 'maintenance/residue' },
