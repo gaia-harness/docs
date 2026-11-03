@@ -41,7 +41,7 @@ After the preflight, in outline, it:
 - Tags the merge commit once it lands, which triggers [release.yml](/contributors/ci/#releaseyml)
 - Then brings `create-gaia`, the website, and these docs in line with the release
 
-A 2.x release ships `gaia-bundle-<tag>.tar.gz` with a `.sha256` asset, and any migration notes it needs travel inside the bundle under `.gaia/migrations/` (see [Migration notes](/maintenance/update-gaia/#migration-notes)). While 1.x projects can still reach a 2.x release, the release body opens with a line that sends a 1.6.1 project to the 2.0.0 migration.
+A 2.x release ships `gaia-bundle-<tag>.tar.gz` with a `.sha256` asset, and any migration notes it needs travel inside the bundle under `.gaia/migrations/` (see [Migration notes](/maintenance/update-gaia/#migration-notes)).
 
 ## Test an unreleased build in a project
 
