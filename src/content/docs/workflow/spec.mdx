@@ -5,25 +5,23 @@ description: Settle what to build through a guided conversation, save a locked S
 
 import { Aside } from '@astrojs/starlight/components';
 
-`/gaia-spec` turns a feature idea into a SPEC through a guided conversation. A SPEC is a written description of what to build and how to test it, locked once saved. The command then plans the SPEC in the same session with [`/gaia-plan`](/workflow/plan/) and ends at the plan's KICKOFF prompt. It never writes the code itself: the building starts in a fresh session.
+`/gaia-spec` turns a feature idea into a SPEC through a guided conversation. A SPEC is a written description of what to build and how to test it, locked once saved. GAIA then plans it in the same session with [`/gaia-plan`](/workflow/plan/) and stops at the plan's KICKOFF prompt. The building starts in a fresh session.
 
 The SPEC and its plan are saved in the [Notebook](/workflow/notebook/).
 
 ## When to use it
 
-Run `/gaia-spec` for a feature whose scope is not clear yet: the description raises more questions than it answers, or two people could read it and picture different features. It is also the way to present an idea and refine it before any code is written, and it fits any new feature that adds user-visible rules, data, or flows, however detailed your description is: a SPEC turns those rules into checked acceptance tests.
+Use `/gaia-spec` when the scope is not clear yet, or when a new feature adds user-visible rules, data, or flows, however well you have described it: the SPEC turns those rules into checked acceptance tests.
 
-For changes whose goal is already obvious (a bug fix, a refactor of known code, a copy edit), just prompt Claude, or go straight to [`/gaia-plan`](/workflow/plan/).
+For a bug fix, a refactor, or a copy edit, just ask Claude, or go straight to [`/gaia-plan`](/workflow/plan/). See [Spec, plan, or just do it](/workflow/work-lifecycle/#spec-plan-or-just-do-it).
 
 ## How to invoke
-
-### Interactive (most common)
 
 ```
 /gaia-spec your feature description
 ```
 
-Claude asks you a series of questions to settle what you want. Any question with a fixed set of answers is a menu, with the recommended option first and a **Discuss this** option to talk it through.
+Claude asks you questions to settle what you want. A question with fixed answers is a menu, recommended option first, with **Discuss this** to talk it through.
 
 ### Auto mode
 
@@ -31,11 +29,9 @@ Claude asks you a series of questions to settle what you want. Any question with
 /gaia-spec auto your feature description
 ```
 
-Claude answers its own questions, picking the recommended option each time, and proceeds without stopping. It skips the model check, checks both gates itself instead of showing them to you, and always starts a new SPEC instead of resuming a draft. Use it when the description is already complete, or when you keep picking the recommended option anyway. A description is required: without one, auto mode stops at once. Anything it could not settle is written down as an open question for you to review.
+Claude answers its own questions with the recommended option, checks both gates itself, and plans with [`/gaia-plan auto`](/workflow/plan/#auto-mode), so the run finishes without asking you anything. It always starts a new SPEC and skips the model check. Anything it could not settle is saved as an open question for you to review.
 
-Auto mode carries into the plan: the SPEC is planned with [`/gaia-plan auto`](/workflow/plan/#auto-mode), so the whole run finishes without asking you anything.
-
-A description whose first word is "auto" is always read as auto mode, so reword one that starts with that word.
+Use it when your description is already complete. A description whose first word is "auto" is read as auto mode, so reword it.
 
 ## What gets produced
 
@@ -43,78 +39,71 @@ Everything lands in `.notebook/specs/SPEC-NNN/`:
 
 | File | Purpose |
 | --- | --- |
-| `SPEC.md` | The locked SPEC: the intent, the success criteria, the UATs, the scope rules (what must always happen, what needs your approval first, what must never happen), the decisions settled during the conversation with their reasons, and a summary of any research. |
-| `AUDIT.md` | The [SPEC audit](#the-spec-audit)'s report: instructions the plan must follow, the fixes folded into the SPEC, and the findings that were disproved. |
-| `plan/` | The plan, written by [`/gaia-plan`](/workflow/plan/#what-gets-produced) in the same session. |
+| `SPEC.md` | The locked SPEC: intent, success criteria, UATs, scope rules (always, ask first, never), and the decisions settled along the way with their reasons. |
+| `AUDIT.md` | The [SPEC audit](#the-spec-audit)'s report: instructions the plan must follow, fixes folded into the SPEC, and findings that were disproved. |
+| `plan/` | The plan, written by [`/gaia-plan`](/workflow/plan/#what-gets-produced). |
+
+Each SPEC number is reserved by pushing a `spec/NNN` git tag, so teammates never get the same number. See [Numbers do not travel](/workflow/notebook/#why-it-stays-on-your-machine) for a repository with no remote.
 
 ### UATs
 
-A UAT (user acceptance test) is an automated acceptance test written into the SPEC. No person runs it. Each one has three parts:
+A UAT (user acceptance test) is an automated acceptance test written into the SPEC. Each one has three parts:
 
 - **Given**: the starting state
 - **When**: one action, by the user or the system
-- **Then**: an outcome a test can check, with no "should" and no hedging
+- **Then**: an outcome a test can check
 
-Writing them is this command's job. Claude proposes them at gate 1, before asking any questions, and you confirm or change them. The questions that follow refine them, and the [SPEC audit](#the-spec-audit) tries to find a way each one could pass while the feature is still broken.
-
-Once the SPEC is saved, the UATs are the contract. [`/gaia-plan`](/workflow/plan/#uat-specs) turns them into tests, and changing one means formally reopening the SPEC.
+Once the SPEC is saved, the UATs are the contract. [`/gaia-plan`](/workflow/plan/#uat-specs) turns them into tests, and changing one means [reopening the SPEC](#reopening-a-saved-spec).
 
 ## Before it starts
 
-- **Model check.** The SPEC is written by your session's model. On a model other than Opus or Fable, Claude offers to stop so you can switch with `/model` first.
-- **Housekeeping.** Notebook entries GAIA no longer needs are cleared out. See [How entries are cleared](/workflow/notebook/#how-entries-are-cleared).
-- **Pull check.** When your checkout has an older GAIA version than the remote, Claude offers to pull first.
-- **Resume.** When an unfinished draft exists, you choose to resume it or start new. Claude can tell when another open session is still writing a draft, so two sessions never resume the same one.
+- **Model check.** The SPEC is written on your session's model. On a model other than Opus or Fable, Claude offers to stop so you can switch with `/model`.
+- **Pull check.** When the remote has a newer GAIA version than your checkout, Claude offers to pull first.
+- **Resume.** When an unfinished draft exists, you choose to resume it or start new. A draft another open session is still writing is never offered.
 
-## SPEC numbers
-
-Each SPEC number is reserved by pushing a `spec/NNN` git tag to the remote, so teammates never get the same number. Reserving one changes no files in your checkout. See [Numbers do not travel](/workflow/notebook/#why-it-stays-on-your-machine) for what happens with no remote.
-
-A SPEC moves through four statuses: `draft`, `ready`, `merged`, and `abandoned`.
+GAIA also clears out [notebook entries it no longer needs](/workflow/notebook/#how-entries-are-cleared).
 
 ## The flow
 
-1. **Reserve** the SPEC number and write the first draft.
-2. **Gate 1: shape.** Before asking anything, Claude prints in plain language what it thinks you want and every proposed UAT. You confirm or revise. Claude keeps a copy of what you confirmed so later steps can catch the SPEC drifting away from it.
-3. **Questions.** One question at a time, each based on your last answer. The questions stop once every topic is settled, or at most after 10 real questions (5 in auto mode). When Claude needs facts, it runs the research itself and brings you the findings.
-4. **Self-review.** A sub-agent checks that the draft still matches what you confirmed at gate 1 and does not contradict itself. It also flags a UAT that lists many cases of one rule: a UAT states the rule with one example journey, and the cases go in lower-layer tests the implementer writes. A UAT about harness, script, or documentation behavior is exempt. It fixes minor problems itself. Critical and major problems come to you as one list, each with its recommended fix, and you answer once: accept all as recommended, or revise the ones you name.
-5. **SPEC audit.** Independent reviewers check the draft against your actual code. See [The SPEC audit](#the-spec-audit).
-6. **Gate 2: the brief.** Claude prints a brief of the final SPEC: what it changes, why, what success looks like, every UAT, what the plan will do because of the audit, the costs and risks you are accepting, and anything still not settled. The paths to the full draft and to `AUDIT.md` sit at the bottom if you want to read them. Revise until it is right.
-7. **Save** to the notebook, then run a lint that enforces the lock.
-8. **Plan it here.** `/gaia-spec` invokes `/gaia-plan` with the SPEC in the same session. The run ends at the plan's report: a cost box and the KICKOFF prompt to paste into a fresh session.
+1. **Draft.** Claude reserves the SPEC number and writes a first draft.
+2. **Gate 1: shape.** Before asking anything, Claude shows in plain language what it thinks you want, with every proposed UAT. You confirm or revise. Later steps check the SPEC against what you confirmed here.
+3. **Questions.** One at a time, each built on your last answer, until every topic is settled or after 10 questions (5 in auto mode). When Claude needs facts, it researches them itself.
+4. **Self-review.** A sub-agent checks that the draft matches gate 1 and does not contradict itself. It fixes minor problems. Critical and major ones come to you as one list with recommended fixes: accept all, or revise the ones you name.
+5. **SPEC audit.** Independent reviewers check the draft against your code. See [The SPEC audit](#the-spec-audit).
+6. **Gate 2: the brief.** Claude shows what the SPEC changes, why, what success looks like, every UAT, what the plan will do because of the audit, the costs and risks you accept, and anything still open. Revise until it is right.
+7. **Save.** The SPEC is saved and locked.
+8. **Plan.** GAIA runs `/gaia-plan` on the SPEC in the same session. The run ends with a [cost box](/models-and-context/cost/) and the KICKOFF prompt to paste into a fresh session.
 
 <Aside type="caution">
-Confirming gate 2 saves the SPEC and locks it. To change a saved SPEC you must formally reopen it, with a written reason and a record of how the UATs change, and the lint enforces this. Get it right before you confirm.
+Confirming gate 2 locks the SPEC. Changing it later means reopening it with a written reason. Get it right before you confirm.
 </Aside>
 
 ### Reopening a saved SPEC
 
-When a plan stops because a UAT can no longer hold, reopen the SPEC:
+When a plan stops because a UAT can no longer hold, type:
 
 ```
 /gaia-spec reopen SPEC-<NNN>
 ```
 
-Claude asks why the UAT cannot hold, starting from the change the stopped plan suggested. It then proposes the new UAT text, together with any change to the plan that follows from it, and asks you to confirm. It records your reason and the old UAT text in the SPEC, checks the SPEC with the lint, and offers to discard the stopped phase's unfinished edits so the plan can resume. It ends by giving you the plan's KICKOFF prompt to paste into a fresh session.
+Claude asks why the UAT cannot hold, proposes the new UAT and any plan change that follows, and asks you to confirm. It records your reason and the old UAT in the SPEC, offers to discard the stopped phase's unfinished edits, and gives you the plan's KICKOFF prompt to paste into a fresh session.
 
 ## The SPEC audit
 
-Before gate 2, a team of reviewers checks the draft. Each one is a fresh sub-agent that reads your code and the draft for itself, so it checks the SPEC against what is really there, not against what the conversation assumed. The audit runs on every SPEC, and you cannot skip it.
+Before gate 2, a team of sub-agents reviews the draft. Each one reads your code for itself, so the SPEC is checked against what is really there, not what the conversation assumed. It runs on every SPEC.
 
-### How hard it looks
-
-Claude first sizes up the draft. A low-stakes SPEC with a narrow scope gets the **Standard** audit. A high-stakes one, or one that touches security or a data migration, gets the **Deep** audit.
+A low-stakes, narrow SPEC gets the **Standard** audit. A high-stakes one, or one that touches security or a data migration, gets the **Deep** audit.
 
 ### The lenses
 
-Each reviewer looks through one lens. GAIA names each lens with a short code, such as `COV`, when it starts the audit and in each finding's id. Four core lenses run on every SPEC:
+Each reviewer looks through one lens. Its short code, such as `COV`, appears in each finding's id. Four lenses run on every SPEC:
 
 | Lens | What it checks |
 | --- | --- |
-| (FG) Factual grounding | Every claim about your code, a dependency, a file path, or an existing convention is true. A new dependency is justified and its version pinned. |
-| (TST) UAT testability | Each UAT can fail. The reviewer looks for a way a UAT passes while the feature is still broken, and proposes a tighter one. |
-| (COV) Coverage and consistency | Every success criterion has a UAT, every promise in the intent is covered, the scope rules do not contradict the UATs, and the SPEC follows your project's conventions. |
-| (RT) Red team and feasibility | The reviewer tries to break the SPEC: a way every UAT passes yet the feature is not delivered, a check that cannot actually run, a file or caller the SPEC missed, an assumption the plan would inherit as fact. |
+| (FG) Factual grounding | Every claim about your code, dependencies, file paths, and conventions is true. A new dependency is justified and pinned. |
+| (TST) UAT testability | Each UAT can fail: no way to pass while the feature is broken. |
+| (COV) Coverage and consistency | Every success criterion and promise has a UAT, the scope rules agree with the UATs, and the SPEC follows your conventions. |
+| (RT) Red team and feasibility | A way every UAT passes yet the feature is not delivered, a check that cannot run, a missed file or caller, an assumption the plan would take as fact. |
 
 Specialist lenses join when the draft touches their area:
 
@@ -122,40 +111,28 @@ Specialist lenses join when the draft touches their area:
 | --- | --- |
 | (SEC) Security | Sign-in, tokens or secrets, redirects, uploads, permissions, personal data, raw user input, headers, cookies |
 | (MIG) Migration | Data formats or schemas, renamed or removed fields, breaking API changes |
-| (A11Y) Accessibility | Components, routes, pages, anything that renders on screen |
+| (A11Y) Accessibility | Anything that renders on screen |
 | (DOC) Documentation | Wiki or docs deliverables |
 | (PERF) Performance | Data volume, loops over collections, network calls, caching, rendering |
 
 ### Refutation
 
-Every critical or major finding then goes to a separate reviewer whose job is to disprove it. That reviewer rejects the finding unless it can show the problem in the code or the draft, which keeps false alarms and inflated severities out of your SPEC.
+A separate reviewer tries to disprove each critical or major finding, and drops it unless the problem shows in the code or the draft. On the Deep audit, three reviewers try, and the finding stays only if two of them fail. A completeness reviewer then looks for what every lens missed.
 
-On the Deep audit, three reviewers try to disprove each finding, each from a different angle: correctness, security, and whether the problem actually happens as described. A finding stays only if at least two of the three fail to disprove it. A completeness reviewer then looks for anything every lens missed.
+With more than 24 critical or major findings on Standard, or more than 8 on Deep, one reviewer per lens checks all of that lens's findings instead, and the completeness review is skipped. This keeps the audit's cost from growing with the number of findings.
 
-When the lenses raise a very large number of findings (more than 24 critical or major ones on the Standard audit, more than 8 on the Deep audit), one reviewer per lens checks all of that lens's findings instead, and the completeness review is skipped. That keeps the number of reviewers fixed, so the audit's time and token cost do not climb with every extra finding. Little is lost: with that many findings, several lenses have usually raised the same problem on their own, which already cross-checks it, and that much volume already covers the gaps a completeness reviewer would hunt for.
+### Findings that survive
 
-### What happens to a finding that survives
+- **The SPEC is wrong** (a UAT that could pass on broken code, a missing UAT, a wrong intent): the fix goes into the draft. Critical and major fixes come to you as one list. Minor ones are folded in.
+- **The SPEC is right, but the build needs steering** (for example, a file the change must also update): it becomes an instruction in `AUDIT.md` that the plan must follow.
 
-Each surviving finding is one of two kinds:
+In auto mode, a clear fix is applied, and a finding with more than one reasonable fix is left open for you.
 
-- **The SPEC itself is wrong**: a UAT that could pass on broken code, a missing UAT, or a wrong intent. The fix goes into the draft. Critical and major fixes come to you as one list to accept or revise. Minor ones are folded in without asking.
-- **The SPEC is right, but the build needs steering**: for example, a file the change must also update. The finding is written into `AUDIT.md` as an instruction, and the plan must follow it.
+If your session cannot start sub-agents, the audit is skipped and gate 2's brief says so.
 
-The draft is not saved yet, so none of this needs a formal reopening. Gate 2's brief tells you what the plan will do because of the audit.
+## While it runs
 
-In auto mode, a clear-cut fix is applied, and a finding with more than one reasonable fix is left open for you to review.
-
-If Claude cannot start sub-agents in your session, the audit is skipped, the self-review is the safety net, and gate 2's brief says the audit did not run.
-
-## While a spec session runs
-
-- **It writes only to the notebook and GAIA's local files**: `.notebook/specs/`, `.gaia/local/cache/`, and the usage ledger. It never edits `apps/web/app/**` or any other source. Because nothing it writes is tracked, you can keep working in other sessions while it runs, on a branch or in a [worktree](/workflow/work-lifecycle/#3-isolate).
+- **It writes only to the notebook and GAIA's local files**, never your source code, so you can keep working in other sessions, on a branch or in a [worktree](/workflow/work-lifecycle/#3-isolate).
 - **Project decisions go into the SPEC, the wiki, or `.claude/rules/`**, never into machine-local memory.
-- **Your progress is saved as you go**, after every answer and every gate. To stop, type a save request (such as "save partial" or "resume later") into a question's **Other** answer, or choose to save from inside **Discuss this**. The next `/gaia-spec` offers to resume.
-- **Long sessions** pause when the context reaches the red band, like any other: Claude saves, then you continue here or clear and resume. See [Work lifecycle](/workflow/work-lifecycle/#resuming-long-work).
-
-## After the plan runs
-
-Before it writes any code, the plan's orchestrator turns the UATs into tests that fail at first. It closes out the SPEC after the implementation merges. See [`/gaia-plan`](/workflow/plan/#uat-specs).
-
-The run ends with a [cost box](/models-and-context/cost/) covering the spec and the plan.
+- **Progress is saved after every answer.** To stop, type a save request (such as "save partial") into a question's **Other** answer, or ask from **Discuss this**. The next `/gaia-spec` offers to resume.
+- **Long sessions** pause at the context red band like any other. See [Work lifecycle](/workflow/work-lifecycle/#resuming-long-work).
