@@ -9,27 +9,23 @@ The `.notebook/` folder at the root of your main checkout is where GAIA keeps wo
 
 ## An engineer's notebook
 
-Conceptually, the notebook works the way an engineer's paper notebook does. You keep it at your own desk and write in it while the work is happening. It holds drafts, the plans you are working through, and notes on what you tried. It is not where the finished result lives.
+The notebook works like an engineer's paper notebook: you keep it at your own desk and write in it while the work is happening. It holds drafts, plans in progress, and notes on what you tried. It is not where the finished result lives.
 
-The finished result is the code, the pull request, and the commit history. Before a plan's pull request goes to the first audit round, Claude writes a short summary of what shipped. It can promote that summary into the [project wiki](/maintenance/wiki/) as a commit on the pull request's branch, so the lasting part travels with the code. After the audit clears and you confirm the merge, Claude rereads each promoted page against the audited code and commits a fix to any page the audit's changes made wrong. The notebook entry has done its job after that, and GAIA clears it out.
+The finished result is the code, the pull request, and the commit history. Before a plan's pull request is audited, Claude writes a short summary of what shipped and can promote it into the [project wiki](/maintenance/wiki/) on the same branch, so the lasting part travels with the code. After the merge, GAIA clears the notebook entry out.
 
-Nothing in the notebook is committed, so drafts, dead ends, and research notes never show up in your repository's history or in a pull request's diff.
-
-Because it sits at the top level of your project, its files are easy to find when you want to read a SPEC, check a plan's progress, or read through research.
+Nothing in the notebook is committed, so drafts, dead ends, and research notes never show up in your history or a pull request's diff.
 
 ## What it holds
 
 | Folder | Contents |
 | --- | --- |
-| `.notebook/specs/SPEC-NNN/` | A SPEC from [`/gaia-spec`](/workflow/spec/). Its plan sits inside it as `plan/` (a second plan for the same SPEC is `plan-2/`). |
+| `.notebook/specs/SPEC-NNN/` | A SPEC from [`/gaia-spec`](/workflow/spec/). Its plan sits inside it as `plan/` (a second plan is `plan-2/`). |
 | `.notebook/plans/PLAN-NNN/` | A plan from [`/gaia-plan`](/workflow/plan/) that has no SPEC. |
-| `.notebook/research/<date>-<topic>/` | Research Claude does for you. When you ask Claude to research something, its notes land here. Each folder has one small file describing where the research stands, rewritten as it goes, with any supporting files beside it. |
+| `.notebook/research/<date>-<topic>/` | Notes from research you ask Claude to do, with a small status file rewritten as it goes. |
 | `.notebook/catalog.json` | GAIA's index of everything above. |
 
-Nothing else lives in the notebook.
-
 <Aside type="caution">
-Do not delete or hand-edit `catalog.json`. It records where each SPEC draft stands (so `/gaia-spec` can resume one) and this machine's share of SPEC numbering, and no other copy of either exists. If the file is present but unreadable, every GAIA command that writes to the notebook stops without changing anything. To recover, ask Claude:
+Do not delete or hand-edit `catalog.json`. It records where each SPEC draft stands and this machine's share of SPEC numbering, and no other copy exists. If it becomes unreadable, every GAIA command that writes to the notebook stops without changing anything. To recover, ask Claude:
 
 ```text
 GAIA says .notebook/catalog.json is unreadable. Find out why and repair it without losing any SPEC drafts or numbering.
@@ -38,13 +34,13 @@ GAIA says .notebook/catalog.json is unreadable. Find out why and repair it witho
 
 ## How entries are cleared
 
-GAIA clears out entries it no longer needs, the way you would tear out pages you have finished with. The housekeeping runs at the start of every `/gaia-spec` and `/gaia-plan`.
+GAIA clears out entries it no longer needs at the start of every `/gaia-spec` and `/gaia-plan`.
 
-**SPECs and plans.** Once the pull request is ready to merge, Claude writes `SUMMARY.md` into the folder. It describes what shipped, checked against the code and its tests. After the merge, Claude removes the working files (`SPEC.md`, `AUDIT.md`, and the plan's files) and keeps the summary. The summary stays for 30 days and is then deleted. A merged folder is kept past the 30 days until its summary is written and the work's cost is recorded in the [usage ledger](/models-and-context/cost/). A SPEC you abandon is deleted 30 days after you abandon it.
+**SPECs and plans.** Once the pull request is ready to merge, Claude writes `SUMMARY.md` into the folder, describing what shipped. After the merge, the working files are removed and the summary kept. The summary is deleted 30 days later, but only once it is written and the work's cost is recorded in the [usage ledger](/models-and-context/cost/). A SPEC you abandon is deleted 30 days after you abandon it.
 
-**Research.** Claude closes a research folder once its result has landed somewhere tracked, such as code, a SPEC, or the wiki. A closed folder can be deleted 30 days after it closed, and only when nothing still points to it: no open SPEC or plan, no Claude memory file, and no open issue or pull request names it. Even then, `/gaia-spec` asks you first, and only in an interactive session with the [GitHub CLI](https://cli.github.com/) (`gh`) signed in, since it checks GitHub for issues and pull requests that name the folder. You can delete it, keep it, or snooze it for another 30 days. `/gaia-plan` only reports how many folders are ready to delete and never asks.
+**Research.** Claude closes a research folder once its result lands somewhere tracked, such as code, a SPEC, or the wiki. Thirty days after it closed, and only when no open SPEC, plan, Claude memory file, issue, or pull request names it, `/gaia-spec` asks you to delete it, keep it, or snooze it for another 30 days. It asks only in an interactive session with the [GitHub CLI](https://cli.github.com/) (`gh`) signed in, since it checks GitHub for references. `/gaia-plan` only reports how many folders are ready.
 
-To change the 30-day window, set these environment variables. Ask Claude to add one to the `env` block of `.claude/settings.local.json` (your machine only, not committed), then restart Claude Code. You can export it in your shell profile instead; restart Claude Code either way.
+To change the 30-day window, ask Claude, then restart Claude Code:
 
 ```text
 Set GAIA_SPEC_RETENTION_DAYS to 60 in the env block of .claude/settings.local.json.
@@ -55,33 +51,31 @@ Set GAIA_SPEC_RETENTION_DAYS to 60 in the env block of .claude/settings.local.js
 | `GAIA_SPEC_RETENTION_DAYS` | SPEC and plan folders | 30 |
 | `GAIA_RESEARCH_RETENTION_DAYS` | Research folders | 30 |
 
+`.claude/settings.local.json` is your machine only, not committed.
+
 ## Why it stays on your machine
 
-A notebook is personal. Yours is on your machine, and your teammate's is on theirs. GAIA does not sync them.
+Your notebook is on your machine and your teammate's is on theirs. GAIA does not sync them.
 
-- **It is working material, not the record.** What your team needs to see reaches them through the code, the pull request, and any wiki pages the summary was promoted into. Everything else is your scratch work.
-- **Its entries do not outlive the work.** Folders are deleted after the work merges, so a link to one from a committed file, a commit message, or a pull request would stop working. GAIA keeps those references out, and Claude writes what they stood for instead. See [Notebook references stay out of shared history](#notebook-references-stay-out-of-shared-history).
-- **Numbers do not travel.** Plan numbers come from your own catalog, so your `PLAN-003` and a teammate's `PLAN-003` are different plans. SPEC numbers are reserved by pushing a `spec/NNN` tag to your remote, so two people never get the same number. With no remote, numbering comes from your own catalog. If the remote refuses the tag, GAIA warns you and does the same. Either way, the SPEC itself stays in the notebook of whoever wrote it.
+- **It is working material, not the record.** Your team sees the work through the code, the pull request, and any wiki pages the summary was promoted into.
+- **Its entries do not outlive the work.** A link to a deleted folder from a commit or pull request would break, so GAIA keeps those references out ([below](#notebook-references-stay-out-of-shared-history)).
+- **Numbers do not travel.** Plan numbers come from your own catalog, so your `PLAN-003` and a teammate's are different plans. SPEC numbers are reserved by pushing a `spec/NNN` tag to your remote, so two people never get the same one. With no remote, or when the remote refuses the tag, numbering comes from your own catalog, and GAIA warns you. Either way, the SPEC stays in its author's notebook.
 
 If something in your notebook should reach your team, put it somewhere tracked, such as the wiki or a rule in `.claude/rules/`.
 
 ## Notebook references stay out of shared history
 
-A SPEC, UAT, or plan number (such as `SPEC-012`; a UAT is an acceptance test written into a SPEC) or a path to a specific notebook entry means nothing to anyone else: it names a document that exists only on one machine, and only until it is cleared. GAIA catches these references in the places your team reads most, and Claude rewrites the text before it lands:
+A SPEC, UAT, or plan number (such as `SPEC-012`) or a path to a notebook entry means nothing to anyone else: it names a document on one machine, and only until it is cleared. GAIA catches these references where your team reads most, and Claude rewrites the text to describe the work instead:
 
 | Where | What catches it |
 | --- | --- |
 | Commit messages | The `commit-msg` git hook |
-| Lines a commit adds | The `pre-commit` git hook. It reads prose files in full, and code only in comments that take up a whole line. It skips test files and fixtures. |
+| Lines a commit adds | The `pre-commit` git hook: prose files in full, code only in whole-line comments, skipping tests and fixtures |
 | Pull request and issue titles and bodies | A Claude Code hook on `gh pr create`, `gh pr edit`, `gh issue create`, and `gh issue edit` |
-| [Playwright](https://playwright.dev/) tests | A scan of `apps/web/.playwright/` while a plan runs, covering file names, test titles, and comments |
+| [Playwright](https://playwright.dev/) tests | A scan of `apps/web/.playwright/` while a plan runs |
 
-Paths to a specific run folder under `.gaia/local/runs/` (GAIA's machine-local state) are caught too. Comments on pull requests and issues are not checked. Placeholders such as `SPEC-NNN` pass, and so do plain issue and pull request numbers such as `#142`. When a check catches one, it names the text it matched, and Claude rewrites it to describe what the work does instead of pointing at the document behind it. If you commit by hand and hit it, do the same, or ask Claude to reword the message. Each check is listed in the [gate reference](/reference/gates/#machine-local-references).
-
-The [`working-doc-ids`](/reference/rules/) rule also asks Claude to keep these numbers out of code and prose it writes, and to leave out references a pattern cannot reliably catch, such as the ids a plan gives its own findings.
+Paths to a run folder under `.gaia/local/runs/` (GAIA's machine-local state) are caught too. Placeholders such as `SPEC-NNN` and plain issue numbers such as `#142` pass. If you commit by hand and hit one of these checks, reword the text or ask Claude to. See the [gate reference](/reference/gates/#machine-local-references).
 
 ## Worktrees share one notebook
 
-Every [worktree](/workflow/work-lifecycle/#3-isolate) GAIA creates gets a `.notebook` [symlink](https://en.wikipedia.org/wiki/Symbolic_link) (a file that stands in for another folder) that points to the main checkout's folder, as long as the main checkout's `.gitignore` ignores `.notebook` (it does unless you remove that line). A plan running in a worktree reads and writes the same notebook you see from the main checkout, and removing the worktree removes nothing from it.
-
-When GAIA cannot work out where the main checkout is, notebook commands stop with an error. They never fall back to a folder inside the worktree, which would split the notebook in two.
+Every [worktree](/workflow/work-lifecycle/#3-isolate) GAIA creates gets a `.notebook` link to the main checkout's folder, so a plan running in a worktree reads and writes the notebook you see, and removing the worktree removes nothing from it. This needs `.notebook` in the main checkout's `.gitignore`, where GAIA puts it.

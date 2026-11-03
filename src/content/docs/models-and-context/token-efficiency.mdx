@@ -7,9 +7,9 @@ sidebar:
 
 import BandScale from '../../../components/BandScale.astro';
 
-Everything GAIA adds to a session takes up part of Claude's context window, the fixed amount of text Claude can hold at once. GAIA keeps that part small on purpose. Its rules, skills, and instruction files are cut down to what improves how Claude works. Each instruction lives in one place instead of being repeated across files, and is checked against the code it describes to keep it accurate. Most of it loads only when a task needs it, which leaves more of the window for your work.
+Everything GAIA adds to a session takes up part of Claude's context window, the fixed amount of text Claude can hold at once. GAIA keeps that part small: each instruction lives in one place, and most of it loads only when a task needs it, which leaves more of the window for your work.
 
-The session-start, task, and skill figures on this page were measured in a new GAIA 2.3.0 project, created with `npx create-gaia@2.3.0`, on Opus 5.5. They count each file the same way every time, so they are not comparable with the figures earlier versions of this page showed. The audit figures come from an earlier measurement, noted where they appear. Percentages are of a 1M-token context window.
+The session-start, task, and skill figures on this page were measured in a new GAIA 2.3.0 project, created with `npx create-gaia@2.3.0`, on Opus 5.5. The audit figures come from an earlier measurement, noted where they appear. Percentages are of a 1M-token context window.
 
 ## At session start
 
@@ -24,7 +24,7 @@ GAIA adds 8,196 tokens to a session before you type anything: 0.82% of the windo
 | [Agent](/reference/agents/) descriptions (10) | 830 |
 | **Total** | **8,196 (0.82%)** |
 
-The session-start text was measured in a session on a feature branch. On the default branch, the instructions for working on a branch are left out, so the total is lower. The session-start text is added when a session starts, and again after `/clear` or compaction.
+The session-start text was measured on a feature branch. On `main`, the instructions for working on a branch are left out, so the total is lower. It is added again after `/clear` or compaction.
 
 A session started from `apps/web/` begins at 10,867 tokens (1.09%). Claude Code still loads everything above, and adds `apps/web/CLAUDE.md` (987) and the descriptions of the 13 frontend skills (1,684).
 
@@ -63,15 +63,13 @@ For the larger skills, a description costs 1% to 3% of the full skill. A small s
 
 ## Deterministic scripts
 
-Much of GAIA's checking, counting, and grading is done by deterministic scripts: they follow fixed rules, so the same input always gives the same result. A script's work costs no Claude tokens. Only its short result reaches Claude. GAIA uses scripts wherever an answer has to come out the same every time, and leaves the parts that need judgment to Claude. For example:
+Much of GAIA's checking, counting, and grading is done by deterministic scripts, which give the same result for the same input. A script's work costs no Claude tokens; only its short result reaches Claude. GAIA leaves to Claude only the parts that need judgment. For example:
 
 - **Gates** are [hooks](/reference/hooks/) that allow or block a commit or a risky command by fixed rules, so Claude cannot talk its way past one. See the [gate reference](/reference/gates/).
 - **The audit** runs [React Doctor](https://github.com/millionco/react-doctor), [Knip](https://knip.dev/), and a dependency advisory check next to its reviewers, and a script checks every repair before it is kept. See the [Code Audit Team](/workflow/code-audit-team/).
 - **[`/gaia-fitness`](/maintenance/fitness/)** grades your Claude setup with a fixed list of rules. Its advisory notes never change the grade.
 - **[Scaffolders](/skills/scaffolders/)** create new components, hooks, routes, and services with GAIA's bundled `gaia scaffold` command, from the project's templates.
 - **[Cost lines](/models-and-context/cost/)** are added up by a script from GAIA's usage records, never estimated by Claude.
-
-When the audit keeps finding the same kind of problem, [`/gaia-codify`](/maintenance/codify/) proposes a guard for it, such as a check, a skill, or a rule, and adds it once you approve.
 
 ## The audit
 
@@ -85,7 +83,7 @@ The [audit loop](/workflow/code-audit-team/#the-audit-loop) runs its review roun
 
 Your session receives less than 1% of what the largest sub-agent holds.
 
-Each reviewer also starts small. In a first-round audit of a frontend change on a new project, `code-audit-frontend` starts with about 26.7k tokens of context (2.7% of a 1M-token window), each [rule specialist](/reference/agents/#audit-rule-specialist) with about 5.9k (0.6%), and `audit-loop-unit` with about 22.7k (2.3%). These figures are medians of five runs on Claude Code 2.1.305, recorded in `wiki/concepts/Code Review Audit Agent.md`.
+Each reviewer also starts small. In a first-round audit of a frontend change on a new project, `code-audit-frontend` starts with about 26.7k tokens of context (2.7% of a 1M-token window), each [rule specialist](/reference/agents/#audit-rule-specialist) with about 5.9k (0.6%), and `audit-loop-unit` with about 22.7k (2.3%). These figures are medians of five runs on Claude Code 2.1.305.
 
 A [light review](/workflow/code-audit-team/#light-review) keeps small changes cheap for the reviewers: in the same audit, a light reviewer peaked at about 12k tokens of context and used about 17k tokens of input in total.
 
@@ -146,7 +144,7 @@ What Claude does at each band, and how to clear and pick up where you left off, 
 
 ### Sub-agents
 
-Long workflows hand work to sub-agents, and the bands apply to the ones that do long stretches of work. You don't see this and have nothing to do; it is here so you know why a long plan does not degrade as it goes.
+The bands also apply to sub-agents that do long stretches of work. You have nothing to do here; it is why a long plan does not degrade as it goes.
 
 A sub-agent has no statusline, so a separate hook reads its context from its own transcript after each of its tool calls. It uses the same red, 🔥, and 💀 bands as your session, on the same window size. When a sub-agent reaches one:
 
@@ -154,7 +152,7 @@ A sub-agent has no statusline, so a separate hook reads its context from its own
 - **🔥:** it stops before starting any new piece of work.
 - **💀:** it stops right away.
 
-Before it stops, it writes a short handoff (the goal, what is done, what is next, and any half-finished work) and leaves its edits uncommitted. The workflow that started it checks the handoff and starts a fresh sub-agent with the same instructions, plus the handoff as progress notes. The handoff cannot widen the task: the new sub-agent keeps the original scope and permissions. A task can hand off twice. If it would need a third, the workflow stops and tells you, with every handoff it wrote, so you can decide how to continue.
+Before it stops, it writes a short handoff (the goal, what is done, what is next). The workflow starts a fresh sub-agent with the same instructions and scope, plus the handoff. A task can hand off twice. If it would need a third, the workflow stops and shows you every handoff, so you can decide how to continue.
 
 This covers the sub-agents that do long stretches of work: the planner in [`/gaia-plan`](/workflow/plan/) and each task's sub-agent when a plan is carried out. The [audit loop](/workflow/code-audit-team/#the-audit-loop) gets the same effect another way: it runs a few rounds at a time, each batch in a fresh sub-agent. Short, single-purpose sub-agents, such as reviewers, finish well inside their context and need neither.
 

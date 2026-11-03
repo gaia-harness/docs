@@ -15,7 +15,7 @@ A gate is not a judgment of you or of Claude. Each one exists because the proble
 
 | Group | What its gates do |
 |---|---|
-| [Commits and branches](#commits-and-branches) | Keep Claude's work off the default branch, keep Claude from skipping the git hooks or dropping commits, and check each commit's code, tests, and message before it lands. |
+| [Commits and branches](#commits-and-branches) | Keep Claude's work off `main`, keep Claude from skipping the git hooks or dropping commits, and check each commit's code, tests, and message before it lands. |
 | [Pull requests and merge](#pull-requests-and-merge) | Claim the issue, open every pull request as a draft with a checked title, leave pull requests from forks to you, and allow a merge only after the Code Audit Team approves the change. |
 | [Secrets and protected files](#secrets-and-protected-files) | Keep secrets out of what Claude reads and writes, protect the files GAIA generates and the records of audit approvals, and keep Claude from destructive deletes. |
 | [Worktrees and parallel work](#worktrees-and-parallel-work) | Keep each session in its own checkout and on its own ports, keep maintenance commands in the main checkout, and pause new work while your GAIA version is behind. |
@@ -27,15 +27,15 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 ## Commits and branches
 
-### Commits on the default branch
+### Commits on `main`
 
 - **Stops:** `git commit` on `main` or `master`, a plain `git push` from them, a push that targets `main`, `master`, or `HEAD`, and force-pushes that name them (`--force`, `--force-with-lease`, or `-f`).
 - **Why:**
-  - **Commit:** work reaches the default branch only through a pull request, where the audit reviews it before it merges.
+  - **Commit:** work reaches `main` only through a pull request, where the audit reviews it before it merges.
   - **Plain push:** it would land your local commits on the shared branch without the pull request and audit every change goes through.
   - **Force-push:** the branch's history is shared, so rewriting it pulls commits out from under every clone and branch built on it.
   - **A push that targets `main`, `master`, or `HEAD`:** stopped from any branch. A `main` or `master` source would land that branch's commits on the remote without the pull request and audit. A bare `HEAD` pushes whatever happens to be checked out, which the guard cannot vouch for. The refusal tells Claude to push the feature branch by its own name and open a pull request.
-- **When:** before the `git` command runs (`block-main-destructive-git`). The hook checks the branch names `main` and `master` themselves, so a default branch with any other name is not covered.
+- **When:** before the `git` command runs (`block-main-destructive-git`). The hook checks the branch names `main` and `master` themselves, so a main branch with any other name is not covered.
 - **Who acts:** Claude. Nothing for you to do.
 - **Clear it:** Claude creates a feature branch, pushes it by name, and opens a pull request as part of the [work lifecycle](/workflow/work-lifecycle/).
 
@@ -80,7 +80,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 ### Commit message format
 
 - **Stops:** a commit message that is not a Conventional Commit (`<type>(<scope>): <subject>`), and any commit when [commitlint](https://commitlint.js.org/) cannot run.
-- **Why:** commit messages, branch names, and pull request titles all use the same list of Conventional Commits types. With a squash merge, the pull request title becomes the commit message on the default branch. A type GAIA does not know cannot be checked later on.
+- **Why:** commit messages, branch names, and pull request titles all use the same list of Conventional Commits types. With a squash merge, the pull request title becomes the commit message on `main`. A type GAIA does not know cannot be checked later on.
 - **When:** at `git commit`, through `.githooks/commit-msg`.
 - **Who acts:** Claude, and you only when you commit by hand.
 - **Clear it:** Claude rewrites the message with one of the types in `.gaia/conventional-commits.json`. When commitlint is missing, Claude runs `pnpm install` and commits again.
@@ -116,12 +116,8 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 - **Stops:** Claude starting work on a GitHub issue already labelled `in-progress`.
 - **Why:** two agents or two people who start the same ticket do the work twice, then fight over the merge.
 - **When:** before a branch or worktree is created for work that closes an issue. This is a rule Claude follows (`.claude/rules/issue-claim.md`), not a hook, so nothing blocks the work mechanically.
-- **Who acts:** Claude, and you only to tell Claude the work is dropped.
-- **Clear it:** Claude tells you the issue is taken and picks different work. The label comes off when Claude merges the claiming pull request with `gh pr merge`, and Claude also removes it when it closes that pull request without merging. On a `tech-debt` issue, the next `/gaia-debt` run removes a claim left behind. A merge on github.com leaves the label set, and so does work you stop without saying so. Tell Claude when you drop the work:
-
-  ```text
-  I'm dropping the work on issue #<n>. Release its in-progress claim.
-  ```
+- **Who acts:** Claude. Nothing for you to do.
+- **Clear it:** Claude tells you the issue is taken and picks different work. GAIA removes the label when Claude merges the claiming pull request, and Claude removes it when it closes that pull request without merging or you tell it the work is dropped. On a `tech-debt` issue, the next `/gaia-debt` run removes a claim left behind.
 
 ### Draft pull requests
 
@@ -134,7 +130,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 ### Pull request title
 
 - **Stops:** a `gh pr create` or `gh pr edit` whose title fails the commit lint once ` (#<n>)` is added to the end, and `--fill` with no `--title`.
-- **Why:** a squash merge uses the title as the commit message on the default branch. Without this check, a title that passed every local check could fail CI after the pull request was already open.
+- **Why:** a squash merge uses the title as the commit message on `main`. Without this check, a title that passed every local check could fail CI after the pull request was already open.
 - **When:** before the `gh` command runs (`block-invalid-pr-title`). The advisory PR Conventions workflow repeats the check in CI.
 - **Who acts:** Claude. Nothing for you to do.
 - **Clear it:** Claude passes a Conventional Commits `--title` that still fits in 100 characters with the ` (#<n>)` suffix added.
@@ -163,7 +159,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 ### Merge without the audit
 
 - **Stops:** `gh pr merge` until every Code Audit Team member responsible for the changed files has approved the current version of the change.
-- **Why:** unreviewed code reaching the default branch is exactly what the audit exists to prevent.
+- **Why:** unreviewed code reaching `main` is exactly what the audit exists to prevent.
 - **When:** before `gh pr merge` runs (`pr-merge-audit-check`).
 - **Who acts:** Claude, and you only when a member refuses and you decide to accept its Major finding with a reason.
 - **Clear it:** Claude runs the [audit loop](/workflow/code-audit-team/#the-audit-loop), fixes what it finds, and merges once every member approves. Pull requests outside the audit's scope, and `chore(deps)` pull requests that only change dependency manifests, are approved by the hook itself.
@@ -212,7 +208,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 - **Stops:** filing a `tech-debt` issue for a non-security finding on a line this branch wrote (`refused-authored`). A finding on the whole file counts when the branch changed that file. Security findings skip this check and follow [their own route](/workflow/tech-debt/#security-findings).
 - **Why:** code a branch wrote is that branch's work. The debt backlog should hold only unrelated finds, not problems left behind by the pull request that made them.
-- **When:** when `file-tech-debt` runs, before it reads GitHub. It compares the branch's committed changes with the point where the branch left the default branch, so uncommitted edits do not count and nothing on the default branch counts as written by a branch. If that comparison cannot be made, the issue is filed anyway and the run notes the check did not happen, since losing a finding costs more than one misplaced issue.
+- **When:** when `file-tech-debt` runs, before it reads GitHub. It compares the branch's committed changes with the point where the branch left `main`, so uncommitted edits do not count and nothing on `main` counts as written by a branch. If that comparison cannot be made, the issue is filed anyway and the run notes the check did not happen, since losing a finding costs more than one misplaced issue.
 - **Who acts:** Claude. In an interactive audit it may ask you to confirm the fix.
 - **Clear it:** Claude fixes the finding on the branch, or records it as an [accepted residual](/maintenance/residue/#what-a-residual-is) when the audit loop's own stop allows that or you accepted it. Otherwise the audit fixes it in the next round: an interactive run asks you first, with the fix as the recommended answer. No issue is created.
 
@@ -325,7 +321,7 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 ### Lagging GAIA version
 
 - **Stops:** starting new work (a SPEC, a plan, a debt drain, a maintenance run, ad-hoc work) while your checkout's GAIA version is behind the remote's.
-- **Why:** the new work would branch from an out-of-date default branch.
+- **Why:** the new work would branch from an out-of-date `main`.
 - **When:** at the start of the command. Resuming earlier work is never stopped.
 - **Who acts:** You, with one choice. In auto mode Claude makes it for you.
 - **Clear it:** Claude asks once; choose **Pull now and restart**, and Claude pulls and starts the command again. For a command only you can start, Claude prints it for you to paste. A command started in auto mode picks the pull without asking. Inside a linked worktree there is no pull option: open Claude Code in the main checkout, run `/update-gaia` there to pull, then start the command again.
@@ -405,14 +401,10 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 ### 1.x baseline
 
 - **Stops:** `/update-gaia` from a GAIA 1.x project.
-- **Why:** 2.0.0 moved the app into `frontend/`. Merging that into a 1.x project would make every app file look deleted by GAIA, and the update would offer to delete your app.
+- **Why:** 2.0.0 moved the app out of the repository root. Merging that into a 1.x project would make every app file look deleted by GAIA, and the update would offer to delete your app.
 - **When:** before any download or change.
-- **Who acts:** You.
-- **Clear it:** ask Claude:
-
-  ```text
-  Migrate this project to GAIA 2.0.0.
-  ```
+- **Who acts:** You, to say go.
+- **Clear it:** Claude offers to run the 2.0.0 migration instead. Choose **Run it**, and Claude follows the migration in the same session.
 
 ### Notebook not moved
 
@@ -457,8 +449,8 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 - **Stops:** any Claude tool call a guard hook would check, while [jq](https://jqlang.org/) is not installed. A call the guard can tell it does not cover, such as the command that installs jq, still goes through.
 - **Why:** the guard hooks read each call with jq. A guard that cannot read the call would otherwise let it through unchecked, so the guards would quietly switch off.
 - **When:** before the tool call runs, in the guard hooks.
-- **Who acts:** You. jq is a system package, and installing it can ask for your password.
-- **Clear it:** install jq, then ask Claude to retry. See [jq](/reference/tools/#jq).
+- **Who acts:** Claude, with your go-ahead. The guards let the install command through, so Claude can install jq itself. Installing it can ask for your password, and then Claude hands you the command to type with the `!` prefix.
+- **Clear it:** answer Claude's install question, then Claude retries. See [jq](/reference/tools/#jq).
 
 ## Tests and lint
 

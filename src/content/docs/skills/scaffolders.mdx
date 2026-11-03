@@ -5,13 +5,13 @@ sidebar:
   order: 2
 ---
 
-These skills create new files in the React app that follow the project's conventions. They run GAIA's scaffolding command for you, so you don't need to remember its options: describe what you want, and the skill asks for anything missing. The files land in the `apps/web/` package, and paths below are relative to `apps/web/`.
+These skills create new files in the React app that follow your project's conventions. Describe what you want, and the skill asks for anything missing. Paths below are relative to `apps/web/`.
 
-Files and folders under `app/components`, `app/pages`, and `app/hooks` are kebab-case (lowercase words joined by hyphens, like `price-card`), and `@gaia-harness/lint` enforces it.
+Files and folders under `app/components`, `app/pages`, and `app/hooks` are kebab-case (like `price-card`), and lint enforces it.
 
 ## New Component
 
-It first checks whether [shadcn/ui](https://ui.shadcn.com/) already offers the component (a dialog, tabs, a popover). If it does, it runs `pnpm shadcn add <name>`, which copies the component's source into your project as a single file, `app/components/ui/<name>.tsx`; GAIA never edits those files. Otherwise it creates a component folder: `app/components/<name>/index.tsx` and `tests/index.stories.tsx`, with a starter test attached to a story. As you ask for each new behavior, Claude adds a test for it. There is no separate test file.
+It first checks whether [shadcn/ui](https://ui.shadcn.com/) already offers the component (a dialog, tabs, a popover). If it does, it adds it as `app/components/ui/<name>.tsx`, which GAIA never edits. Otherwise it creates `app/components/<name>/index.tsx` and `tests/index.stories.tsx`, with a starter test attached to a story.
 
 **Confirms:** name (kebab-case or PascalCase; the folder uses the kebab-case form), parent folder (default `app/components/`), and props.
 
@@ -19,7 +19,7 @@ It first checks whether [shadcn/ui](https://ui.shadcn.com/) already offers the c
 
 **Example phrasing:** "create a price-card component", "scaffold a user-avatar with a name and url prop".
 
-Props can use most TypeScript types, including ones that contain commas, such as `Record<string, unknown>`, function types, and tuples. A component cannot be created inside `app/components/ui`, which holds only shadcn/ui files.
+A component cannot be created inside `app/components/ui`, which holds only shadcn/ui files.
 
 ## New Hook
 
@@ -33,7 +33,7 @@ Creates a custom React hook, `app/hooks/use-<name>.ts` (named export `useName`),
 
 ## New Route
 
-Creates a route file, `app/routes/<group>.<name>.tsx` (named with the flat file convention of `@react-router/fs-routes`), and its page, `app/pages/<name>/page.tsx`, with `tests/page.stories.tsx`. Its story carries the page's tests: a starter test that checks for one top-level heading and one main landmark. For a route connected to a service, the starter test also checks that the loaded data shows, and a route with a form gets a second test that the submitted form sends the right data. The route file stays small (`loader`, `action`, `meta`, and a one-line default export); the UI lives in the page.
+Creates a route file, `app/routes/<group>.<name>.tsx`, and its page, `app/pages/<name>/page.tsx`, with `tests/page.stories.tsx`. The story's starter test checks for one top-level heading and one main landmark, plus the loaded data for a connected route and the submitted data for a form. The route file stays small; the UI lives in the page.
 
 When you connect it to a service, it writes everything from loading the data to showing it on the page. Ask for the data to load in one of three ways:
 
@@ -43,7 +43,7 @@ When you connect it to a service, it writes everything from loading the data to 
 | in the browser | a `clientLoader` and a `HydrateFallback` |
 | through TanStack Query | a `clientLoader` that loads the data into the [TanStack Query](https://tanstack.com/query/latest) cache, and a page that reads it with `useSuspenseQuery` (needs Query installed) |
 
-Ask for a list page or a detail page. A list page is `<group>.<name>.tsx`, and a detail page is `<group>.<name>_.$id.tsx`, which takes an id from the URL. The page story gets its data from [MSW](https://mswjs.io/) mocks. To see the files a route would create without writing them, ask Claude to show them first.
+Ask for a list page (`<group>.<name>.tsx`) or a detail page (`<group>.<name>_.$id.tsx`, which takes an id from the URL). The page story gets its data from [MSW](https://mswjs.io/) mocks. To preview the files without writing them, ask Claude to show them first.
 
 **Confirms:** name (kebab-case), group (`_public` or `_session`), and the data, action, and i18n options.
 
@@ -51,11 +51,11 @@ Ask for a list page or a detail page. A list page is `<group>.<name>.tsx`, and a
 
 **Example phrasing:** "add a /pricing page in _public", "scaffold a projects list page in _session backed by the projects service".
 
-A route that is not connected to a service can still get a small `loader` for the page title and meta tags, and an empty `action` to fill in. If you ask for an action on a connected route, it writes a create action for a list page or an update action for a detail page, checked against the service's input schema. With translations, it adds the page's locale file to the locale barrel (the index file that re-exports the locale files); if the barrel is missing, the scaffold stops with an error that says how to fix it.
+A route not connected to a service can still get a `loader` for the page title and meta tags, and an empty `action`. On a connected route, an action is a create for a list page or an update for a detail page, checked against the service's input schema.
 
 ## New Service
 
-Creates an API service in your API's folder under `app/services/` (shipped as `gaia/`, often renamed to the company or API name). It writes request functions built on [Ky](https://github.com/sindresorhus/ky) that check responses against [Zod](https://zod.dev/) schemas, plus the schemas, URL constants, and types, and optionally MSW mock handlers under `test/mocks/<name>/`. When `@tanstack/react-query` is installed and the service has a `get`, it also writes `queries.ts` with query keys and `queryOptions` factories.
+Creates an API service in your API's folder under `app/services/` (shipped as `gaia/`, often renamed for your API). It writes [Ky](https://github.com/sindresorhus/ky) request functions that check responses against [Zod](https://zod.dev/) schemas, plus the schemas, URL constants, and types, and optionally MSW mocks under `test/mocks/<name>/`. With TanStack Query installed and a `get` endpoint, it also writes `queries.ts` with query keys and `queryOptions`.
 
 **Confirms:** name (kebab-case), endpoints (any of `get`, `post`, `put`, `delete`), the schema as `name:type` pairs, and whether to include mocks.
 
@@ -63,6 +63,6 @@ Creates an API service in your API's folder under `app/services/` (shipped as `g
 
 **Example phrasing:** "add a projects service with get and post", "wire up CRUD for tasks with mocks".
 
-Schema fields can be text, numbers, true/false values, dates with times, or one of a fixed set of values, and any field can be optional. For example: "a tasks service with get and post, where a task has an id, a title, an optional due date, and a status of open or done". To add `queries.ts` to a service you already have, ask for the Query options for that service.
+Fields can be text, numbers, true/false, dates with times, or one of a fixed set of values, and any can be optional: "a tasks service with get and post, where a task has an id, a title, an optional due date, and a status of open or done". To add `queries.ts` to an existing service, ask for its Query options.
 
-The skill does not connect the service to a page or hook, so you decide where it belongs. [New Route](#new-route), connected to the service, does that for a route.
+The skill does not connect the service to a page; [New Route](#new-route) does that for a route.

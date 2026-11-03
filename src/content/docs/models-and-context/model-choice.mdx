@@ -5,11 +5,11 @@ description: Which Claude model each GAIA workflow uses at each step, how GAIA p
 
 import { Aside } from '@astrojs/starlight/components';
 
-GAIA does not run everything on one model. Your session's model handles the conversation, the decisions, and every step that needs you. When a workflow hands a step to a [sub-agent](https://code.claude.com/docs/en/sub-agents) (a separate Claude instance with its own fresh context), the workflow names the sub-agent's model, chosen for that kind of work. This page lists every one of those choices.
+Your session's model handles the conversation, the decisions, and every step that needs you. When a GAIA workflow hands a step to a [sub-agent](https://code.claude.com/docs/en/sub-agents) (a separate Claude instance with its own fresh context), GAIA picks the sub-agent's model for that kind of work. This page lists every one of those choices.
 
 ## How GAIA picks a model
 
-Every choice follows one table that Claude reads from your project wiki (ask Claude to show it to you). GAIA ranks models by how well they fit the work: how much reasoning it needs, and how closely the model has to stick to its instructions. Price decides only between two models that fit equally well.
+GAIA ranks models by how well they fit the work: how much reasoning it needs, and how closely the model has to stick to its instructions. Price decides only between two models that fit equally well.
 
 | Kind of work | Model | Why it fits |
 |---|---|---|
@@ -24,7 +24,7 @@ Every choice follows one table that Claude reads from your project wiki (ask Cla
 A step runs on Fable only when your session is on Fable and the step uses your model, or when you pick Fable at `/gaia-plan`'s planner question.
 </Aside>
 
-Some steps never leave your session, whatever kind of work they are: a step that needs to ask you something (a sub-agent cannot ask you questions), small work, and quick edit-run-fix loops, where handing off costs more than it saves. For the roles sub-agents take and why only your session commits, see [Who does what](/workflow/work-lifecycle/#who-does-what).
+Some steps never leave your session: a step that asks you something (a sub-agent cannot), small work, and quick edit-run-fix loops, where handing off costs more than it saves. For the roles sub-agents take and why only your session commits, see [Who does what](/workflow/work-lifecycle/#who-does-what).
 
 ### Effort
 
@@ -62,11 +62,11 @@ A step not listed here runs on your session's model. That covers `/gaia-debt`, `
 
 ## Skills that set a model
 
-Six skills set Haiku in their frontmatter: the four scaffolders (`new-component`, `new-route`, `new-hook`, `new-service`) and the two fix skills (`eslint-fixes`, `a11y-fixes`). When one of them loads, Claude Code runs the rest of that turn on Haiku. That is right for these skills, because the turn that loads them does nothing but follow a template or fix a specific rule.
+Six skills set Haiku in their frontmatter: the four scaffolders (`new-component`, `new-route`, `new-hook`, `new-service`) and the two fix skills (`eslint-fixes`, `a11y-fixes`). When one loads, Claude Code runs the rest of that turn on Haiku, which suits a turn that only follows a template or fixes one rule.
 
-Every other skill leaves the model alone and runs on yours. Some look like lookups but load in the middle of other work, such as `typescript` and `tailwind`. A Haiku setting there would move the rest of your implementation turn to Haiku. Others need judgment, such as `react-code`.
+Every other skill runs on your model. Some, such as `typescript` and `tailwind`, load in the middle of other work, so a Haiku setting would move the rest of your implementation turn to Haiku.
 
-A pinned skill runs the rest of the turn on its model even when you picked a stronger one, so a pin on judgment work would hold that work back. Set a model on a skill you write only when every use of it is template or rule-id work.
+Set a model on a skill you write only when every use of it is template or rule-id work. A pinned skill runs the rest of the turn on its model, even when you picked a stronger one.
 
 ## What you control
 

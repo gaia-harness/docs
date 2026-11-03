@@ -3,13 +3,13 @@ title: /gaia-codify
 description: Turn a problem the Code Audit Team keeps finding into a guard (an automated check, a skill, or a rule for matching files), picking the option that adds least to Claude's context, with your approval.
 ---
 
-`/gaia-codify` looks at what the [Code Audit Team](/workflow/code-audit-team/) keeps finding across merged pull requests, including what the tools its members run report (such as [React Doctor](https://github.com/millionco/react-doctor), [axe](https://github.com/dequelabs/axe-core), [Knip](https://knip.dev/), and `pnpm audit`), and proposes a guard so the problem stops coming back. For each repeat problem it recommends the lightest fix that would work (the one that adds least to what Claude reads on every task), explains it in plain language, and asks you once to accept the plan. Nothing is authored or switched on without your answer.
+`/gaia-codify` looks at what the [Code Audit Team](/workflow/code-audit-team/) keeps finding across merged pull requests, including what the tools its members run report (such as [React Doctor](https://github.com/millionco/react-doctor), [axe](https://github.com/dequelabs/axe-core), [Knip](https://knip.dev/), and `pnpm audit`), and proposes a guard so the problem stops coming back. For each repeat problem it recommends the lightest fix that works (the one that adds least to what Claude reads), explains it, and asks you once to accept the plan. Nothing is written or switched on without your answer.
 
 It runs like every [maintenance command](/maintenance/#how-maintenance-commands-run): from the main checkout, on a branch of its own, ending in a pull request. Only you start it, by typing it; Claude never runs it on its own.
 
 ## Why it helps
 
-Every audit round that catches the same mistake again costs review time and tokens, and the fix lives only in that one pull request. `/gaia-codify` turns a mistake that keeps coming back into something that stops it before review: a check that fails, a skill Claude loads for that kind of work, or a rule that loads only for the files it covers. The lesson then stays with the project for every teammate and every future session, without making Claude read more on unrelated work, because each rule is scoped to the files it covers and a check adds nothing to Claude's context. Ask Claude why GAIA prefers a check over a written rule to hear the full reasoning.
+Every audit round that catches the same mistake again costs review time and tokens, and the fix lives only in that one pull request. `/gaia-codify` turns a recurring mistake into something that stops it before review: a check that fails, a skill Claude loads for that kind of work, or a rule that loads only for the files it covers. The lesson stays with the project for every teammate and session, without making Claude read more on unrelated work.
 
 ## When to use it
 
@@ -18,17 +18,17 @@ The statusline nudges you with `🔨 /gaia-codify (<reason>)`:
 - Before your first completed review, it counts recurring patterns: `/gaia-codify (3 recurring patterns)`.
 - After a completed review, it stays quiet until something changes, then names it: a new recurring pattern, a pattern that has grown noticeably, or a change in how findings are counted.
 
-Each merge records the pull request's findings in a comment on it, and the count reads those comments. Only comments from the repository's owner, collaborators, and organization members count, so a findings comment from anyone else, such as an outside commenter on a public repository, is ignored.
+The count reads the findings comment each merge posts on its pull request. Only comments from the repository's owner, collaborators, and organization members count, so an outside commenter cannot skew it.
 
 ## What counts as recurring
 
-A kind of finding (its finding class) becomes a candidate once it appears on **3 or more different merged pull requests within the last 90 days**, at any severity, and no rule from an earlier run already covers it. Findings the audit could not place in a class are counted too, and surface as their own signal when they recur. A finding the audit accepted as a residual instead of fixing (listed in the pull request under `## Accepted residuals (recorded, not fixed)`, see [What gets recorded instead of filed](/workflow/tech-debt/#what-gets-recorded-instead-of-filed)) is left out, because the decision not to fix it is already made. Waived and filed findings still count.
+A kind of finding (its [finding class](#finding-classes)) becomes a candidate once it appears on **3 or more different merged pull requests within the last 90 days**, at any severity, and no rule from an earlier run already covers it. A finding accepted as a [residual](/maintenance/residue/#what-a-residual-is) is left out, because the decision not to fix it is already made. Waived and filed findings still count.
 
 The count reads your merged pull requests through `gh`. When it cannot, the run says so ("this is not an all-clear") instead of reporting nothing.
 
 ## Finding classes
 
-Every finding the Code Audit Team records carries a finding class: a fixed name for the kind of problem it is. Recurrence is counted per class, so two findings about the same kind of problem in different files count as one pattern. The lists below are the classes GAIA ships with. A member picks a class only from these lists, plus the classes your project registers (see [Your own finding classes](#your-own-finding-classes)). Claude never invents a class on the fly: a finding that fits none of them is recorded as `holistic/unclassified`.
+Every finding the Code Audit Team records carries a finding class: a fixed name for the kind of problem. Recurrence is counted per class, so the same kind of problem in different files counts as one pattern. A member picks a class only from the lists below, plus [your own](#your-own-finding-classes). A finding that fits none is recorded as `holistic/unclassified`.
 
 ### Tool findings
 
@@ -100,12 +100,12 @@ These match GAIA's coding conventions for React and TypeScript.
 
 ### Your own finding classes
 
-A member you add for your own code (see [Adding a member](/workflow/code-audit-team/#adding-a-member)) may need classes of its own. Your project registers them in `.gaia/finding-classes.json`, which ships empty and is yours: `/update-gaia` never merges or overwrites it. It holds two lists, and both must stay in the file even when one is empty, or the file is read as empty:
+A member you add for your own code (see [Adding a member](/workflow/code-audit-team/#adding-a-member)) may need classes of its own. They go in `.gaia/finding-classes.json`, which ships empty and is yours: `/update-gaia` never overwrites it. It holds two lists:
 
 - **`classes`**: new kinds of problem, each named `<prefix>/<slug>` in lowercase words joined by hyphens, such as `api/missing-rate-limit`. The member's agent file names them as its own.
 - **`oracle_prefixes`**: the prefix of a check tool of your own, such as `ruff`. Any finding id after that prefix is accepted as it is, the way GAIA accepts `axe/<rule>`.
 
-`/gaia-codify` counts a registered class like a built-in one, and `file-tech-debt` files its findings instead of setting them aside as malformed. Register a class before the member uses it: a class in no list is counted as unclassified. Keep each class a real kind of problem the member can assign the same way every time, not a label for "somewhere in this member's files". Ask Claude:
+A registered class counts like a built-in one. Register it before the member uses it: a class in no list counts as unclassified. Keep each class a real kind of problem, not a label for "somewhere in this member's files". Ask Claude:
 
 ```text
 Register the finding classes my <member> audit member reports in .gaia/finding-classes.json, and name them in its agent file.
@@ -113,7 +113,7 @@ Register the finding classes my <member> audit member reports in .gaia/finding-c
 
 ### Unclassified findings
 
-A finding recorded as `holistic/unclassified`, or with a class no list registers, is never a candidate, because there is no single kind of problem to write a guard for. When unclassified findings recur on 3 or more pull requests within 90 days, the run shows them as one extra row, marked as not a candidate. With your yes, it records a suppression the same way as a [decline](#decline-and-defer), shared with the team once its pull request merges, so the signal stays quiet until it rises noticeably or the suppression is older than 90 days. When the same kind of problem keeps landing here, the class list may be missing a class for it, or the cluster needs looking into on its own. `/gaia-codify` points this out but never adds a class itself. Registering a class later also counts findings that already recorded that exact class. Findings recorded as `holistic/unclassified` stay unclassified until they age out of the 90-day window.
+An unclassified finding is never a candidate, because there is no single kind of problem to write a guard for. When unclassified findings recur on 3 or more pull requests within 90 days, the run shows them as one extra row. With your yes, it quiets that row the same way as a [decline](#decline-and-defer). If the same kind of problem keeps landing there, the class list may be missing a class: `/gaia-codify` points this out but never adds one itself.
 
 ## How it judges the form
 
@@ -137,19 +137,17 @@ A written rule is the weakest option: it advises instead of enforcing, and Claud
    - **Change some**: pick rows, then choose **approve**, **decline**, **defer**, or **redirect** (a different form) for each
    - **Stop without changes**: nothing is authored or recorded
 4. **Apply** your choice for each candidate. Approved rule edits land in the working tree on the run's own branch.
-5. **Publish** the run's changes as one pull request at the end, merged only on your answer. A run that only declines, or only records the unclassified suppression, opens one too.
+5. **Publish** the run's changes, declines included, as one pull request, merged only on your answer.
 
 ### Decline and defer
 
-- **Decline** records, for your whole team, that you are not acting on the pattern. Each decline is a small file in the committed `.gaia/codify-declines/` folder, and it reaches your teammates through the run's pull request. Once that merges, the pattern stops showing up as a candidate for each teammate as soon as they pull it, so nobody reviews it again. Until then, your own manual `/gaia-codify` runs still list it. A decline lapses on its own in three cases:
+- **Decline** records, for your whole team, that you are not acting on the pattern. It is a small file in the committed `.gaia/codify-declines/` folder, so once the run's pull request merges, nobody on the team sees the pattern as a candidate again. A decline lapses on its own when:
   - the pattern keeps growing noticeably: at least 3 more pull requests, and a clearly larger share of audited pull requests than when you declined.
   - a GAIA update changes how findings are counted, so you can decide again on the new numbers.
-  - the decline is older than 90 days, the same window the count covers. A pattern that keeps recurring comes back for review once per window, and one teammate declining it again covers the whole team.
-
-  A decline made before GAIA 2.3.0 stays on the machine where it was made and keeps working there until it is older than 90 days.
+  - the decline is older than 90 days, the window the count covers.
 - **Defer** records nothing of its own. The candidate still appears in the next review; the nudge stays quiet until the pattern grows or the counting changes.
 
-Whenever your team has declined a pattern, the run lists it in a short **Declined by the team** section, apart from the candidates. They never count toward the statusline nudge. If you disagree with a decline, pick that row and approve it: under **Change some**, or **Reconsider some** when there are no other candidates. Nothing edits or deletes a decline: an approved written rule takes over once it merges, and any other approved change takes effect while the decline lapses on its own.
+Declined patterns are listed in a short **Declined by the team** section and never count toward the statusline nudge. To overturn a decline, pick that row and approve it, under **Change some** (or **Reconsider some** when there are no other candidates).
 
 ## Promoted rules
 
@@ -159,6 +157,6 @@ A rule `/gaia-codify` writes carries a one-line comment after its frontmatter sa
 <!-- gaia-harden: promoted from recurring finding_class <class>; pruned by /gaia-cleanse on obsolescence/redundancy/supersession/duplication only, never for non-recurrence -->
 ```
 
-`gaia-harden` is the command's old name. Leave the comment in place: it is what stops the pattern from being counted again, and removing it makes the pattern count again. [`/gaia-cleanse`](/maintenance/cleanse/) treats a marked rule like any other, except it never removes one because its pattern stopped showing up: a pattern that stops showing up means the rule is working.
+`gaia-harden` is the command's old name. Leave the comment in place: removing it makes the pattern count again. [`/gaia-cleanse`](/maintenance/cleanse/) never removes a marked rule because its pattern stopped showing up, since that means the rule is working.
 
 The run ends with a [cost line](/models-and-context/cost/).

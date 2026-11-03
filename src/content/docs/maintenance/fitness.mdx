@@ -3,9 +3,7 @@ title: /gaia-fitness
 description: Check your project's Claude setup against a fixed list of rules and get an F-to-A+ grade, plus advisory notes. Fixes only your own files, one file at a time, each on a yes.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-
-`/gaia-fitness` checks your project's Claude integration (skills, commands, agents, rules, hooks, settings, `CLAUDE.md` files, and the wiki) and reports an F-to-A+ grade. A linter (a script that gives the same result every time) does the checking and the grading. A separate review by Claude covers what a script can't judge. It only gives advice and never changes the grade.
+`/gaia-fitness` checks your project's Claude integration (skills, commands, agents, rules, hooks, settings, `CLAUDE.md` files, and the wiki) and reports an F-to-A+ grade. A linter (a script that gives the same result every time) does the checking and grading. A separate Claude review covers what a script can't judge; it only gives advice and never changes the grade.
 
 It runs like every [maintenance command](/maintenance/#how-maintenance-commands-run): from the main checkout, with any fixes on a branch of its own, ending in a pull request. Only you start it, by typing it; Claude never runs it on its own.
 
@@ -25,7 +23,7 @@ The [statusline](/workflow/statusline/#nudges) suggests `/gaia-fitness` for the 
 | --- | --- |
 | `💪 /gaia-fitness (grade B+)` | The check finds something in a file your project owns. The reason is the overall grade. |
 | `💪 /gaia-fitness (3 blended files)` | An [`/update-gaia`](/maintenance/update-gaia/) run combined your team's edits with GAIA's changes in harness files, and no `/gaia-fitness` run has reviewed them since the update reached your main checkout. |
-| `💪 /gaia-fitness (15 harness commits)` | Your team has made at least 15 commits that change harness files since the last `/gaia-fitness` run. GAIA's own scaffold and update commits do not count, and neither do commits not yet pulled into your main checkout. Before your first run, every commit counts. In a shallow clone, this reason never shows. |
+| `💪 /gaia-fitness (15 harness commits)` | Your team has made at least 15 commits that change harness files since the last `/gaia-fitness` run, not counting GAIA's own scaffold and update commits. Before your first run, every commit counts. |
 
 The commit count defaults to 15. To change it, ask Claude:
 
@@ -33,9 +31,9 @@ The commit count defaults to 15. To change it, ask Claude:
 Change the /gaia-fitness nudge to show after 30 harness commits instead of 15.
 ```
 
-Claude sets `fitness_commit_threshold` in [`.gaia/project.json`](/reference/gaia-folder/#projectjson), your team's shared GAIA settings, to a positive whole number. It is a team setting, so the change lands through a pull request. Without a valid value, the count is 15.
+Claude sets `fitness_commit_threshold` in [`.gaia/project.json`](/reference/gaia-folder/#projectjson), your team's shared GAIA settings, so the change lands through a pull request.
 
-A run clears the blended-files and harness-commits reasons and refreshes the nudge right away. It does not clear the grade reason: that one clears only when you fix the finding or [suppress it](#suppressing-a-finding) with a reason. An oversized `CLAUDE.md` belongs to [`/gaia-cleanse`](/maintenance/cleanse/) and never shows this nudge.
+A run clears the blended-files and harness-commits reasons. The grade reason clears only when you fix the finding or [suppress it](#suppressing-a-finding). An oversized `CLAUDE.md` belongs to [`/gaia-cleanse`](/maintenance/cleanse/) and never shows this nudge.
 
 ## What it checks
 
@@ -64,7 +62,7 @@ The overall grade is the lowest category grade. A category with nothing to check
 
 **Only your own files are graded.** A finding in a file GAIA ships is listed separately, in an upstream section, and is fixed by [`/update-gaia`](/maintenance/update-gaia/).
 
-The run also reports whether Claude Code's own built-in checks (`claude doctor`, `claude plugin validate`) ran or were skipped. For the Claude Code diagnostics and prompt review it does not run, use `/doctor` and `/doctor prompt-audit` interactively.
+The run also reports whether Claude Code's built-in checks (`claude doctor`, `claude plugin validate`) ran. For the diagnostics and prompt review it does not run, use `/doctor` and `/doctor prompt-audit`.
 
 ### The judgment pass
 
@@ -112,23 +110,21 @@ The report starts with a report card: one row per category, with the count of fi
 +------------------------------------------------------------------------------+
 ```
 
-Here one warning sets the `authoring` grade to B+, and because it is the lowest category grade, the overall grade is B+ too. The two informational findings alone would have given an A. `hooks`, `rules`, `settings`, and `wiki` show `n/a` because this project has nothing in them to check.
-
-After the card come the built-in checks, Claude's advisory findings from the judgment pass, and how to fix each finding.
+One warning sets `authoring` to B+, the lowest category grade, so the overall grade is B+. The two informational findings alone would give an A. The `n/a` categories have nothing to check.
 
 ## The flow
 
 1. **Check the repository state.** If the repository is in the middle of a rebase, merge, cherry-pick, or bisect, or on a detached HEAD, the run reports and grades but makes no fixes, and tells you how to get out of that state.
 2. **Check and judge.** The linter, the built-ins, and the judgment pass run.
 3. **Report.** The report card prints as a box, followed by the built-in checks, Claude's advisory findings, and how to fix each finding.
-4. **Fix.** For each finding the linter marks as fixable, a separate Sonnet agent proposes the complete new file. You see the diff and answer **Apply** or **Skip**, one file at a time. Fixes are written only to your project's own files. Before writing, GAIA checks again that the file is yours, refuses a path that leads outside the project through a symlink, and refuses a file that changed since you saw the diff. A GAIA-shipped file is never edited. When a fix would change too much, you get a recommended approach instead of a diff.
+4. **Fix.** For each fixable finding, a Sonnet sub-agent proposes the new file. You see the diff and answer **Apply** or **Skip**, one file at a time. Only your project's own files are written, never a GAIA-shipped file or one that changed since you saw the diff. When a fix would change too much, you get a recommended approach instead of a diff.
 5. **Verify.** The linter runs once more and reports what was fixed and anything new, with a fresh report card. There is no second round of fixes.
 6. **Publish**, asked once when at least one fix was applied:
    - **Publish** (recommended): commit, push, open a pull request, and merge it through the audit gate.
    - **Open PR only**: commit, push, and open a draft pull request without merging.
    - **Keep for review**: leave the changes on the run's branch, uncommitted, with the commands to review or discard them.
 
-A clean run prints `No findings. Overall A+. No changes made, no branch created.` A run with nobody to answer (a headless session) reports and stops without fixing anything.
+A clean run makes no branch. An unattended run reports and stops without fixing anything.
 
 The run ends with a [cost line](/models-and-context/cost/).
 
@@ -142,22 +138,7 @@ Suppress the authoring.playbook.max-lines fitness finding for
 splitting it would break the generator.
 ```
 
-Claude adds an entry to `.claude/gaia-fitness.json`, by rule id and path, with your reason:
-
-```json
-{
-  "version": 1,
-  "ignore": [
-    {
-      "rule_id": "authoring.playbook.max-lines",
-      "path": ".claude/skills/my-skill/references/big.md",
-      "reason": "Generated reference; splitting it would break the generator."
-    }
-  ]
-}
-```
-
-An entry without a reason is not applied. A malformed file, or an entry that names a rule or path that no longer exists, is itself a finding.
+Claude records it in `.claude/gaia-fitness.json` with your reason. An entry without a reason is not applied, and one that names a rule or path that no longer exists is itself a finding.
 
 ## Related
 

@@ -9,7 +9,7 @@ sidebar:
 
 Unlike [rules](/reference/rules/), which Claude reads and follows, hooks are scripts that always behave the same way. A guard hook turns back one of Claude's tool calls no matter what the model decided. Its message goes to Claude, usually with the allowed form of the command or the next step, and Claude retries that way, with nothing for you to do. Guards act on Claude's tool calls only: a command you run yourself in a terminal never meets them. A permission mode that skips prompts, such as auto mode, does not skip hooks.
 
-Claude never uses `cd` in a command (the `shell-cwd` rule), because a `cd` into another folder can switch GAIA's guards off without warning. When `jq` is missing, a guard hook turns the call back rather than letting it through unchecked; installing jq is yours (see [jq not installed](/reference/gates/#jq-not-installed)).
+Claude never uses `cd` in a command (the `shell-cwd` rule), because a `cd` into another folder can switch GAIA's guards off without warning. When `jq` is missing, a guard hook turns the call back rather than letting it through unchecked. Claude installs jq with your go-ahead, and hands you the command to type if it asks for your password (see [jq not installed](/reference/gates/#jq-not-installed)).
 
 Why each guard exists, and how to clear it, is in the [gate reference](/reference/gates/).
 
@@ -79,7 +79,7 @@ These hooks never turn anything back. They record what happened (test failures, 
 
 - **Native git hooks** in `.githooks/`: `pre-commit` (typecheck, [lint-staged](https://github.com/lint-staged/lint-staged), tests) and `commit-msg` ([commitlint](https://commitlint.js.org/)). Both also catch [machine-local references](/reference/gates/#machine-local-references). They run on every commit, Claude's or yours: Claude fixes what they report and commits again, and when you commit by hand you can ask Claude to fix it. See [Git hooks and conventions](/workflow/git-conventions/).
 - **Permission rules** in `.claude/settings.json`: for example, Claude cannot edit `pnpm-lock.yaml` directly; `pnpm install` regenerates it. Another rule makes Claude's edit tools ask you before they change a `.claude/settings.json` file ([the gate](/reference/gates/#claude-settings-file)).
-- **The `GAIA-Audit` required check** on GitHub, registered by [`/setup-gaia`](/getting-started/setup-gaia/). Claude posts it on every merge it runs, so it meets you only when you merge with the button on github.com.
+- **The `GAIA-Audit` required check** on GitHub, registered by [`/setup-gaia`](/getting-started/setup-gaia/). GAIA posts it on every merge Claude runs, so it meets you only when you merge with the button on github.com.
 - **The CI required checks** (`Vitest and Playwright`, `Shellcheck and bats`) on GitHub, also registered by `/setup-gaia`. A pull request with failing lint, typecheck, tests, or shellcheck cannot merge. See [CI required checks](/reference/gates/#ci-required-checks).
 
 ## Adding your own

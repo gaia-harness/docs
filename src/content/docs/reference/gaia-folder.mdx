@@ -30,6 +30,8 @@ You rarely edit anything here by hand. When you want to change a setting, ask Cl
 | `labels.json` | Your repository's GitHub labels | Committed | The release | Merged |
 | `conventional-commits.json` | The allowed commit and pull request title types | Committed | The release | Merged |
 | `setup-features.json` | The list of setup steps `/setup-gaia` owns | Committed | The release | Merged |
+| `toolchain-floors.tsv` | The oldest version of each tool GAIA supports | Committed | The release | Merged |
+| `vendor/` | The pinned version of each third-party skill GAIA bundles | Committed | The release | Merged |
 | `state-registry.json` | What each entry in `.gaia/local/` is and when it is cleaned up | Committed | The release | Merged |
 | `packages.json` | The packages in your workspace that GAIA covers | Committed | The release, then you | Never touched |
 | `finding-classes.json` | Your project's own [audit finding classes](/maintenance/codify/#your-own-finding-classes) | Committed | The release (empty), then you | Never touched |
@@ -64,7 +66,11 @@ Keep the file in your project. Put your own license in a `LICENSE` file at the p
 
 ### cli/
 
-`.gaia/cli/gaia` is the bundled `gaia` CLI, a command-line tool that GAIA's hooks and commands call. You don't need to run it. Ask Claude for what you want instead, for example `Sync GAIA's GitHub labels.`
+`.gaia/cli/gaia` is the bundled `gaia` CLI, a command-line tool that GAIA's hooks and commands call. You don't need to run it. Ask Claude for what you want instead, for example:
+
+```text
+Sync GAIA's GitHub labels.
+```
 
 `.gaia/cli/templates/` holds the templates `gaia scaffold` fills in for new components, hooks, routes, and services. See [Scaffolders](/skills/scaffolders/).
 
@@ -102,6 +108,14 @@ The types allowed at the start of a commit message or pull request title, such a
 
 The list of setup steps `/setup-gaia` owns. Each step has an id and a decision: `applied`, `declined`, or `not-applicable`. Decisions for project-level steps are committed in `project.json`, and decisions for machine-level steps stay in `.gaia/local/setup-state.json`. When a release adds a step, `/setup-gaia` runs it even on a project whose setup is already complete. See [New setup steps from later releases](/getting-started/setup-gaia/#8-new-setup-steps-from-later-releases).
 
+### toolchain-floors.tsv
+
+The oldest version of each tool GAIA supports, such as git, jq, and pnpm. [`/setup-gaia`](/getting-started/setup-gaia/), [`/gaia-init`](/getting-started/gaia-init/), and [`/update-gaia`](/maintenance/update-gaia/) check your tools against it, and an update checks against the incoming release's copy. See [Tool versions](/reference/gates/#tool-versions).
+
+### vendor/
+
+`vendor/playwright-cli.json` pins the version of the `playwright-cli` skill GAIA bundles from the `@playwright/cli` package, with a checksum for each of its files. GAIA updates it with each release.
+
 ### state-registry.json
 
 A list of everything GAIA keeps under `.gaia/local/`: what each entry is, whether a linked worktree shares it, and when it gets cleaned up. It also lists files that features removed in earlier releases left behind, which the [leftover-file cleanup](/maintenance/update-gaia/#leftover-file-cleanup) deletes after an update. See [Cleaning up `.gaia/local/`](#cleaning-up-gaialocal).
@@ -119,8 +133,16 @@ The packages in your workspace that GAIA's harness covers, as a list of `{name, 
 Team settings and project setup decisions, shared by everyone on the repository:
 
 - `sandbox_recommended` and `isolation_policy`, the two team settings. See [Team settings](/getting-started/setup-gaia/#4-team-settings).
-- `fitness_commit_threshold`, optional: how many of your team's harness commits since the last `/gaia-fitness` run show its statusline nudge. Without it the count is 15. No command sets it, so ask Claude, for example `Set the /gaia-fitness nudge threshold in .gaia/project.json to <n> commits.` See [The statusline nudge](/maintenance/fitness/#the-statusline-nudge).
-- `shellcheck`, optional: set it to `false` to turn off the shell lint in the Tests workflow's [Shellcheck and bats](/workflow/git-conventions/#github-workflows-that-ship) check. Without it, the lint is on. The workflow reads the value from the pull request itself, so the pull request that sets it is already not linted. The bats run has no setting: it runs only when `tests/shell/` holds a `.bats` suite and the pull request changes shell or that folder. To turn the lint off, ask Claude, for example `Turn off shellcheck in the Tests workflow by setting "shellcheck": false in .gaia/project.json.`
+- `fitness_commit_threshold`, optional: how many of your team's harness commits since the last `/gaia-fitness` run show its statusline nudge. Without it the count is 15. No command sets it, so ask Claude (see [The statusline nudge](/maintenance/fitness/#the-statusline-nudge)):
+
+  ```text
+  Set the /gaia-fitness nudge threshold in .gaia/project.json to <n> commits.
+  ```
+- `shellcheck`, optional: set it to `false` to turn off the shell lint in the Tests workflow's [Shellcheck and bats](/workflow/git-conventions/#github-workflows-that-ship) check. Without it, the lint is on. The workflow reads the value from the pull request itself, so the pull request that sets it is already not linted. The bats run has no setting: it runs only when `tests/shell/` holds a `.bats` suite and the pull request changes shell or that folder. To turn the lint off, ask Claude:
+
+  ```text
+  Turn off shellcheck in the Tests workflow by setting "shellcheck": false in .gaia/project.json.
+  ```
 - `setup_decisions`, the decision recorded for each project-level step in `setup-features.json`.
 
 `/gaia-init` creates the file with GAIA's defaults. `/setup-gaia` adds decisions, and only a repo admin running `/setup-gaia --reconfigure` changes the team settings. `/update-gaia` adds decisions for setup steps a new release brings, and commits them with the update. Its merge never overwrites the file.

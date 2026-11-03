@@ -7,52 +7,52 @@ sidebar:
 
 import { Aside } from '@astrojs/starlight/components';
 
-GAIA enforces its commit and pull request rules in three places: git hooks that run on every commit, Claude Code hooks that check a command before Claude runs it, and a few GitHub workflows that run on pull requests.
+GAIA checks commits and pull requests in three places: git hooks on every commit, Claude Code hooks that check a command before Claude runs it, and GitHub workflows on pull requests.
 
 ## Native git hooks
 
-The hooks live in `.githooks/`. Git finds them through its `core.hooksPath` setting, which `pnpm install` sets for you (through the root `prepare` script). GAIA does not use Husky: git's own `core.hooksPath` setting does the same job without another dependency.
+The hooks live in `.githooks/`. Git finds them through its `core.hooksPath` setting, which `pnpm install` sets for you. GAIA uses this instead of Husky, so there is no extra dependency.
 
 | Hook | What it runs |
 |---|---|
 | `pre-commit` | For each package that has staged files: typecheck, [lint-staged](https://github.com/lint-staged/lint-staged) ([ESLint](https://eslint.org/), [Prettier](https://prettier.io/), and [Stylelint](https://stylelint.io/) on the staged files), and the tests for the staged files. When GAIA's generated settings file no longer matches its sources, it stops the commit and names the regenerate step. When the commit changes the Code Audit Team roster or a member's agent file, it runs the [roster check](/workflow/code-audit-team/#the-roster-check). Claude fixes what fails and commits again. |
 | `commit-msg` | Checks the message with [commitlint](https://commitlint.js.org/) against `commitlint.config.mjs`. A message that does not follow Conventional Commits is refused, and so is any commit when commitlint cannot run. Claude reads the refusal, rewrites the message, and commits again. |
 
-Both hooks also run when you commit by hand in your own terminal. Then the failure is yours to see: the hook prints what failed, and you can ask Claude to fix it and commit.
+Both hooks also run when you commit in your own terminal. If one fails, ask Claude to fix it and commit.
 
-The test step launches headless Chromium for stories and hook tests. [`/gaia-init`](/getting-started/gaia-init/) and [`/setup-gaia`](/getting-started/setup-gaia/) install it. Otherwise, run `pnpm install:browsers` yourself once per machine. It installs the browsers' system libraries too, which can ask for your password.
+The test step needs headless Chromium for stories and hook tests. [`/gaia-init`](/getting-started/gaia-init/) and [`/setup-gaia`](/getting-started/setup-gaia/) install it; on another machine, see [Where tests go](/workflow/tdd/#where-tests-go).
 
 ### Checking a clone
 
-When a clone's hooks are not active, commits go through with no checks and nothing says so, so a broken setup looks exactly like a working one. This can happen when `pnpm install` ran with any `CI` environment variable set, even `CI=false`, because the setup step skips itself then, or when `pnpm install` never ran.
+When a clone's hooks are not active, commits go through with no checks and nothing says so. This happens when `pnpm install` never ran, or ran with any `CI` environment variable set, even `CI=false`.
 
-[`/setup-gaia`](/getting-started/setup-gaia/) checks this on every run: when git's `core.hooksPath` setting is not `.githooks`, it asks to turn the hooks on and sets it. To check outside setup, ask:
+[`/setup-gaia`](/getting-started/setup-gaia/) checks this on every run and offers to turn the hooks on. To check outside setup, ask:
 
 ```text
 Check that this clone's git hooks are active, and turn them on if they are not.
 ```
 
-**Why:** the pre-commit hook is the minimum check that stops a commit failing typecheck, lint, or its tests from landing. Claude cannot skip it either: if it tries `git commit` or `git push` with `--no-verify`, `-n` on a commit, or `-c core.hooksPath=<path>`, a Claude Code hook sends the command back, and Claude fixes the failures instead. See the [gate reference](/reference/gates/#no-verify).
+**Why:** the pre-commit hook is the minimum check that keeps a commit failing typecheck, lint, or its tests from landing. Claude cannot skip it: GAIA sends back `--no-verify`, `-n` on a commit, or `-c core.hooksPath=<path>`, and Claude fixes the failures instead. See the [gate reference](/reference/gates/#no-verify).
 
 ## Conventional Commits
 
 Commit messages and pull request titles follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<optional scope>): <subject>`. The types are `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`, and `wiki`, listed in `.gaia/conventional-commits.json`.
 
-The type at the front of every line makes the history easy to scan and filter: you can see at a glance which changes were features, fixes, or chores, and tools can build a changelog from it.
+The type at the front makes the history easy to scan and filter, and lets tools build a changelog from it.
 
 ## Pull request titles
 
-A squash merge uses the pull request title as the commit's first line on the default branch, followed by ` (#<number>)`. GAIA checks that whole line, so the 100-character limit applies to the title plus that suffix. A title that passes the commit-msg hook can still be one character too long once the suffix is added.
+A squash merge uses the pull request title as the commit's first line on `main`, followed by ` (#<number>)`. GAIA checks that whole line, so the 100-character limit applies to the title plus that suffix.
 
-Before `gh pr create` or `gh pr edit` runs with a title, a Claude Code hook checks the title with the same commitlint setup CI uses, and blocks a title that would fail. The refusal tells Claude what failed, so Claude shortens or corrects the title and runs the command again. You don't have to do anything. It also blocks `gh pr create --fill` (and `-f`) with no `--title`, because the title GitHub would fill in cannot be checked in advance. Claude passes `--title` instead.
+Before `gh pr create` or `gh pr edit` runs with a title, GAIA checks the title with the same commitlint setup CI uses. When it would fail, Claude corrects it and tries again; nothing for you to do. `--fill` with no `--title` is sent back too, because GitHub's filled-in title cannot be checked in advance.
 
-By default, [`/setup-gaia`](/getting-started/setup-gaia/#5-squash-only-merges) sets your repository to allow only squash merges, with the PR title as the commit's first line. So the title check covers exactly what lands on the default branch.
+By default, [`/setup-gaia`](/getting-started/setup-gaia/#5-squash-only-merges) sets your repository to allow only squash merges, with the PR title as the commit's first line. So the title check covers exactly what lands on `main`.
 
 ## Draft pull requests
 
-Every pull request Claude opens for this repository opens as a draft. If Claude leaves off `--draft`, a hook sends the command back and Claude adds it. When the audit passes and posts `GAIA-Audit`, the pull request is marked ready for review, and a member's refusal turns it back into a draft.
+Every pull request Claude opens for this repository opens as a draft; GAIA sends back a `gh pr create` without `--draft`, and Claude adds it. When the audit passes and posts `GAIA-Audit`, the pull request is marked ready for review, and a member's refusal turns it back into a draft.
 
-**Why:** reviewers are notified when a pull request is ready, and in a GAIA project that is when the audit passes. A pull request opened as ready notifies them before any audit has run. Pull requests to another repository are allowed without `--draft`.
+**Why:** reviewers are notified when a pull request is ready, which in a GAIA project should be when the audit passes. Pull requests to another repository need no `--draft`.
 
 <Aside type="note" title="Private repositories on GitHub Free">
 On GitHub Free, draft pull requests are available only in public repositories ([compare plans](https://github.com/pricing#compare-features)). So in a private repository, GAIA allows a pull request without `--draft`, and it opens ready for review.
@@ -60,13 +60,11 @@ On GitHub Free, draft pull requests are available only in public repositories ([
 
 ## Branches and worktrees
 
-A **branch** is a named line of commits. In a single checkout (the folder you cloned), only one branch is checked out at a time, and switching branches swaps the files in that folder.
-
-A **worktree** is an extra folder linked to the same repository, with its own branch checked out. Each worktree has its own copy of the files, so two tasks can run at the same time without touching each other or your main checkout.
+A **worktree** is an extra folder linked to the same repository, with its own branch checked out. Each has its own copy of the files, so two tasks can run at once without touching each other or your main checkout.
 
 GAIA runs most work in a worktree, each on its own new branch. Your team's isolation policy decides when Claude uses a worktree and when it uses a branch in your current checkout. See [Isolate](/workflow/work-lifecycle/#3-isolate).
 
-Every branch GAIA creates, in a worktree or not, is named in the form `<kind>/<rest>`. See [Name](/workflow/work-lifecycle/#2-name). Claude never commits or pushes to `main` or `master`, or force-pushes them: a hook turns those commands back, and Claude works on a branch and opens a pull request instead.
+Every branch GAIA creates, in a worktree or not, is named in the form `<kind>/<rest>`. See [Name](/workflow/work-lifecycle/#2-name). Claude never commits, pushes, or force-pushes to `main` or `master`: GAIA sends those commands back, and Claude works on a branch and opens a pull request instead.
 
 ## GitHub workflows that ship
 
@@ -74,8 +72,8 @@ Three workflows ship in `.github/workflows/`. None of them runs Claude.
 
 | Workflow | When it runs | What it does |
 |---|---|---|
-| **Tests** (`tests.yml`) | Pull requests to `main`, and manual runs (`workflow_dispatch`). A push to `main` triggers the workflow but runs no job. | Two checks, both made required by [`/setup-gaia`](/getting-started/setup-gaia/#recommended-defaults-admin-only). **Vitest and Playwright** runs when the pull request changes anything under `apps/` or `packages/`, or the shared workspace files. It typechecks and runs the unit tests of every workspace package, lints the web app's files changed since the last commit this check passed on (all of the pull request's changes when none has), and runs the web app's Playwright tests. A change to something lint reads (the ESLint or Prettier config, a web app tsconfig, a `package.json`, `pnpm-workspace.yaml`, or the lockfile) lints the whole web app instead, because it can make an unchanged file fail. A `chore(deps)` pull request skips them only when every changed file is a package manifest. [Playwright](https://playwright.dev/) runs one worker per CPU core. **Shellcheck and bats** checks the shell scripts and [bats](https://github.com/bats-core/bats-core) test files (`.sh`, `.bats`) the pull request adds or changes with [shellcheck](https://www.shellcheck.net/), a shell linter, and runs your bats suites in `tests/shell/` when shell or anything in `tests/shell/` changed. A `.shellcheckrc` in your repository applies, and a change to it lints every shell file. It skips GAIA's own shell scripts only on a GAIA update. It runs on every pull request and finishes in seconds when there is no shell to check. To turn the lint off, see [`project.json`](/reference/gaia-folder/#projectjson). |
-| **[Chromatic](https://www.chromatic.com/)** (`chromatic.yml`) | `main`, and pull requests that are ready for review. Drafts are skipped. | Takes a screenshot of every story, once in light mode and once in dark mode, so each story costs two snapshots per build. A branch pushed several times as a draft pays for only one build, when it is marked ready. The snapshot job's `GITHUB_TOKEN` can only read the repository contents. |
+| **Tests** (`tests.yml`) | Pull requests to `main`, and manual runs. | Two checks, both made required by [`/setup-gaia`](/getting-started/setup-gaia/#recommended-defaults-admin-only). **Vitest and Playwright** runs when the pull request changes anything under `apps/` or `packages/`, or the shared workspace files. It typechecks and runs the unit tests of every workspace package, lints the web app's changed files (the whole app when a lint config, tsconfig, `package.json`, or the lockfile changes), and runs the web app's Playwright tests. A `chore(deps)` pull request skips them only when every changed file is a package manifest. [Playwright](https://playwright.dev/) runs one worker per CPU core. **Shellcheck and bats** checks the shell scripts and [bats](https://github.com/bats-core/bats-core) test files (`.sh`, `.bats`) the pull request adds or changes with [shellcheck](https://www.shellcheck.net/), a shell linter, and runs your bats suites in `tests/shell/` when shell or anything in `tests/shell/` changed. A `.shellcheckrc` in your repository applies, and a change to it lints every shell file. It skips GAIA's own shell scripts only on a GAIA update. It finishes in seconds when there is no shell to check. To turn off the shellcheck lint (the bats suites still run), see [`project.json`](/reference/gaia-folder/#projectjson). |
+| **[Chromatic](https://www.chromatic.com/)** (`chromatic.yml`) | `main`, and pull requests that are ready for review. Drafts are skipped. | Takes a screenshot of every story, once in light mode and once in dark mode, so each story costs two snapshots per build. A branch pushed several times as a draft pays for only one build, when it is marked ready. |
 | **PR Conventions** (`pr-conventions.yml`) | Pull requests (opened, edited, pushed) | Advisory only: it reports but does not block. Checks the branch name, checks the title as the future squash-merge commit line, and checks that a plan branch's type (`<type>/spec-<nnn>`) matches the title's type. Safe on pull requests from forks: it uses no secrets and a read-only token. |
 
 The Tests and Chromatic workflows pin third-party actions to exact commit SHAs and set a time limit on each job. The audit itself runs locally; see [Code Audit Team](/workflow/code-audit-team/).

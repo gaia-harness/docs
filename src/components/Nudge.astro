@@ -1,0 +1,33 @@
+---
+// A statusline nudge, in the color GAIA's statusline draws it
+// (.gaia/statusline/gaia-statusline-right.sh, nudge_set). Matches the
+// colors on workflow/statusline.mdx.
+interface Props {
+	cmd: keyof typeof COLORS;
+	text: string;
+	block?: boolean;
+}
+
+const COLORS = {
+	'setup-gaia': '#f0abfc',
+	'update-gaia': '#22d3ee',
+	'update-deps': '#facc15',
+	'gaia-cleanse': '#4ade80',
+	'gaia-fitness': '#93c5fd',
+	'gaia-codify': '#e879f9',
+	'gaia-debt': '#fca5a5',
+	'gaia-residue': '#e5e7eb',
+	'gaia-wiki': '#67e8f9',
+} as const;
+
+const { cmd, text, block = false } = Astro.props;
+const style = `color: ${COLORS[cmd]}; font-weight: 700;`;
+---
+
+{
+	block ? (
+		<pre style="padding: 0.75rem 1rem; overflow-x: auto; border: 1px solid var(--sl-color-gray-5); background: #1a1b26;"><code><span style={style}>{text}</span></code></pre>
+	) : (
+		<code style="background: #1a1b26;"><span style={style}>{text}</span></code>
+	)
+}

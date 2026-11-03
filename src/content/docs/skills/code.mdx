@@ -5,9 +5,7 @@ sidebar:
   order: 1
 ---
 
-These skills shape how Claude writes and reviews code. Each one loads automatically when the task matches its trigger, whether the task comes from your request or from work Claude or a sub-agent is already doing. You don't call them by name.
-
-The React app's skills live in `apps/web/.claude/skills/` and load in sessions that work on the app. `tdd` and `naming-conventions` live in the root `.claude/skills/` and apply anywhere in the repository.
+These skills shape how Claude writes and reviews code. Each loads on its own when the task matches its trigger ([how triggering works](/skills/#how-triggering-works)). You don't call them by name.
 
 ## TypeScript
 
@@ -40,15 +38,15 @@ Descriptive names that explain themselves, in any language: TypeScript, bash, wo
 Conventions for React components, pages, routes, hooks, and forms. Claude runs four checks before writing code:
 
 - **Hook check**: before a `useEffect`, decide whether it should be an Effect at all (an Effect is for syncing with something outside React, like a browser API or the network). No `useMemo`, `useCallback`, or `memo` (see below). For a `useState` with no initial value, use `undefined`, not `null`.
-- **Form element check**: plain HTML form elements (`<input>`, `<select>`, `<textarea>`, checkboxes, and buttons) are replaced with the [shadcn/ui](https://ui.shadcn.com/) controls in `~/components/ui/` (`Input`, `NativeSelect`, `Textarea`, `Checkbox`, `RadioGroup`, `Button`). Those controls are grouped in `Field` parts and connected to the form with [Conform](https://conform.guide/), the form library. `@conform-to/zod` is always imported from its `/v4` subpath; importing it without the subpath fails at runtime, and lint catches it.
+- **Form element check**: plain HTML form elements are replaced with the [shadcn/ui](https://ui.shadcn.com/) controls in `~/components/ui/` (`Input`, `NativeSelect`, `Textarea`, `Checkbox`, `RadioGroup`, `Button`), grouped in `Field` parts and connected to the form with [Conform](https://conform.guide/). `@conform-to/zod` is imported from its `/v4` subpath, which lint enforces.
 - **Translation check**: every string the user sees comes from `t()`.
 - **React 19 idiom check**: `ref` as an ordinary prop (no `forwardRef`), `use()` rather than `useContext`, `<Context>` rather than `<Context.Provider>`, guarding against `count && <X />` rendering a stray `0`, and [React Router](https://reactrouter.com/)'s form handling instead of `useActionState`, `useFormStatus`, or `useOptimistic`.
 
-**Memoization is left to the compiler.** React Compiler is on by default. It caches values and components for you so they are not recomputed on every render, so plain code needs no `useMemo`, `useCallback`, or `memo`. A manual memo is allowed in only two cases: a value is passed into code the compiler does not compile, or the compiler skips a component (a bailout) and measurement shows the memo matters. Each manual memo carries a comment naming its case.
+**Memoization is left to the compiler.** React Compiler is on by default and caches values and components for you, so plain code needs no `useMemo`, `useCallback`, or `memo`. A manual memo is allowed in two cases, each with a comment naming it: a value passed into code the compiler does not compile, or a component the compiler skips (a bailout) where measurement shows the memo matters.
 
-**Data loading** follows one pattern. Data that belongs to the URL loads through the route's server `loader` by default (or a `clientLoader`). Data that belongs to a component loads through [TanStack Query](https://tanstack.com/query/latest), when your project has it enabled. A Query reference covers query keys, derived state with `select`, dependent and paginated queries, error handling, and optimistic updates.
+**Data loading.** Data that belongs to the URL loads through the route's `loader` (or a `clientLoader`). Data that belongs to a component loads through [TanStack Query](https://tanstack.com/query/latest), when your project has it enabled.
 
-Before adding a dependency or writing a helper from scratch, the skill follows the reuse order in the [`coding-guidelines`](/reference/rules/#always-loaded-root) rule: code already in the project, then built-in browser APIs and elements (`Intl`, `URL`, `structuredClone()`, `<dialog>`, modern CSS), then a dependency you already have, then a new dependency, and only then custom code. A project component wins over a native element, because the wrapper exists for a reason. It also covers when to split out a component, and how routes and pages divide the work: files in `app/routes/` stay thin, and the UI lives in `app/pages/`.
+**Reuse first.** Before adding a dependency or writing a helper, Claude follows the reuse order in the [`coding-guidelines`](/reference/rules/#always-loaded-root) rule: code already in the project, then built-in browser APIs and elements (`Intl`, `URL`, `structuredClone()`, `<dialog>`), then a dependency you already have, then a new one, and only then custom code. Files in `app/routes/` stay thin, and the UI lives in `app/pages/`.
 
 **Triggers** when writing or reviewing React components, hooks, or event handlers, deciding whether to extract a component, deciding whether a manual memo or `"use no memo"` is justified, debugging stale closures or infinite re-renders, weighing a new dependency, or choosing a React 19 idiom.
 
@@ -56,17 +54,15 @@ Before adding a dependency or writing a helper from scratch, the skill follows t
 
 ## React Performance
 
-You point it at one specific interaction, like a button click, and it finds the component that re-renders when it shouldn't and explains what is causing the extra work. It diagnoses; it does not fix anything itself. You can also run it as `/gaia-react-perf <target>`. See [React performance](/skills/react-performance/) for the full workflow.
-
-**Triggers** only when you clearly ask about rendering: "profile renders", "measure renders", "why is X re-rendering", or "diagnose render performance". It does not trigger on a vague "feels slow" or "janky"; [React Doctor](https://github.com/millionco/react-doctor) covers those.
+Finds the component that re-renders when it shouldn't on one interaction, and why. It diagnoses; it does not fix. Also `/gaia-react-perf <target>`. See [React performance](/skills/react-performance/).
 
 ## Styling
 
 ### Tailwind
 
-Every color uses a shadcn role token, a color named for its job rather than its hue (`bg-background`, `text-foreground`, `text-muted-foreground`, `bg-primary`, `border-input`, `text-destructive`). One token covers both the light and dark themes. `@gaia-harness/lint` fails raw palette classes (like `bg-blue-500`), color literals, and arbitrary color classes. Other arbitrary values are allowed when no scale step or token fits.
+Every color uses a shadcn role token, a color named for its job rather than its hue (`bg-background`, `text-muted-foreground`, `bg-primary`, `text-destructive`). One token covers light and dark themes. Lint fails raw palette classes (like `bg-blue-500`), color literals, and arbitrary color classes.
 
-`cn` (from the `cn` package) is the only helper for combining classes. It joins classes and resolves conflicts between them, so a `className` passed in by the caller comes last and overrides the component's default. Write a conditional class as `cond && 'class'`; lint rejects the object form and ternaries with an empty branch. Variants with several classes use `cva`. Custom sizes use `rem`, never `px`, and a new role token is named for what the element is.
+`cn` is the only helper for combining classes. It resolves conflicts, so a caller's `className` comes last and overrides the default. Write a conditional class as `cond && 'class'`. Variants with several classes use `cva`. Custom sizes use `rem`, never `px`.
 
 **Triggers** when writing [Tailwind](https://tailwindcss.com/) classes, combining classes with `cn`, writing conditional classes, building variants, defining `@theme` tokens, picking `rem` or `px`, or working with breakpoints.
 
@@ -74,15 +70,13 @@ Every color uses a shadcn role token, a color named for its job rather than its 
 
 ### Skeleton Loaders
 
-Loading placeholders (skeletons) that match the real content's layout exactly. A skeleton uses the same HTML elements and font classes as the real content, plus a shared `shimmer` class; anything that is not text stays an empty `<div>`. The skill includes a 200ms delay so a fast load does not flash the skeleton on screen.
-
-Fixed text in a skeleton that gets translated uses `t()` or `<Trans>`, the same call the real component uses, so the widths match. The skeleton's root element carries `aria-hidden`, so screen readers skip it. The region that receives the content carries `aria-busy="true"` or a visually hidden `role="status"` live region.
+Loading placeholders (skeletons) that match the real content's layout: the same HTML elements and font classes, plus a shared `shimmer` class, with a 200ms delay so a fast load does not flash. Translated text uses the same `t()` call as the real component, so widths match. The skeleton is hidden from screen readers, and the region that receives the content is marked busy.
 
 **Triggers** when adding loading states, building skeletons for async data, handling pending route transitions, or preventing layout shift.
 
 ## Test-driven development
 
-`tdd` runs the red-green-refactor loop Claude uses to build features and fix bugs, and its React companion, `tdd-react`, holds the frontend testing reference: stories as component tests, hook tests, [MSW](https://mswjs.io/), route tests, and [Playwright](https://playwright.dev/). See [Test-driven development](/workflow/tdd/) for how the loop works and how GAIA checks that each test can catch a bug.
+`tdd` runs the red-green-refactor loop, and `tdd-react` holds the frontend testing reference: stories, hook tests, [MSW](https://mswjs.io/), route tests, and [Playwright](https://playwright.dev/). See [Test-driven development](/workflow/tdd/).
 
 **Triggers** when building features or fixing bugs, mentioning "red-green-refactor", asking for integration tests, or asking for test-first development.
 
@@ -90,7 +84,7 @@ Fixed text in a skeleton that gets translated uses `t()` or `<Trans>`, the same 
 
 ## Playwright CLI
 
-Microsoft's [Playwright CLI](https://github.com/microsoft/playwright-cli) skill for browser automation, copied unchanged from Microsoft's repository. It can navigate, click, type, take screenshots, manage cookies and storage, run several browser sessions in parallel, and find page elements using the references in the page snapshots it saves. It runs the `playwright-cli` command installed on your machine, which [`/setup-gaia`](/getting-started/setup-gaia/) installs once per machine, and `/update-deps` offers to upgrade it when it is out of date.
+Microsoft's [Playwright CLI](https://github.com/microsoft/playwright-cli) skill for browser automation, unchanged: navigate, click, type, take screenshots, manage cookies and storage, and run several sessions in parallel. [`/setup-gaia`](/getting-started/setup-gaia/) installs the `playwright-cli` command once per machine, and `/update-deps` offers to upgrade it.
 
 **Triggers** when navigating websites, filling forms, taking screenshots, testing web applications, or extracting information from pages. You can also say "use playwright for ...".
 
@@ -106,6 +100,6 @@ Lint requires every `eslint-disable` comment to give a reason after `--` (`@esli
 
 ## Accessibility Fixes
 
-Fixes specific accessibility errors reported by [axe-core](https://github.com/dequelabs/axe-core), the accessibility checker: `color-contrast`, `label`, `image-alt`, `button-name`, `link-name`, `region`, `heading-order`, the `aria-*` rules, `tabindex`, `duplicate-id`, and others. For an error not on its list, it makes a fix and then re-runs the check to confirm. Fixes use role tokens and the `ui` controls, so they work in both light and dark themes. General guidance lives in the `accessibility` rule; this skill handles the specific fix once an error is reported.
+Fixes specific accessibility errors reported by [axe-core](https://github.com/dequelabs/axe-core): `color-contrast`, `label`, `image-alt`, `button-name`, `link-name`, `region`, `heading-order`, the `aria-*` rules, `tabindex`, `duplicate-id`, and others. For an error not on its list, Claude fixes it and re-runs the check. Fixes use role tokens and the `ui` controls, so they work in both themes.
 
 **Triggers** when an axe rule name (like `color-contrast`) appears in the output of a story test under [Vitest](https://vitest.dev/) (`addon-a11y`), the Playwright accessibility helper (`apps/web/.playwright/a11y.ts`), or `code-audit-frontend`'s accessibility findings.

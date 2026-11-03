@@ -7,6 +7,8 @@ tableOfContents:
   maxHeadingLevel: 4
 ---
 
+import Nudge from '../../../components/Nudge.astro';
+
 `/setup-gaia` sets up a GAIA project on your machine and connects it to GitHub. On a new project, `/gaia-init` runs it for you. You can run it again any time. It checks what is still needed and runs only those steps.
 
 It covers three things:
@@ -20,7 +22,7 @@ Type `/setup-gaia` yourself; Claude does not start it when you ask in plain lang
 ## When to use this
 
 - After cloning an existing GAIA project, once per machine.
-- When the statusline shows `⚙️ /setup-gaia`.
+- When the statusline shows <Nudge cmd="setup-gaia" text="⚙️ /setup-gaia" />.
 - To connect GitHub to a project that skipped it.
 - On a new project, only if `/gaia-init` stopped before setup finished.
 

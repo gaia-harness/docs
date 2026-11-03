@@ -3,13 +3,15 @@ title: /update-gaia
 description: Pull the latest GAIA release into your project without overwriting your customizations.
 ---
 
-`/update-gaia` pulls the latest GAIA release into your project. It merges each file by comparing three versions: your file, the same file in the GAIA release your project is on, and the same file in the latest release (a [three-way merge](#the-three-way-merge)). GAIA's changes come in, your customizations stay, and you answer one question per real conflict. When a new release is available, the statusline shows a `🚀 /update-gaia` indicator.
+import Nudge from '../../../components/Nudge.astro';
+
+`/update-gaia` pulls the latest GAIA release into your project with a [three-way merge](#the-three-way-merge): GAIA's changes come in, your customizations stay, and you answer one question per real conflict. When a new release is available, the statusline shows <Nudge cmd="update-gaia" text="🚀 /update-gaia" />.
 
 It runs like every [maintenance command](/maintenance/#how-maintenance-commands-run): from the main checkout, in a worktree of its own, ending in a pull request.
 
 ## How to invoke
 
-Click the `🚀 /update-gaia` statusline indicator, or ask in plain language:
+Click the <Nudge cmd="update-gaia" text="🚀 /update-gaia" /> statusline indicator, or ask in plain language:
 
 - "update GAIA"
 - "pull the latest GAIA"
@@ -17,20 +19,23 @@ Click the `🚀 /update-gaia` statusline indicator, or ask in plain language:
 
 ## What it does
 
-1. **Checks where it is running.** Stops inside a linked worktree other than its own update worktree. Reads your current GAIA version from `.gaia/VERSION` and looks up the latest release. Never moves you to an older version.
-2. **Pulls first if your checkout is behind.** When your main checkout's GAIA version is behind the remote's, it fast-forwards your checkout instead of updating, then offers to continue from the pulled copy.
-3. **Checks whether a teammate is already updating.** Each update run opens a draft pull request first to mark the update as in progress (step 7). Before any download, it looks for one. If a teammate's update is still in progress, your run stops and names their pull request. If the open update is your own, the run resumes it or closes it to start fresh. The statusline also shows when a teammate's update is in progress.
-4. **Downloads and verifies the bundles.** Each release ships as `gaia-bundle-<tag>.tar.gz` with a `.sha256` checksum file. The bundle for your current version and the latest bundle are both checked against their published checksums before anything else happens. On a mismatch nothing has changed yet: the bad download is deleted and the run stops and tells you. Run `/update-gaia` again for a fresh download. If that one still doesn't match, the release is damaged or tampered with; report it to GAIA.
+1. **Checks where it is running** and reads your GAIA version from `.gaia/VERSION`. It never moves you to an older version.
+2. **Pulls first if your checkout is behind** the remote's GAIA version, then offers to continue from the pulled copy.
+3. **Checks whether a teammate is already updating.** Each run marks itself with a draft pull request (step 7). If a teammate's update is in progress, your run stops and names their pull request; the statusline shows it too. If the open update is your own, the run resumes it or closes it to start fresh.
+4. **Downloads and verifies the bundles.** The bundles for your current version and the latest release are checked against their published checksums before anything else happens. On a mismatch nothing has changed: the bad download is deleted and the run stops. Run `/update-gaia` again for a fresh download. If that one still doesn't match, the release is damaged or tampered with; report it to GAIA.
 
-   Then it checks this machine's tools against what the new release needs, using the new release's own list, so an older GAIA cannot let an outdated tool through. A tool that is missing or too old stops the run before anything is branched or merged, and Claude walks you through the update in the same run. See [Tools](/reference/tools/#checked-on-every-setup-and-update).
+   Then it checks this machine's tools against the new release's own list. A tool that is missing or too old stops the run before anything is branched or merged, and Claude walks you through updating it in the same run. See [Tools](/reference/tools/#checked-on-every-setup-and-update).
 5. **Picks the migration notes** shipped in the verified bundle (see [Migration notes](#migration-notes)).
-6. **Shows the full changelog** from your version to the latest, including every release in between, and asks **Proceed** or **Abort**. Abort leaves your project unchanged. The downloaded bundles are kept for the next run.
-7. **Creates an update worktree** on an `update/v<version>-<timestamp>` branch, from the default branch, whichever branch your main checkout holds. Your checkout's branch, files, and `node_modules` stay as you left them. The run then opens a draft pull request with an empty commit to mark the update as in progress, so two teammates never update at once. If it can't open one, it warns and continues without it.
-8. **Merges every file** (see [The three-way merge](#the-three-way-merge)), then asks you one question per real conflict, up to four per prompt. Every answer is recorded in `.gaia/update-decisions.json`, which is committed with the update, so the next update does not ask again. An item you put off is asked again at the next update.
-9. **Follows after-merge migration notes** and carries any new project-wide [setup steps](/getting-started/setup-gaia/#8-new-setup-steps-from-later-releases) the release adds. A step that needs a repo admin, such as the [required CI checks](/getting-started/setup-gaia/#recommended-defaults-admin-only), applies only when an admin runs the update. Otherwise the summary lists it as owed by an admin. From 2.4.0 the update also offers a repo admin [auto-merge](/getting-started/setup-gaia/#recommended-defaults-admin-only), the same question `/setup-gaia` asks. New setup steps for this machine wait for the merge (step 12), because they act on your main checkout, not the update's worktree. When the release adds a [Code Audit Team](/workflow/code-audit-team/#the-roster-check) member that now covers paths you had listed in `unowned:`, it removes those entries and lists each one, with the member that now owns it, in the summary. If a removed entry also covered files no member reviews, the summary says so. Ask Claude to add a narrower `unowned:` entry for those files.
-10. **Writes the new version** and manifest, runs the Quality Gate, and shows a summary: every file by outcome, every answer, every item still deferred, and any action the release notes say you owe (a dependency GAIA dropped, a file it removed), with the exact command. Those are suggestions; nothing is removed for you. Ask Claude to carry out any of them. It also records the harness files where it combined your edits with GAIA's, so the statusline can suggest [`/gaia-fitness`](/maintenance/fitness/#the-statusline-nudge) to review them once the update lands.
-11. **Asks once to commit**, then pushes. The push updates the draft pull request from step 7, whose description is replaced with the summary; if there isn't one, it opens a draft pull request, `chore(gaia): update to <tag>`. Either way the pull request merges through the [Code Audit Team](/workflow/code-audit-team/).
-12. **Tells you what comes after the merge.** When Claude merges the update's pull request, it offers the [leftover-file cleanup](#leftover-file-cleanup) and runs the new setup steps for this machine in your main checkout. After a merge made elsewhere, such as on github.com, run `/setup-gaia` from your main checkout to carry those setup steps.
+6. **Shows the changelog** from your version to the latest, every release in between included, and asks **Proceed** or **Abort**. Abort leaves your project unchanged.
+7. **Creates an update worktree** on an `update/v<version>-<timestamp>` branch cut from `main`, leaving your checkout's branch, files, and `node_modules` as they were. It opens the draft pull request that marks the update as in progress, so two teammates never update at once.
+8. **Merges every file** ([The three-way merge](#the-three-way-merge)), then asks one question per real conflict, up to four per prompt. Answers are committed in `.gaia/update-decisions.json`, so the next update does not ask again, except about items you put off.
+9. **Follows after-merge migration notes** and runs any new project-wide [setup steps](/getting-started/setup-gaia/#8-new-setup-steps-from-later-releases) the release adds.
+   - A step that needs a repo admin, such as the [required CI checks](/getting-started/setup-gaia/#recommended-defaults-admin-only), applies only when an admin runs the update; otherwise the summary lists it as owed. From 2.4.0 the update also offers an admin [auto-merge](/getting-started/setup-gaia/#recommended-defaults-admin-only).
+   - Setup steps for this machine wait for the merge (step 12), because they act on your main checkout.
+   - When a new [Code Audit Team](/workflow/code-audit-team/#the-roster-check) member covers paths you had listed in `unowned:`, those entries are removed and listed in the summary with their new owner. If a removed entry also covered files no member reviews, the summary says so; ask Claude to add a narrower `unowned:` entry for them.
+10. **Writes the new version**, runs the Quality Gate, and shows a summary: every file by outcome, every answer, every item still deferred, and any action the release notes say you owe (a dependency GAIA dropped, a file it removed). Nothing is removed for you; ask Claude to carry out any of them. Harness files where your edits were combined with GAIA's are recorded, so the statusline can suggest [`/gaia-fitness`](/maintenance/fitness/#the-statusline-nudge) to review them once the update lands.
+11. **Asks once to commit**, then pushes to the draft pull request, whose description becomes the summary. It merges through the [Code Audit Team](/workflow/code-audit-team/).
+12. **After the merge.** When Claude merges the update, it offers the [leftover-file cleanup](#leftover-file-cleanup) and runs the new setup steps for this machine. After a merge on github.com, type `/setup-gaia` in your main checkout to run them.
 
 The run ends with a [cost line](/models-and-context/cost/).
 
@@ -46,7 +51,7 @@ For every file GAIA ships, `/update-gaia` compares three copies:
 - **Base**: the same file in the GAIA release your project is on, the version in `.gaia/VERSION`. If the project was last synced from an unreleased GAIA build (it has a `.gaia/VERSION-dev` file), the base is that build, as long as this machine still keeps a copy of it.
 - **Latest**: the same file in the new release.
 
-The base is what makes the merge safe. Comparing yours with the base shows what you changed. Comparing the latest with the base shows what GAIA changed. So the merge never has to guess whose edit a difference is.
+The base is what makes the merge safe: comparing yours with the base shows what you changed, and comparing the latest with the base shows what GAIA changed, so the merge never guesses whose edit a difference is.
 
 | What changed since the base | What happens |
 | --- | --- |
@@ -58,7 +63,7 @@ The base is what makes the merge safe. Comparing yours with the base shows what 
 | GAIA removed the file, and you never edited it | It is deleted. |
 | GAIA removed the file, and you edited it | You are asked whether to remove it or keep it. |
 
-When you both changed a file, `git merge-file` merges the two line by line. Claude then reads your change and GAIA's change side by side, even when the text merged cleanly. Two edits can solve the same problem on different lines and merge without a conflict into duplicate or contradictory instructions, which a line-by-line merge cannot see.
+When you both changed a file, `git merge-file` merges the two line by line, then Claude reads both changes side by side, even when the text merged cleanly. Two edits can solve the same problem on different lines and merge into duplicate or contradictory instructions, which a line-by-line merge cannot see.
 
 - **Separate concerns that merged cleanly** are written with no question.
 - **Everything else** becomes one question: a text conflict, two changes to the same thing, or changes that contradict each other. The answers are **Combine** (both changes in one version, shown to you first), **Keep mine**, **Take GAIA's**, and **Decide later**, with the recommended one first. When your change covers something GAIA's misses, Claude suggests opening an issue on [gaia-harness/gaia](https://github.com/gaia-harness/gaia) describing it.
@@ -70,7 +75,7 @@ Every file the merge overwrites or deletes is backed up first, under `.gaia-back
 `.gaia/manifest.json` is GAIA's list of the files it ships. It gives each file one of three classes, which decide the recommended answer when you and GAIA both changed it:
 
 - **`owned`**: GAIA maintains the file. Most of `.claude/`, `.gaia/` and `.githooks/` is owned. A conflict question recommends GAIA's version. If you already had a file of your own at a path a new release starts shipping, yours is backed up and replaced.
-- **`shared`**: GAIA ships a starting version that you are expected to customize, such as `CLAUDE.md`, `.claude/settings.json`, `package.json`, `.gaia/audit-ci.yml`, `apps/web/app/styles/theme.css` and the CI workflows. A conflict question recommends keeping yours. If you already had a file at a path a new release starts shipping, you are asked instead of overwritten. When an update writes `.claude/settings.json` with a copy or an edit, Claude Code asks you first because [GAIA guards that file](/reference/gates/#claude-settings-file). Approve it if it matches the answer you just chose. An automatic merge of the file goes through with no prompt. An unattended run cannot write the file by copy or edit.
+- **`shared`**: GAIA ships a starting version you are expected to customize, such as `CLAUDE.md`, `.claude/settings.json`, `package.json`, `.gaia/audit-ci.yml`, `apps/web/app/styles/theme.css` and the CI workflows. A conflict question recommends keeping yours. If you already had a file at a path a new release starts shipping, you are asked instead of overwritten. When the update writes `.claude/settings.json` from one of your answers, Claude Code asks you to approve the write, because [GAIA guards that file](/reference/gates/#claude-settings-file). Approve it if it matches your answer.
 - **`wiki-owned`**: pages in `wiki/` that GAIA ships. They merge like `shared` files, and sections you added to one are kept.
 
 ### What the merge never touches
@@ -82,15 +87,19 @@ Every file the merge overwrites or deletes is backed up first, under `.gaia-back
 - **Your design system, once it is established.** After you settle your project's design (the `Design System` wiki page is marked established), that page and `apps/web/.claude/rules/design-baseline.md` become yours, and later updates skip both.
 - **`apps/web/.claude/settings.json`.** It is never merged. GAIA rebuilds it from the root `.claude/settings.json` plus `apps/web/.claude/settings.overlay.json`, so put frontend-only settings in the overlay.
 
-`package.json`, `pnpm-workspace.yaml` and `.gaia/audit-ci.yml` are merged key by key instead of as whole files. A key only you added is never touched, and neither is a key you removed that GAIA later changed. A key GAIA changed that you left alone takes GAIA's value. A key you both changed becomes a question. Your own dependencies, overrides, build approvals and [Code Audit Team](/workflow/code-audit-team/) entries stay as you set them. The one exception is a package GAIA renames: once the new name lands in your `package.json`, the merge deletes the old one from the same section, even if you changed its version. In 2.2.0 this swaps `@gaia-react/lint` for `@gaia-harness/lint`. If the new name ends up in a conflict you have not resolved, the old package stays. Each Code Audit Team reviewer file has a section listing the files that reviewer covers; after the merge, GAIA rebuilds that section from your `.gaia/audit-ci.yml`, so it matches your project and not GAIA's.
+`package.json`, `pnpm-workspace.yaml` and `.gaia/audit-ci.yml` are merged key by key. A key only you added, or one you removed, is never touched. A key GAIA changed that you left alone takes GAIA's value. A key you both changed becomes a question. Your dependencies, overrides, build approvals and [Code Audit Team](/workflow/code-audit-team/) entries stay as you set them.
+
+The one exception is a package GAIA renames (in 2.2.0, `@gaia-react/lint` to `@gaia-harness/lint`): once the new name lands in your `package.json`, the old one is deleted from the same section, even if you changed its version.
+
+After the merge, GAIA rebuilds each Code Audit Team member's list of covered files from your `.gaia/audit-ci.yml`, so it matches your project, not GAIA's.
 
 ## Leftover-file cleanup
 
-GAIA keeps machine-local state under `.gaia/local/`, which is never committed. When a release retires a feature, the files that feature kept there are no longer used, and the leftover-file cleanup deletes them. Files it doesn't recognize are listed and never deleted.
+GAIA keeps machine-local state under `.gaia/local/`, which is never committed. When a release retires a feature, the cleanup deletes the files that feature kept there. Files it doesn't recognize are listed, never deleted.
 
-The cleanup can't run inside the update's worktree: it needs the new release's list of retired files in your main checkout, which arrives only when the update's pull request merges and your main checkout pulls it. So the cleanup runs after the merge. When Claude merges the update's pull request, its cleanup step pulls your main checkout, lists the leftover files, and asks before deleting them. It then refreshes the [React Doctor](https://github.com/millionco/react-doctor) skill, if this machine has it, because the skill has no version of its own to compare and goes stale. A failed refresh is reported and the cleanup carries on. Last, it runs any new setup steps for this machine that the update held back.
+The cleanup runs after the merge, in your main checkout, because it needs the new release there. When Claude merges the update, it pulls your main checkout, lists the leftover files, and asks before deleting them. It then refreshes the [React Doctor](https://github.com/millionco/react-doctor) skill, if this machine has it, and runs the setup steps for this machine that the update held back.
 
-If that pull was skipped or failed, Claude tells you so, and if you merged on github.com, nothing offers it. In either case, once your main checkout is pulled, start Claude there (not in a worktree: a worktree's `.gaia/local/` is only a link to the main checkout's) and ask:
+If you merged on github.com, or the pull failed, start Claude in your pulled main checkout (not a worktree) and ask:
 
 ```text
 The GAIA update merged. Run GAIA's leftover-file cleanup from this main checkout, show me the list, then apply it if I agree.
@@ -98,13 +107,11 @@ The GAIA update merged. Run GAIA's leftover-file cleanup from this main checkout
 
 Then type `/setup-gaia` there to run the held-back setup steps for this machine.
 
-Every machine has its own `.gaia/local/`, so each teammate's copy has its own leftovers. A teammate who runs `/update-gaia` after the update merged gets the cleanup offered: the run pulls the update into their checkout (step 2), runs the new setup steps for their machine, shows the leftover files, and asks before deleting them. A teammate who pulled the update some other way can paste the same prompt.
+Every machine has its own `.gaia/local/`. A teammate who runs `/update-gaia` after the update merged gets the pull (step 2), their machine's setup steps, and the cleanup offered. A teammate who pulled some other way can paste the same prompt.
 
 ## Stopping and resuming
 
-Every stop after the update worktree exists leaves it in place, changes nothing in your main checkout, and prints the worktree's path.
-
-Re-run `/update-gaia` to resume. If a run stopped before writing the new version, re-running safely repeats the merge and your answers. If it stopped after writing the version but before committing, re-run it inside the update worktree and it picks up at the Quality Gate.
+A stop after the update worktree exists leaves it in place, changes nothing in your main checkout, and prints the worktree's path. Re-run `/update-gaia` to resume: before the version write, it safely repeats the merge with your answers; after it, re-run inside the update worktree and it picks up at the Quality Gate.
 
 To throw the stopped update away instead, ask Claude:
 
@@ -114,51 +121,13 @@ Discard the stopped GAIA update: close its draft pull request, then remove its w
 
 ## Migration notes
 
-A release can ship migration notes in its bundle, under `.gaia/migrations/<version>.md`, for steps a file merge cannot do: moving a directory tree, rewriting a config, removing a retired feature. `/update-gaia` reads notes only from the verified bundle, never from your working tree or a URL. It follows the notes for every version between yours and the latest, oldest first.
+A release can ship migration notes, `.gaia/migrations/<version>.md`, for steps a file merge cannot do: moving a directory tree, rewriting a config, removing a retired feature. `/update-gaia` reads them only from the verified bundle and follows the notes for every version between yours and the latest, oldest first.
 
 - **After-merge** notes run after the merge and before the version write. They are safe to repeat.
 - **Blocking** notes stop the update before anything is branched or merged. `/update-gaia` names the note and asks whether to follow it now. Following the note brings you to that note's version; re-run `/update-gaia` afterwards to get anything newer.
 
-### Updating to 2.4.0
-
-GAIA 2.4.0 ships a blocking note, so an update from 2.3.1 or earlier stops at it and asks whether to follow it now. That older `/update-gaia` has no tool check of its own, so the note runs the [tool check](#what-it-does) the newer one runs in step 4. Every tool must pass. Claude walks you through updating any that falls short, as in step 4, except that here it asks before installing a missing pnpm too. Once every tool passes, the update carries on in the same run. If a tool still falls short, or you decline, the update stops before anything is branched or merged. Run `/update-gaia` again once the tool is updated.
-
-When the tools pass, the note does not stop at 2.4.0. It checks the notes of every later release, then moves your app and carries on to the latest release in the same run, so you do not need to re-run `/update-gaia` afterwards. The one exception: if a later release also ships a blocking note, the update stops before anything is merged and names that note.
-
-2.4.0 moves the app from `frontend/` to `apps/web/` and renames its package from `frontend` to `web`, so your project can hold more apps under `apps/` and shared libraries under `packages/` ([Project layout](/getting-started/project-layout/)). The note makes the move in your main checkout, on a new update branch, not in a worktree:
-
-1. **Checks first.** Claude asks to remove each of your worktrees before the move. Land your open branches first, or rebase them onto the update once it merges. Your session must be started from the repository root.
-2. **Moves the app** to `apps/web/` with its git history, lists it as `web` in [`.gaia/packages.json`](/reference/gaia-folder/#packagesjson), and adds `apps/*` and `packages/*` to `pnpm-workspace.yaml` beside your own entries.
-3. **Merges the latest release** into the moved files with the usual [three-way merge](#the-three-way-merge), so your changes and earlier answers carry over.
-4. **Finds the old names** in your tracked files: `frontend/` and the old package name in workspace dependencies, `--filter` arguments, workflow path filters, and a `Dockerfile`. It asks about anything unclear, and checks that files git ignored before the move are still ignored at their new paths. It also moves your [Code Audit Team](/workflow/code-audit-team/) file patterns in `.gaia/audit-ci.yml` to the new paths and reports each change.
-5. **Finishes like any update:** it reinstalls dependencies, follows the after-merge notes, runs the Quality Gate, and makes one commit and one pull request.
-
-Restart Claude Code from the repository root before you merge that pull request, because the running session still uses the hook setup from before the move. If the move is interrupted, stay on the update branch and ask Claude to follow the 2.4.0 migration note again. It finishes only what is still owed.
-
-Two steps are yours, because Claude never opens `.env` files:
-
-- **Check your `.env` files** for the old `frontend/` path.
-- **On every other clone**, after pulling the update, move the ignored env files, `frontend/.env*`, into `apps/web/`. Git does not move ignored files, so they stay behind on clones that did not run the update.
-
-### Stories in 2.3.0
-
-GAIA 2.3.0 moves stories to Storybook's CSF Next format, where each behavior is a test attached to a story (see [Stories are the component tests](/workflow/tdd/#where-tests-go)). Its migration note converts every story file in your project with `gaia migrate-csf4`, then typechecks, lints, and runs the stories. It needs network access, because it fetches Storybook's own converter. Your story logic stays the same. Only its shape changes.
-
-- **Each converted story test needs a new review.** Converting renames every story test, so the update's pull request needs a fresh [worthiness review](/workflow/tdd/#everything-else-the-worthiness-review) for each one before it merges. Claude runs it.
-- **Open branches that touch stories** need the conversion too. Finish each one, or bring it up to date with the update, then ask Claude to convert its stories and review its tests again.
-- **A plan written before 2.3.0** that is not finished yet fails the plan check until its `Story play-function criterion` lines are renamed to `Story test criterion`. Ask Claude to rename them.
-- **If the conversion stops before writing anything**, Claude tells you why. It stops, for example, when your Storybook version is not 10.6 or Storybook's converter cannot be downloaded. A story file in Storybook's oldest format (`storiesOf` or `Template.bind`) has to be moved to the previous format first with Storybook's `csf-2-to-3` converter. Claude never discards an uncommitted change of yours. It asks you how to proceed.
-- **If a converted story fails**, the converted files stay in place. Claude shows you which story files failed and works through them with you. The conversion prints a command that undoes it, and Claude runs it only if you say so.
-
-If you brought in GAIA 2.3.0 without `/update-gaia`, the conversion has not run, and a story file in the old format is sent back with the command that converts it. The conversion stops if anything in the repo is uncommitted, so commit your work first. Then ask Claude:
-
-```text
-Convert my stories to CSF Next with gaia migrate-csf4, then show me the report.
-```
-
 ## Gotchas
 
-- Run it from the main checkout. Inside any other linked worktree it stops and tells you whether an update is pending; open Claude Code in the main checkout and run it there.
 - An update to the same version that is already applied but not committed is reported as such, never as "up to date". Commit it, or start over by asking Claude:
 
   ```text

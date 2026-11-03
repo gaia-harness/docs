@@ -3,7 +3,7 @@ title: Maintenance
 description: 'The GAIA commands that keep a project in shape as it grows: GAIA itself, dependencies, what Claude loads at startup, problems reviews keep finding, trade-offs accepted at merge, the wiki, the Claude setup, and bug reports for GAIA itself.'
 ---
 
-GAIA ships commands for doing work and commands for keeping the project in shape. This page covers the second kind. A project's upkeep (dependencies, the wiki, Claude's memory) drifts a little with every change, and small, regular passes keep each one cheap to fix. You rarely need to remember them: each one except `/gaia-forensics` surfaces as a statusline nudge when it is due.
+These commands keep a project in shape. Dependencies, the wiki, and Claude's memory drift a little with every change, and small, regular passes keep each one cheap to fix. You rarely need to remember each one.
 
 ## Commands
 
@@ -20,7 +20,7 @@ GAIA ships commands for doing work and commands for keeping the project in shape
 
 ## The statusline
 
-The right side of the [statusline](/workflow/statusline/) names each command above except `/gaia-forensics`, and also [`/gaia-debt`](/workflow/debt/), when it has work to do, with a short reason, for example `🐛 /gaia-debt (3 issues)`. A nudge clears once the command has done its work. Nudges show only in the main checkout, where these commands run.
+The [statusline](/workflow/statusline/) names each command above except `/gaia-forensics`, plus [`/gaia-debt`](/workflow/debt/), when it has work to do, with a short reason, for example `🐛 /gaia-debt (3 issues)`. A nudge clears once the command has done its work. Nudges show only in the main checkout, where these commands run.
 
 ## Which one to run
 
@@ -37,16 +37,16 @@ The boundary between `/gaia-cleanse` and `/gaia-wiki` is deliberate. `/gaia-clea
 
 ## How maintenance commands run
 
-Every maintenance command except `/gaia-forensics` (`/update-deps`, `/update-gaia`, `/gaia-cleanse`, `/gaia-codify`, `/gaia-residue`, `/gaia-wiki`, `/gaia-fitness`) follows the same pattern:
+Every maintenance command except `/gaia-forensics` follows the same pattern:
 
-1. **It starts from the main checkout.** Inside a linked worktree it stops and names the main checkout; open Claude Code there and run the command again. The exceptions are `/update-deps` and `/update-gaia`, which also accept their own `deps/` or `update/` worktree, so a re-run continues there.
+1. **It starts from the main checkout.** Inside a linked worktree it stops and names the main checkout; open Claude Code there and run the command again. `/update-deps` and `/update-gaia` also run in their own `deps/` or `update/` worktree, so a re-run continues there.
 2. **It offers to pull first** when your checkout's GAIA version is behind the remote's.
-3. **It does its work on a branch of its own**, created just before it first changes a file: a worktree cut from the default branch by default, following your team's [isolation policy](/workflow/work-lifecycle/#3-isolate). It never writes onto the branch your checkout holds. The branch is named for the command and a timestamp, for example `deps/2026-10-20-1432`.
+3. **It works on a branch of its own**, created just before it first changes a file: by default a worktree cut from `main`, following your team's [isolation policy](/workflow/work-lifecycle/#3-isolate). It never writes onto the branch your checkout holds. The branch is named for the command and a timestamp, for example `deps/2026-10-20-1432`.
 4. **It commits and opens a draft pull request**, reviewed by the [Code Audit Team](/workflow/code-audit-team/). Whether it then merges on its own, asks you first, or leaves the pull request for you depends on the command: see [who merges what](/workflow/work-lifecycle/#6-merge).
-5. **It cleans up** the worktree and branch and pulls the default branch. A worktree holding unresolved work is kept, with the commands to remove it.
-
-A run that ends with nothing to publish removes its empty branch and worktree.
+5. **It cleans up** the worktree and branch and pulls `main`. A worktree holding unresolved work is kept, with the commands to remove it. A run with nothing to publish removes its empty branch and worktree.
 
 Each run ends with a [cost line](/models-and-context/cost/) showing what it spent.
 
-`/gaia-forensics` works differently. It only reads, so it needs no branch or pull request: it saves its report under `.gaia/local/forensics/` and, when the problem looks like a GAIA bug, asks before filing it as a GitHub issue. See [`/gaia-forensics`](/maintenance/forensics/).
+## /gaia-forensics
+
+When a GAIA command or hook goes wrong, [`/gaia-forensics`](/maintenance/forensics/) turns the problem into a bug report to GAIA itself.

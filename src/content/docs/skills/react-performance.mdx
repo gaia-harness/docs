@@ -11,8 +11,6 @@ GAIA includes a render-performance diagnostic, the `gaia-react-perf` skill. You 
 
 It measures. It does not change your code. You read the diagnosis, then ask Claude to apply the fix in the same conversation.
 
-The render recording is built on [bippy](https://github.com/aidenybai/bippy), the same library that [react-scan](https://github.com/aidenybai/react-scan) uses to read React's internal component tree.
-
 ## How to ask for it
 
 Name the page and the one interaction to measure:
@@ -25,13 +23,11 @@ You can also type `/gaia-react-perf <page and interaction>`.
 
 The skill loads only when you clearly ask about rendering, with phrasing like "profile renders", "measure renders", "why is X re-rendering", or "diagnose render performance". It does **not** load for a vague "feels slow", "janky", or "optimize my app". [React Doctor](https://github.com/millionco/react-doctor) covers those.
 
-It needs one small, specific interaction: a button click or a local state change on a specific page. A page navigation or "the whole app" will not work. A navigation re-renders the whole page, so the problem gets lost among hundreds of framework renders. A small interaction re-renders only the part of the page it affects, so the cause stands out. If you don't name an interaction, Claude asks for one first.
+It needs one small interaction, such as a button click on a specific page. A page navigation or "the whole app" will not work: a navigation re-renders the whole page, and the cause gets lost among hundreds of framework renders. If you don't name an interaction, Claude asks for one.
 
 ## What Claude does
 
-Claude writes a temporary [Playwright](https://playwright.dev/) test that performs your interaction in a real browser and records every render it causes. It then reduces that recording to a short ranked summary, reads the summary, and removes the temporary test when the diagnosis is done. The raw recording is large (about 43,000 tokens even for a trivial click), so it stays on disk and never enters the conversation.
-
-It runs in the main checkout or in a worktree, and uses that checkout's own dev server ports. The dev server starts for you.
+Claude writes a temporary [Playwright](https://playwright.dev/) test that performs your interaction in a real browser, records every render it causes, and reduces the recording to a short ranked summary. The raw recording stays on disk, out of your context, and the temporary test is removed when the diagnosis is done. Claude starts the dev server, in the main checkout or a worktree.
 
 <Aside type="caution">
 The recording works only on a development build, which is what Claude starts. It cannot record a production build.
@@ -39,9 +35,9 @@ The recording works only on a development build, which is what Claude starts. It
 
 ## What you get back
 
-A component wrapped in `memo` is supposed to skip re-rendering when its inputs have not changed. The diagnostic looks for renders where that memo was defeated, not for everything that re-rendered. A render is memo-defeated when the component re-renders and every input that changed is a newly created object or function. The value may be the same, but it is a new copy, so React treats it as changed.
+A component wrapped in `memo` should skip re-rendering when its inputs have not changed. The diagnostic looks for renders where that memo was defeated: every changed input is a newly created object or function, the same value in a new copy, so React treats it as changed.
 
-Renders where nothing meaningful changed are not reported on their own, because chasing them leads to wrapping everything in memo for no real gain. Findings are ranked by how many memo-defeated renders a component had times how long its slowest render took. A component is also flagged on timing alone when it and its children take longer than the frame budget to render. The frame budget is the time one frame gets at 60 frames per second, 16ms by default. Ask Claude to use a different budget if your target differs.
+Findings are ranked by memo-defeated renders times the slowest render's time. A component is also flagged when it and its children take longer than the frame budget: 16ms, one frame at 60 frames per second. Ask Claude for a different budget if your target differs.
 
 For the top finding, Claude tells you:
 
@@ -61,7 +57,7 @@ Fix the structure first. If a value never changes, move it out of the component 
 | A context value built on every render | Move a static value to a constant at the top of the file, or split the context so components that don't use the changed part stop re-rendering | Fix the compiler bailout, or apply an exception case |
 | A child component defined inside another component's body | Move the component to the top level of the file | Not a memoization fix |
 
-The diagnostic cannot detect the last case on its own, because it sees a list of renders, not where each component was defined. Claude recognizes it from the component's name and the unstable input.
+Claude recognizes the last case from the component's name and the unstable input, since the recording does not show where a component is defined.
 
 To apply the fix, ask:
 
@@ -69,7 +65,7 @@ To apply the fix, ask:
 Apply the recommended fix for the top finding, then profile the same interaction again to confirm it is gone.
 ```
 
-After a real fix, the component disappears from the findings entirely. A memo that now works skips its render, so the recording has nothing for it. That absence is the clearest proof.
+After a real fix, the component disappears from the findings: a memo that works skips its render.
 
 ## When to stop
 
@@ -78,9 +74,7 @@ The diagnosis is done when both of these hold for your app's components:
 - No render is memo-defeated.
 - No render goes over the frame budget.
 
-You need both. The memo-defeat count catches cheap mistakes, a memo that silently does nothing. The frame-budget check catches the rarer case of a part of the page that is slow to render, which the count alone can miss.
-
-Claude names any leftover findings as out of scope instead of chasing them. A framework render (a router or library component the diagnostic did not filter out) is not something your app can fix, and an app finding far below the frame budget is too small to notice.
+Claude names any leftover findings as out of scope instead of chasing them: a framework render your app cannot fix, or an app finding far below the frame budget.
 
 ## Under the React Compiler
 
@@ -98,9 +92,9 @@ Measure what the React Compiler saves on <interaction>: profile renders with the
 
 Use it to find out why a memo that should skip a render does not, on one concrete interaction.
 
-Keep the cost in perspective. Saving renders often makes no difference anyone can notice. A memo-defeated render of a small component with no children costs about 0.038ms, hundreds of times under the 16ms frame budget. The diagnostic mainly finds broken memos and values that are recreated on every render. It is most valuable when the component whose memo is defeated is expensive to render along with its children, so that it goes over the frame budget. Don't let a finding with no noticeable cost tempt you into wrapping everything in memo.
+Keep the cost in perspective. A memo-defeated render of a small component costs about 0.038ms, hundreds of times under the 16ms frame budget. The diagnostic is most valuable when the defeated component is expensive enough to go over the budget. Don't let a finding with no noticeable cost tempt you into wrapping everything in memo.
 
-Two more limits worth knowing:
+Two limits:
 
-- **Timings need an honest baseline.** Under React's StrictMode, components render twice, which roughly doubles the measured times. The recording turns StrictMode off for honest numbers. If a run leaves StrictMode on, Claude says so; compare those timings with each other, but don't read them as real durations.
-- **Telling app code from framework code is a guess based on names.** The diagnostic decides whether a render is framework noise or your code by the component's name, not by where it is defined. A component with an unusual name can slip through, which is one more reason to review the fix yourself. A render whose component name could not be found at all is worth investigating in itself.
+- **StrictMode doubles timings.** The recording turns it off. If a run leaves it on, Claude says so; compare those timings with each other, not as real durations.
+- **App versus framework code is judged by component name.** A component with an unusual name can slip through, so review the fix yourself.
