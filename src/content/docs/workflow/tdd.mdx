@@ -3,7 +3,7 @@ title: Test-driven development
 description: How Claude builds features and fixes bugs test-first in a GAIA project, where each kind of test goes, and how GAIA checks that a test can actually catch a bug.
 ---
 
-Claude builds features and fixes bugs test-first. An always-loaded rule tells it to follow the `tdd` skill for this work, so you don't need to ask.
+GAIA has Claude build features and fix bugs test-first, through the `tdd` skill, so you don't need to ask.
 
 The skill runs a red-green-refactor loop: write one failing test (red), write just enough code to make it pass (green), tidy up (refactor), then move to the next behavior.
 
@@ -34,10 +34,10 @@ Tests mock only at the edges of the system: network requests, time, and randomne
 
 ### Which TDD style
 
-TDD has two classic schools, which Martin Fowler compares in [Mocks Aren't Stubs](https://martinfowler.com/articles/mocksArentStubs.html#ClassicalAndMockistTesting):
+TDD has two classic schools ([Mocks Aren't Stubs](https://martinfowler.com/articles/mocksArentStubs.html#ClassicalAndMockistTesting)):
 
-- **Detroit (classicist)** uses real objects wherever it can and checks the result: what the code returns, or what the user sees.
-- **London (mockist)** works outside-in from the user's side of the system, replaces every collaborator with a mock, and checks how the code calls them.
+- **Detroit (classicist)**: real objects, checks the result.
+- **London (mockist)**: outside-in, mocks every collaborator, checks how they are called.
 
 GAIA takes from both:
 
@@ -56,15 +56,19 @@ In the React app, each behavior is tested at the lowest layer that can check it.
 | Route | A route module's `loader` or `action` called with a `Request` in Vitest, no browser and no server, in `app/route-tests/<feature>/tests/` | Status, redirect, returned data, validation errors, authorization outcome, side effects |
 | End-to-end | [Playwright](https://playwright.dev/) against the dev server | What only the live server or a browser shows: middleware, the HTTP status of a refusal, hydration, focus, client navigation, one test per user flow |
 
-**What a route test cannot prove.** Calling a loader or action directly skips middleware, so a guard in middleware needs a live-server check. On a single-fetch request, a parent route's loader guards neither a child's action nor a child's loader. So each write action guards itself and its own test proves it, and a parent-loader guard on a read needs a live-server check. A route test also cannot prove an authorization outcome an upstream API owns, since the MSW handler answers however the test wrote it.
+**What a route test cannot prove.** It calls the loader or action directly, so it skips middleware: a guard there needs a live-server check. On a single-fetch request, a parent route's loader guards neither a child's action nor its loader, so each write action guards itself and its own test proves it, and a parent-loader guard on a read needs a live-server check. And it cannot prove an authorization outcome an upstream API owns, because the MSW handler answers however the test wrote it.
 
-**Playwright workers each get their own database.** When your project adds a real database, each parallel Playwright worker talks to its own server and database, and logs in on its own. Running the suite serially to share one database is not accepted. Test setup goes through builders that write to the worker's own database. Put them in a file you own, such as `apps/web/.playwright/project-fixtures.ts`, because GAIA replaces its `fixtures.ts` on update. The stock suite starts no extra servers, and an existing suite moves to this pattern only when you decide to.
+**Playwright workers each get their own database.** Once your project adds a real database, each parallel Playwright worker gets its own server and database, and test setup writes to that worker's database through builders. Keep the builders in a file you own, such as `apps/web/.playwright/project-fixtures.ts`, because GAIA replaces its `fixtures.ts` on update.
 
 **Stories are the component tests.** A story shows one visual state of a component, and each behavior is a named test attached to that story with `.test()`. The test clicks and types like a user and checks the result, in a real Chromium browser. A story can also have a play function, a script that clicks or types to bring the component into the state the story shows, but it checks nothing itself. Each test is reported by its own name, so a failure tells you which behavior broke. Claude does not write a separate test file that renders the component again.
 
-This is Storybook's newer story format, CSF Next. GAIA 2.3.0 moved to it, and [`/update-gaia`](/maintenance/update-gaia/#migration-notes) converts the stories you already have. A story file still in the old format is sent back with the command that converts it. Every story is also checked for accessibility, and a story that opts out of that check fails the tests unless the opt-out is recorded with a reason in `apps/web/test/story-a11y-opt-out.test.tsx`.
+This is Storybook's newer story format, CSF Next. [`/update-gaia`](/maintenance/update-gaia/#migration-notes) converts the stories you already have. A story file still in the old format is sent back with the command that converts it. Every story is also checked for accessibility, and a story that opts out of that check fails the tests unless the opt-out is recorded with a reason in `apps/web/test/story-a11y-opt-out.test.tsx`.
 
-Stories and hook tests need Chromium. [`/gaia-init`](/getting-started/gaia-init/) and [`/setup-gaia`](/getting-started/setup-gaia/) install it; outside them, run `pnpm install:browsers` yourself once per machine. It installs the browsers' system libraries too, which can ask for your password.
+Stories and hook tests need Chromium. [`/gaia-init`](/getting-started/gaia-init/) and [`/setup-gaia`](/getting-started/setup-gaia/) install it. On another machine, ask Claude to install the test browsers. The install adds system libraries and can ask for your password, so Claude hands you the command to type:
+
+```
+! pnpm install:browsers
+```
 
 ## Proving a test can fail
 
@@ -80,7 +84,7 @@ When the gate stops a commit, Claude runs the test file on its own, as a separat
 
 ### Everything else: the worthiness review
 
-Stories, component interaction tests, async tests, and Playwright tests have no reliable failing-then-passing run to observe. Route tests get this review too, on top of the RED gate. For these, a separate reviewer with no shared context reads each changed test, plus the test files next to it, once the tests pass. The author shares their own blind spots, so Claude cannot review its own tests here.
+Stories, component interaction tests, async tests, and Playwright tests have no reliable failing-then-passing run to observe. Route tests get this review too, on top of the RED gate. For these, a separate reviewer with no shared context reads each changed test, plus the test files next to it, once the tests pass. The session that wrote the tests never judges them, since it would share their blind spots.
 
 Each test is judged on two questions:
 
@@ -93,21 +97,19 @@ Each test gets one verdict: keep, fix, or delete. The reviewer edits no test or 
 
 ### The worthiness step
 
-A plan run, a plain request, and `/gaia-debt` each finish this review once the draft pull request is open and before the first audit round. A fix made at this point costs no clearance, because no member has earned one yet. If the branch changed no test of this kind, or every such test already has a verdict, the step ends with no commit.
+A plan run, a plain request, and `/gaia-debt` each finish this review once the draft pull request is open and before the first audit round. If the branch changed no test of this kind, or every such test already has a verdict, the step ends with no commit.
 
 - **Keep**: nothing more happens. A test that already has a keep for its current content is not reviewed again.
 - **Fix**: a fresh sub-agent fixes the test, Claude commits, and the reviewer judges the changed test once more. If it still gets a fix verdict, or the fixer cannot fix it, it becomes an [accepted residual](/maintenance/residue/#what-a-residual-is). If it now gets a delete verdict, the delete steps below apply. A fix for a test this branch did not change goes to [tech debt](/workflow/tech-debt/) instead.
-- **Delete**: Claude asks you, as described below, and an approved delete goes to the same fixer. A test rendered from a SPEC's UAT never gets a delete verdict: if it no longer matches, the SPEC is [reopened](/workflow/spec/#reopening-a-saved-spec) instead. A refused delete keeps the test with no residual. In an unattended run, the test stays and a residual is recorded.
+- **Delete**: Claude shows you the evidence (the redundant assertion and the test that already covers it) and asks you to confirm the delete or keep the test. An approved delete goes to the same fixer. A test rendered from a SPEC's UAT never gets a delete verdict: if it no longer matches, the SPEC is [reopened](/workflow/spec/#reopening-a-saved-spec) instead. A refused delete keeps the test with no residual. In an unattended run, the test stays and a residual is recorded.
 
-An audit fixer can change a test after it was judged, so Claude checks again after a clean audit. If a changed test then gets a fix verdict, Claude asks you. It recommends the fix and tells you it means another review by the member that owns the test and one more CI run. The alternative is an accepted residual.
-
-Claude follows this order from its instructions, and no gate stops an audit that skipped the step. The [worthiness verdict gate](/reference/gates/#worthiness-verdict) still catches a missing review at merge.
+If an audit fixer changes a test after it was judged and it now gets a fix verdict, Claude asks you. Fixing it means another review and one more CI run. The alternative is an accepted residual.
 
 ### The overlap pass
 
 A check proven at one layer does not need a slower test proving it again. After the worthiness step, a plan run looks for tests the branch changed that repeat what another test already checks, across stories and unit tests, route tests, and Playwright tests. It runs once per plan run, and only when the branch changed a Playwright test.
 
-An `overlap-evaluator` sub-agent proposes, for each duplicate, to drop it, merge it into the other test, move it to a lower layer, or keep both. It changes no file. A script then checks that each proposal cites a real test on a real layer, and sets aside any it cannot confirm. You see every remaining proposal in one list, with the property each test checks and the test it would rely on, and answer once: accept all as recommended, or revise. Proposals on a test rendered from a SPEC, or on code the branch did not write, are listed for information and never applied. A sub-agent applies the rest that you approved, the Quality Gate runs, Claude commits, and the worthiness step runs once more. In an unattended run nothing changes: the proposals are listed in the plan's progress file and the final summary. The pass files no tech debt and records no residual.
+An `overlap-evaluator` sub-agent proposes, for each duplicate, to drop it, merge it into the other test, move it to a lower layer, or keep both. You see every proposal in one list, with the test it would rely on, and answer once: accept all as recommended, or revise. Proposals on a test rendered from a SPEC, or on code the branch did not write, are listed for information and never applied. In an unattended run nothing changes: the proposals are listed in the plan's progress file and the final summary.
 
 ## What you see at the end
 
@@ -115,7 +117,7 @@ When the work is done, Claude's summary shows:
 
 - **Each source file it touched, with how it was classified**: predictable (owes a failing-first run) or not (goes to the worthiness review). Every file is listed, so a wrong call is visible.
 - **Honesty fixes**, already made. A test that could not fail for a real reason is rewritten in place, and you review it like any other edit.
-- **Proposed deletes**, each with its evidence shown inline: the redundant assertion and the test that already covers it. Claude asks you about each one (confirm the delete or keep the test) and never deletes on its own.
+- **Proposed deletes**, each with its evidence. Claude asks you about each one, as in [the worthiness step](#the-worthiness-step).
 
 The list shows the most severe findings first, with a count when there are more. Before merging, a hook checks that every changed test of this kind has a review on record for its current content. See [the worthiness verdict gate](/reference/gates/#worthiness-verdict).
 
