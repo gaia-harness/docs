@@ -46,7 +46,7 @@ Runs once per clone:
 
 - Installs the [React Doctor](https://github.com/millionco/react-doctor) skill and the [Playwright CLI](https://github.com/microsoft/playwright-cli).
 - Installs the TypeScript language server plugin, so Claude can jump to definitions and see type errors.
-- Creates `apps/web/.env` from `apps/web/.env.example`.
+- Creates `apps/web/.env` from `apps/web/.env.example`, if `/gaia-init` has not. It never overwrites an existing one.
 - Asks about the sandbox, if your team recommends it.
 
 #### Sandbox decision
