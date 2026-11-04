@@ -1,6 +1,6 @@
 ---
 name: voice-check
-description: Audit drafted or existing docs content against GAIA brand voice rules. Use this skill BEFORE publishing any new docs page, after editing copy, or when the user asks for a voice review, "voice check", "AI tell scan", "before I commit this", or mentions em dashes / AI tells / brand voice. Also trigger when the user says "check this for voice", "is this on-brand", or "scan for voice issues". Operates on .md / .mdx files in src/content/docs/ by default; accepts a path argument for a specific file.
+description: Audit drafted or existing docs content against GAIA brand voice rules. Use BEFORE publishing any new docs page, after editing copy, before committing copy, or whenever the user asks whether copy is on-voice or on-brand, or mentions em dashes, AI tells, or brand voice. Operates on .md / .mdx files in src/content/docs/ by default; accepts a path argument for a specific file.
 ---
 
 # voice-check
@@ -70,7 +70,7 @@ Docs are reference register. Procedural and declarative, not pitch.
 ### 7. Founder-byline check
 
 ```sh
-grep -rniE '^|[^t]By Steven Sacks' src/content/docs/
+grep -rni 'by steven sacks' src/content/docs/ | grep -vi 'built by steven sacks'
 ```
 
 If a byline appears, it must read "Built by Steven Sacks": builder voice, not publisher voice.
@@ -168,4 +168,4 @@ Group by severity. Empty categories collapse. End with the list of clean files.
 
 - Does not auto-edit. Surface findings, let the user accept or reject each.
 - Does not replace reading `VOICE.md`. The grep list is a tripwire, not the full ruleset. Subtle voice issues (over-promising, missed earned drama, wrong register) need human review.
-- Does not check identity claims (audience, positioning): that's the documentation-audit agent's job.
+- Does not verify factual claims or audience-boundary leaks: that is the `docs-audit` agent's job.

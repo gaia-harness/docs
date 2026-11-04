@@ -141,7 +141,7 @@ Per record:
 
 ### Step 3: Hash content
 
-`content_hash` is the sha256 of the whole file, so an edit anywhere is drift. Earlier snapshots hashed only frontmatter plus 40 body lines; that hashed every frontmatter-less file to the same value and missed most edits to long files.
+`content_hash` is the sha256 of the whole file, so an edit anywhere is drift.
 
 ### Step 4: Walk the docs side
 

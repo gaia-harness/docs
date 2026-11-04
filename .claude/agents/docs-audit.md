@@ -1,6 +1,6 @@
 ---
 name: docs-audit
-description: Verify factual claims in a docs page against the GAIA source code at ~/Development/gaia-react/gaia/. Use BEFORE publishing or merging any new or substantially edited docs page. Flags unverifiable, stale, or contradicted assertions about commands, flags, file paths, hook behavior, skill triggers, configuration options, and feature behavior. CRITICAL: enforces the adopter-vs-contributor split: adopter pages must NEVER reference contributor-only paths, commands, or behavior excluded by .gaia/release-exclude or gaia:maintainer-only block markers. Returns a structured audit report. Distinct from voice-check (style/voice): this audit is correctness/truth only.
+description: 'Verify factual claims in a docs page against the GAIA source code at ~/Development/gaia-react/gaia/. Use BEFORE publishing or merging any new or substantially edited docs page. Flags unverifiable, stale, or contradicted assertions about commands, flags, file paths, hook behavior, skill triggers, configuration options, and feature behavior. Also enforces the adopter-vs-contributor split: flags any adopter page that references contributor-only paths, commands, or behavior excluded by .gaia/release-exclude or gaia:maintainer-only block markers. Returns a structured audit report. Distinct from voice-check (style/voice): this audit is correctness/truth only.'
 model: sonnet
 color: blue
 ---
@@ -44,7 +44,7 @@ Verify claims against the right region of `~/Development/gaia-react/gaia/`:
 | Skills and their triggers | `gaia/.claude/skills/<name>/SKILL.md` (frontmatter `description` defines triggers) |
 | Hooks and their behavior | `gaia/.claude/hooks/*.sh` and `gaia/.claude/settings.json` matchers |
 | Subagents | `gaia/.claude/agents/*.md` |
-| Rules files | `gaia/.claude/rules/*.md` (top level) for adopter; `gaia/.claude/rules/_internal/*.md` is contributor-only |
+| Rules files | `gaia/.claude/rules/*.md` (top level) for adopter; `gaia/.claude/rules/maintainers/*.md` is contributor-only |
 | Project structure / scaffolding | `gaia/app/`, `gaia/.claude/`, `gaia/wiki/modules/` |
 | Architecture / feature catalog | `gaia/wiki/index.md` for index; specific pages for context |
 | Release / distribution mechanics | `gaia/.gaia/release-exclude`, `gaia/.gaia/release-scrub.yml`, `gaia/.github/workflows/release.yml`, `gaia/wiki/concepts/Release Workflow.md`, `gaia/wiki/decisions/Bundle-time Scrub.md` (all contributor-only) |
@@ -116,7 +116,7 @@ For each claim, classify:
 **Common adjacent-surface patterns to watch for:**
 
 - Pages documenting `/gaia-init`, `/setup-gaia` or `/update-gaia` that describe the usage ping beyond what `reference/telemetry.mdx` states (server side, payload schema, how `projectId` is derived), or that name any `_internal-*` subcommand.
-- Pages derived from or linking to `wiki/hot.md` / `wiki/index.md` that carry a `gaia:maintainer-only` line through.
+- Pages derived from or linking to `wiki/index.md` that carry a `gaia:maintainer-only` line through.
 - Any page that backticks `gaia release` or any release subcommand.
 
 ### 3. Report
@@ -193,7 +193,7 @@ clean.
 
 These are the patterns that historically cause stale docs:
 
-- **Audience-boundary leaks.** Adopter docs cite `/gaia-release`, `/health-audit`, `.gaia/cli/src/`, `.claude/rules/_internal/`, `wiki/concepts/Release Workflow.md`, or any other contributor-only path. Always category-A. Always reportable.
+- **Audience-boundary leaks.** Adopter docs cite `/gaia-release`, `/distribution-vet`, `.gaia/cli/src/`, `.claude/rules/maintainers/`, `wiki/concepts/Release Workflow.md`, or any other contributor-only path. Always category-A. Always reportable.
 - **Marker-block leaks.** Adopter docs cite a wiki page that ships, but the cited section is inside `<!-- gaia:maintainer-only:start --> ... <!-- gaia:maintainer-only:end -->`. The page ships; the cited section does not. Look at the actual line range, not just the file.
 - **README confusion.** Adopter docs claiming "the README says X" referring to `gaia/README.md` (excluded). Adopter README is regenerated from `gaia/.gaia/templates/README.md` at scaffold time. Always cite the template.
 - **Renamed slash commands.** A skill or command kept its description but changed its `name` frontmatter. Old name still appears in docs.
