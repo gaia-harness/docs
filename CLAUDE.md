@@ -65,14 +65,7 @@ Before publishing a page: the `docs-audit` agent (facts and leaks), the `voice-c
 
 The `studio/` vault is the singular location for voice/branding/positioning knowledge. Don't copy any of it into this repo. Reference by path.
 
-## Local commands
-
-```sh
-pnpm install
-pnpm dev      # http://localhost:4321
-pnpm build    # production build → ./dist
-pnpm preview  # preview the build
-```
+## Deploys
 
 Pushes to `main` deploy via `.github/workflows/deploy.yml`. PRs from this repo upload a Cloudflare preview version; they never touch the live site.
 
