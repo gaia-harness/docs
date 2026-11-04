@@ -33,139 +33,37 @@ GAIA has two audiences and the docs must keep them strictly separate:
 
 **Two exclusion mechanisms** (both stripped by `gaia release scrub` at release time):
 
-1. **Path-level exclusion**: entire files / directories listed in `.gaia/release-exclude`. Examples: `.claude/commands/gaia-release.md`, `.claude/commands/distribution-vet.md`, `.claude/skills/release-notes`, `.claude/agents/code-audit-maintainer-*.md`, `.claude/rules/maintainers/`, `.gaia/tests/`, `.gaia/scripts/tests/`, `.gaia/cli/src/`, `.gaia/cli/health/`, `.githooks/pre-push`, `wiki/entities/`, `wiki/meta/`, `wiki/concepts/Release Workflow.md`, `wiki/decisions/Bundle-time Scrub.md`, `CHANGELOG.md`, `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `README.md`, `SUPPORTERS.md`.
-2. **Block-level exclusion**: content between `<!-- gaia:maintainer-only:start -->` and `<!-- gaia:maintainer-only:end -->` markers inside files that DO ship (currently used in `wiki/`, `.claude/` (for example `.claude/rules/pr-merge.md`), `.gaia/audit-ci.yml`, and `.githooks/pre-commit`). The shipped file is a subset of the source.
+1. **Path-level exclusion**: entire files / directories listed in `.gaia/release-exclude`.
+2. **Block-level exclusion**: content between `<!-- gaia:maintainer-only:start -->` and `<!-- gaia:maintainer-only:end -->` markers inside files that DO ship. The shipped file is a subset of the source.
 
 **The hard rule:** an adopter docs page must not reference any path, command, skill, agent, rule, or behavior that is excluded by either mechanism. A leak is a category-A failure, worse than a stale fact, because it signposts contributor-only content the adopter cannot have.
 
 **The inverse rule (softer):** a contributor docs page should not duplicate what's already in the adopter docs. Cross-link instead.
 
-## GAIA's actual surface (verified against gaia `86f47ad3` (v2.3.1 tag), 2026-10-30, GAIA 2.3.1; volatile, re-check before publishing)
+**Never document** what `.claude/audit/do-not-document.yml` lists (obscurity by design), and mute the mechanisms `.claude/audit/adjacent-surfaces.md` names.
 
-GAIA 2.0.0 is a pnpm workspace: the shared harness at the root (`.claude/`, `.gaia/`, `.githooks/`, `.github/`, `wiki/`, root `CLAUDE.md`) and the React app plus its frontend-only harness in `frontend/` (`frontend/app/`, `frontend/.claude/{rules,skills,agents}`, `frontend/CLAUDE.md`). Every 1.x `app/...` path is now `frontend/app/...`. Releases ship as `gaia-bundle-<tag>.tar.gz` with a `.sha256`.
+## Where the rest lives
 
-**Layer 1: slash commands** at `gaia/.claude/commands/*.md`:
-
-| Adopter | Contributor-only |
-|---|---|
-| `/gaia-init`, `/setup-gaia` (replaces `/setup-gaia-ci` and `/setup-cloned-gaia-project`), `/gaia-spec`, `/gaia-plan`, `/gaia-debt`, `/gaia-residue`, `/gaia-cleanse` (was `/gaia-audit`), `/gaia-codify` (was `/gaia-harden`), `/gaia-fitness`, `/gaia-forensics` | `/gaia-release`, `/distribution-vet` |
-
-User-only commands set `disable-model-invocation` (`/gaia-init`, `/setup-gaia`, `/gaia-fitness`, `/gaia-forensics`, `/gaia-codify`, `/gaia-residue`). `/health-audit`, `/gaia-handoff` and `/gaia-pickup` are removed.
-
-**Layer 2: skills.** Root `gaia/.claude/skills/*/SKILL.md`: `gaia-wiki`, `update-deps`, `update-gaia` (skill-backed slash commands), `file-tech-debt`, `naming-conventions`, `tdd`, plus the `gaia/` references folder (no slash entry). Frontend `gaia/frontend/.claude/skills/`: `a11y-fixes`, `eslint-fixes`, `gaia-react-perf`, `new-component`, `new-hook`, `new-route`, `new-service`, `playwright-cli`, `react-code`, `skeleton-loaders`, `tailwind`, `tdd-react`, `typescript`. `react-doctor` installs per machine under `frontend/.claude/skills/` (gitignored). Frontend runbooks Claude follows on request live in `gaia/frontend/.claude/instructions/` (`add-locale.md`, `remove-i18n.md`; both are deleted when i18n is removed). Contributor-only: the `release-notes` skill.
-
-**Layer 3: workflow references** at `gaia/.claude/skills/gaia/references/`: `spec.md` (+`spec/`), `plan.md` (+`plan/`), `fitness.md`, `cleanse.md` (+`cleanse/`), `codify.md`, `debt.md` (+`debt/`), `residue.md`, `forensics.md` (+`forensics/`), `wiki.md` (+`wiki/`), `setup/`, `isolation.md`, `work-lifecycle.md`, `cost-record.md`. Contributor-only blocks inside them are marked `gaia:maintainer-only`.
-
-spec-kit is gone: no `.specify/`, no `speckit.*` commands. The spec lifecycle lives in `.gaia/scripts/spec/`, `.gaia/templates/spec/` and `references/spec/`. Specs, plans and research live in the gitignored `.notebook/` at the main checkout.
-
-**Layer 4: bundled CLI** at `gaia/.gaia/cli/gaia` (ships): `scaffold`, `react-perf reduce`, `wiki` (state, commit-classify, state-init, state-bump, log-prepend, page-index, orphans, near-collisions, dead-paths, frontmatter, empty-sections, broken-links, chain), `fitness`, `labels sync`, `packages sync-settings`, `migrate-csf4` (2.3.0), `codify-ledger`, `codify-tally`, `update`, `update-deps`, `init`, `setup`, `sandbox`, `ping`, `residue-tally`, `residue-cursor`, `residue-record`. `gaia --help` is authoritative. The release namespace lives only in `.gaia/cli/gaia-maintainer` (contributor-only). CLI source (`.gaia/cli/src/`, `test-fixtures/`, configs) and `.gaia/cli/health/` are contributor-only.
-
-**Layer 5: supporting machinery**:
-
-| Surface | Adopter-shipped | Contributor-only |
+| File | Holds | Loads |
 |---|---|---|
-| Hooks (`.claude/hooks/*.sh`, registered in `.claude/settings.json`; `frontend/.claude/settings.json` is generated from it plus an overlay) | All shipped: guards (`block-*`, `pr-merge-audit-check`, `red-verify-commit-check`, `worthiness-presence-check`, `audit-loop-bound`), recorders and context injectors, `provision-worktree`, `usage-capture`, `wiki-session-start` | none |
-| Native git hooks (`.githooks/`) | `pre-commit`, `commit-msg` | `pre-push` |
-| Rules | Root `.claude/rules/` (ambient-context-resolution, bats-assertions (2.3.0), code-comments, coding-guidelines, context-discipline, fenced-copy-paste-blocks, file-placement, generated-files (2.1.0), guards-must-fail, issue-claim, issue-writing (2.3.0), no-abbreviations, pr-merge, quality-gate, shell-cwd, subagent-dispatch, user-questions, wiki-style, working-doc-ids); frontend `frontend/.claude/rules/` (accessibility, api-service, coding-guidelines-react, design-baseline, i18n, playwright, ports, react-router-docs, routes, shadcn-ui, state-pattern, storybook, tailwind) | `.claude/rules/maintainers/` |
-| Agents (`.claude/agents/`) | `code-audit-frontend` (+ `frontend/.claude/agents/code-audit-frontend/` extensions), `code-audit-github-workflows`, `code-audit-shell` (2.3.0), `audit-loop-unit`, `audit-light-reviewer`, `audit-refuter`, `audit-rule-specialist`, `worthiness-evaluator`, `uat-fidelity-judge`, `fitness-judge` | `code-audit-maintainer-node`, `code-audit-maintainer-shell` |
-| CI workflows (`.github/workflows/`) | `tests.yml` (from 2.3.0 also the `Shellcheck and bats` job; `"shellcheck": false` in `.gaia/project.json` turns off only its lint, bats still runs), `chromatic.yml`, `pr-conventions.yml` (advisory) | `release.yml`, `cli-tests.yml`, `audit-ci-tests.yml`, `distribution-harness.yml`, `shell-lint.yml`, `forensics-triage.yml`. No Claude-on-Actions workflow exists any more (GAIA CI is removed). |
-| Wiki (`gaia/wiki/`) | most of `modules/`, `concepts/`, `decisions/` | `entities/`, `meta/`, and the individual pages `.gaia/release-exclude` lists (Release Workflow, Release-Notes, Bundle-time Scrub, CLI-Binary-Split, Folding Shell Scripts into the CLI Binary, Forensics Triage Workflow, Sharded CI Test Matrix, Shell Guard Fixture Discrimination, Local Test Runtime, Dependabot as a Data Source), plus every `gaia:maintainer-only` block |
-| Governance | `.gaia/templates/README.md` (regenerated at scaffold), `.gaia/LICENSE` (GAIA's MIT notice, scoped to GAIA-provided files; from 2.2.0) | repo `README.md`, `CHANGELOG.md`, `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORTERS.md`, `.github/CODEOWNERS`, `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`, `.github/FUNDING.yml`, `.gaia/project.json` |
+| `.claude/rules/docs-writing.md` | Docs voice, tight pages, prompts over terminal commands, adjacent-surface muting, how to verify a page | When a file under `src/content/docs/` is read or edited |
+| `.claude/rules/starlight.md` | Starlight conventions: sidebar, frontmatter, asides, assets, site config | When a file under `src/`, `public/`, or `astro.config.mjs` is touched |
+| `.claude/rules/fenced-copy-paste-blocks.md` | How to hand the user something to paste | Always |
+| `.claude/audit/gaia-surface.md` | What GAIA ships to adopters vs contributors, with the gaia SHA it was verified against (bump it at each release tag) | Read by `docs-audit`, `source-survey`, and you when checking what ships |
+| `.claude/audit/adjacent-surfaces.md` | Shipped mechanisms the docs describe only by behavior (the usage ping, the usage ledger) | Read by `docs-audit` and before writing about them |
 
-**Things that are protected by obscurity (do NOT document anywhere public):** CLI subcommand names beginning `_internal-`, and the `gaia-maintainer release*` subcommand list. The mentorship layer is removed in 2.0.0, so its old protections are moot. See `docs/.claude/audit/do-not-document.yml`.
-
-When in doubt, grep `.gaia/release-exclude`. When a wiki page itself ships but contains `gaia:maintainer-only` blocks, treat those blocks as nonexistent for adopter purposes.
+Before publishing a page: the `docs-audit` agent (facts and leaks), the `voice-check` skill (voice), and `pnpm build`.
 
 ## References
 
-- **Brand voice**: `~/Development/gaia-react/studio/branding/VOICE.md`: read before writing any docs copy. Voice rules apply to public-facing docs (no em dashes, no AI tells, no borrowed-field jargon, concrete numbers, etc.).
+- **Brand voice**: `~/Development/gaia-react/studio/branding/VOICE.md`: read before writing any docs copy.
 - **Brand identity**: `~/Development/gaia-react/studio/branding/IDENTITY.md`: read before writing copy that makes claims about what GAIA is or who it's for. Naming conventions live here.
-- **Brand design**: `~/Development/gaia-react/studio/branding/DESIGN.md`: palette, typography, motion. Consult before adding visual assets or custom components.
-- **Product source**: `~/Development/gaia-react/gaia/`: the GAIA app itself. **Source of truth for what to document.** Verify every feature claim, command name, hook behavior, skill trigger, and config option against the actual code before publishing. Studio does not track gaia source: that's this project's job.
-- **Product wiki**: `~/Development/gaia-react/gaia/wiki/`: start at `gaia/wiki/index.md`. High-level architecture catalog and feature index. Use to discover what exists before reading the source.
+- **Brand design**: `~/Development/gaia-react/studio/branding/DESIGN.md`: palette, typography, motion.
+- **Product source**: `~/Development/gaia-react/gaia/`: **source of truth for what to document.** Verify every feature claim, command name, hook behavior, skill trigger, and config option against the actual code before publishing. Studio does not track gaia source: that's this project's job.
+- **Product wiki**: `~/Development/gaia-react/gaia/wiki/`: start at `gaia/wiki/index.md`. Use it to discover what exists before reading the source; the source wins when they conflict.
 - **Agentic Design audit**: `~/Development/gaia-react/studio/strategy/research/AGENTIC_DESIGN.md`: authoritative pattern-by-pattern evaluation. Consult before writing or revising any agentic-design page. Earlier "ReAct" / "four canonical patterns" framings are retired.
 
 The `studio/` vault is the singular location for voice/branding/positioning knowledge. Don't copy any of it into this repo. Reference by path.
-
-## Voice: docs adaptation
-
-Studio's `VOICE.md` covers marketing, docs, and in-app strings together. For docs specifically:
-
-- **Reference register, not pitch register.** Procedural and declarative. "Run `/gaia-cleanse` to review memory and auto-loaded files." Not "Unleash the power of `/gaia-cleanse`."
-- **Voice rules still apply.** No em dashes anywhere. No AI tells (delve, tapestry, leveraging, seamless, robust, powerful). No borrowed-field jargon (substrate, paradigm, ecosystem, fabric). Grep for `—` before publishing.
-- **Plain language.** Readers are engineers, but their experience varies widely. Explain in everyday words, keep jargon and internal vocabulary to a minimum, define an unavoidable term the first time a page uses it, and split long sentences. Plainer is often shorter; it never drops a fact.
-- **Concrete over vague.** Real command names, real flags, real file paths, real numbers. Not "various options."
-- **Code blocks are honest.** Examples should run. If a snippet won't work as written, it doesn't belong.
-- **No "we" / "our team."** Either declarative ("GAIA installs…") or second-person instructional ("Run `pnpm install`…"). "Built by Steven Sacks" stays in marketing surfaces, not docs.
-
-### Tight pages (load-bearing)
-
-Every page says only what the reader needs, in the fewest words. Draft short, then cut again: a first "tightened" draft still carries too much.
-
-- **GAIA only.** Say what GAIA does with a third-party tool and link to its docs for how the tool works (Claude Code auto mode, the sandbox, Corepack). Never restate them.
-- **One home per explanation.** Getting-started pages stay short and link to the reference page that holds the detail. Tool installs and versions live on `reference/tools.mdx`.
-- **One kind of thing per reference page.** Gates are checks that stop something. Content that is not a gate goes elsewhere; when it has no home, make a page.
-- **Write for a new reader.** Never use a GAIA name (`GAIA-Audit`, "the audit") as if the reader already knows it. Say what it does for them and link the term.
-- **Cut what the reader cannot see or act on.** Internal steps, exact console output, things replaced before the reader ever saw them, rare recovery paths, reassurance clauses.
-- **The reader's words, not the source's.** Numbered steps, not "Phase: x". "Statusline", not "statusline left side". Say "API" when the source says "backend" but means the API.
-- **Never overstate a requirement.** Recommended is not required. Present a default as a tradeoff, not a warning (the sandbox is opt-in, not "not recommended"). Check every "needs" or "requires" against the source.
-- **GAIA leads.** Put what GAIA does first, then the third-party setting it replaces ("GAIA's `/update-deps` fixes vulnerable packages… Dependabot alerts stay on, but…").
-- **GAIA or Claude, by who drives it.** GAIA is the subject when a GAIA rule, hook, gate, or workflow makes the step happen ("GAIA runs the checks"). Claude is the subject only for what Claude does on its own ("everything Claude writes"). Full rule in `VOICE.md`.
-- **Say `main`, not "default branch".** Readers think in `main` (or `master`); "default branch" makes them translate. Name `main` and let `master` users infer it.
-- **A link beats a sentence.** Point at the section that explains why instead of summarizing it.
-- **Same shape across pages.** Command pages walk through numbered steps under `## The flow`.
-
-## Prompts over terminal commands (load-bearing)
-
-Readers work by asking Claude. They never read GAIA's source or scripts. Every page holds to three rules:
-
-1. **Define every term the reader meets.** A config key, file, script name, or internal mechanism gets an everyday explanation the first time a page uses it, or a link to the page that owns it. If the reader does not need it to act, cut it. Example of the failure: "a file that is not listed under `unowned:`" with no word on what `unowned:` is.
-2. **Give a Claude prompt, not a terminal command, whenever Claude can do the job.** Write it as a ` ```text ` block the reader pastes, with placeholders in `<angle brackets>`. A terminal command stays only when it must run outside Claude: `npx create-gaia`, `claude update`, `/clear`, a typed slash command, a typed grant line (`audit-grant`, `audit-accept`), an env var set before launching Claude, a step that asks for a sudo password, or something Claude is blocked from by design (`.env` secrets, `.gaia/local/protected/`, `git reset --hard`). The sentence says why the reader runs it themselves.
-3. **Never hand the reader work Claude does or should do.** If GAIA already does it, say so ("GAIA runs the roster check after the change"). If nothing does yet, describe current behavior honestly, give a prompt, and route the product gap to `gaia/` as an issue. Never write "nothing runs it for you, run it by hand" as the end state. Never claim automation that does not exist.
-
-4. **Frame guards as steering for Claude, not work for the reader.** Most hooks and checks exist to keep Claude on the right path: the refusal reaches Claude, which does it the right way or fixes it and retries. Lead with that ("Claude shortens the title and tries again; nothing for you to do"), then say why the guard exists if it helps. Words like refused, blocked, denied, rejected, or halted, left on their own, read as extra work for the reader. Only a few guards actually stop for the reader (a human-only grant, a credential or password, an approval prompt, something Claude is forbidden from by design); say plainly that those are the reader's and what to do.
-5. **Call the reader "you".** When the point is "you, not Claude", write "you" ("Only you can answer"), not "a person", "a human", "someone", or "the user". Keep a third party only when it really is someone else (a teammate already working on an issue, a repo admin, a reviewer).
-
-User-only commands (`disable-model-invocation`) cannot be started by asking in plain language; pages say the reader types them. No `Source: .claude/...` footers pointing readers at workflow source. The `voice-check` skill (check 11) flags violations.
-
-## Writing discipline for adjacent surfaces
-
-Some adopter-facing commands and wiki pages internally reference mechanisms that are listed in `docs/.claude/audit/do-not-document.yml`. When a docs page covers one of these surfaces, the page must describe what the user sees and does without naming the deferred / obscured mechanism behind it.
-
-**The rule:** name the user-visible behavior, not the mechanism.
-
-**Current adjacent surfaces and how to handle them:**
-
-- **The usage ping** (`gaia ping`, sent by `/gaia-init`, `/setup-gaia`, `/update-gaia` and the 2.0.0 migration). Documented as opt-out on the Telemetry page (`reference/telemetry.mdx`), which lists the three events and the categorical fields each adds: one fire-and-forget POST to telemetry.gaiaharness.com (2.2.0 on; 2.0.x and 2.1.x post to telemetry.gaiareact.com, which stays live) with a few categorical fields, a pseudonymous per-install `projectId`, the GAIA version and a coarse platform, never paths or free text, turned off with `GAIA_TELEMETRY_PING_DISABLE=1`. From 2.3.1 `projectId` is a random UUID in `.gaia/local/.install-id` (rotated once from the old path-hash `.project-id`); the page says so (maintainer decided 2026-10-30). Describe it in those terms only; do not document the server side or the payload schema beyond that.
-- **The local usage ledger** (`.gaia/local/telemetry/usage.jsonl`) is documented on `reference/cost.mdx`. It is local-only and is not the ping.
-- The 1.x mentorship layer (and its `gaia mentorship` verbs, display rule and opt-in step) is removed in 2.0.0. Do not describe it; mention its removal only where the CHANGELOG makes it adopter-actionable.
-
-**The registry is `docs/.claude/audit/do-not-document.yml`.** Before writing about any adopter command, hook, skill, or wiki page, check whether any deferred / obscured name appears in the source you're documenting. If yes, the page needs muting at write time. The `docs-audit` agent will also flag this on review, but writers should catch it first.
-
-**This is distinct from the leak rule.** A leak is citing a *contributor-only path* in adopter docs (worse: out-of-bounds entirely). Adjacent-surface muting is citing an *adopter-shipped* mechanism the project has decided not to surface yet (deferred / obscurity-by-design). Both are reportable, but adjacent-surface mentions are easier to overlook because the source path is technically fair game.
-
-## Verification protocol
-
-Before documenting anything:
-
-1. **Identify the audience.** Is this page adopter-facing (top of `src/content/docs/`) or contributor-facing (`src/content/docs/contributors/`)? Different rules apply.
-2. **For adopter pages**: verify against the adopter-shipped subset only. Read `.gaia/release-exclude` first; if the path you're about to cite is excluded, the claim is a leak; kill it. Treat content inside `<!-- gaia:maintainer-only:start --> ... <!-- gaia:maintainer-only:end -->` blocks in shipped files as nonexistent.
-3. **For contributor pages**: full `gaia/` tree is fair game.
-4. Find the supporting code: app code in `gaia/frontend/app/`, root harness in `gaia/.claude/` (rules, skills, hooks, agents, commands), frontend harness in `gaia/frontend/.claude/` (read `gaia/frontend/CLAUDE.md` first).
-5. If `gaia/wiki/` has a page, read it for context, but treat the source as authoritative if they conflict.
-6. Run-or-read the actual file to confirm behavior matches what you're about to write.
-7. Cite version-specific behavior with the gaia version it was verified against where it matters.
-
-If a claim can't be grounded in the source, don't write it. Open a question instead.
-
-## Starlight conventions
-
-- Content lives in `src/content/docs/`. Each `.md` / `.mdx` file becomes a route at the same path.
-- Sidebar registered in `astro.config.mjs`. Adding a new page means adding a sidebar entry; don't rely on autogenerate unless you've configured it.
-- Frontmatter follows Starlight's `docsSchema()` (`src/content.config.ts`). At minimum: `title`, `description`. Use `sidebar.order` for explicit ordering when needed.
-- Asides: `tip` (green, shield icon) is reserved for safety and privacy callouts. Use `note` for ordinary tips and `caution` for warnings.
-- Images go in `src/assets/` and are imported. Static files (favicon, `_headers` for response headers) go in `public/`.
-- Site config: `astro.config.mjs`. `site` is `https://docs.gaiaharness.com`; don't change without coordination.
 
 ## Local commands
 

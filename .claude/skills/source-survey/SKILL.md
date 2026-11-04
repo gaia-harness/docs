@@ -274,4 +274,5 @@ End with one line: whether the snapshot was written, and the gaia commit it was 
 - `~/Development/gaia-react/gaia/.gaia/release-exclude` and `.gaia/release-scrub.yml`: the adopter / contributor split.
 - `~/Development/gaia-react/gaia/wiki/concepts/Release Workflow.md`: the distribution boundary in prose (contributor-only, readable for context).
 - `~/Development/gaia-react/docs/CLAUDE.md`: the docs project's audience rules.
+- `~/Development/gaia-react/docs/.claude/audit/gaia-surface.md`: what GAIA ships to adopters vs contributors, with the gaia SHA it was verified against.
 - `~/Development/gaia-react/studio/branding/VOICE.md`: voice rules for any prose this skill produces.

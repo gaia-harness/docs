@@ -5,7 +5,7 @@ description: Audit drafted or existing docs content against GAIA brand voice rul
 
 # voice-check
 
-Audit docs content against `~/Development/gaia-react/studio/branding/VOICE.md` (canonical voice rules — read it before running this skill if you have not in this session).
+Audit docs content against `~/Development/gaia-react/studio/branding/VOICE.md` (canonical voice rules: read it before running this skill if you have not in this session).
 
 ## When to run
 
@@ -19,9 +19,9 @@ By default, scan all `.md` / `.mdx` files under `src/content/docs/`. If the user
 
 ## Procedure
 
-Run greps in this order. Report findings grouped by category, with file:line refs. Do not auto-fix — surface findings and let the user decide.
+Run greps in this order. Report findings grouped by category, with file:line refs. Do not auto-fix: surface findings and let the user decide.
 
-### 1. Em dashes — category-A check
+### 1. Em dashes: category-A check
 
 ```sh
 grep -rn '—' src/content/docs/
@@ -29,13 +29,13 @@ grep -rn '—' src/content/docs/
 
 Any hit is a violation. No exceptions for prose, alt text, code comments, or frontmatter. UI glyphs that mean "absent" must be en dashes (`–`).
 
-### 2. AI tells — category-A check
+### 2. AI tells: category-A check
 
 ```sh
 grep -rniE 'delve|tapestry|in the realm of|it'\''s worth noting|leveraging|seamless|robust|powerful|unleash|supercharge|effortless' src/content/docs/
 ```
 
-Flag every hit. These are the top AI giveaways. "Powerful" and "robust" are empty hype adjectives — replace with the concrete capability or delete.
+Flag every hit. These are the top AI giveaways. "Powerful" and "robust" are empty hype adjectives: replace with the concrete capability or delete.
 
 ### 3. Buildup-then-add parallelism
 
@@ -73,7 +73,7 @@ Docs are reference register. Procedural and declarative, not pitch.
 grep -rniE '^|[^t]By Steven Sacks' src/content/docs/
 ```
 
-If a byline appears, it must read "Built by Steven Sacks" — builder voice, not publisher voice.
+If a byline appears, it must read "Built by Steven Sacks": builder voice, not publisher voice.
 
 ### 8. "We" / "our team" in docs
 
@@ -81,7 +81,7 @@ If a byline appears, it must read "Built by Steven Sacks" — builder voice, not
 grep -rniE '\b(we|our team|our docs|we'\''ve|we'\''re)\b' src/content/docs/
 ```
 
-Docs use declarative ("GAIA installs…") or second-person ("Run `pnpm install`…"). "We" creeps in. Flag for review — context decides whether each instance is OK.
+Docs use declarative ("GAIA installs…") or second-person ("Run `pnpm install`…"). "We" creeps in. Flag for review: context decides whether each instance is OK.
 
 ### 9. Semicolons in body copy (advisory)
 
@@ -89,7 +89,7 @@ Docs use declarative ("GAIA installs…") or second-person ("Run `pnpm install`�
 grep -rn ';' src/content/docs/ | grep -vE '\.ts|\.tsx|\bclassName\b|\.css|frontmatter'
 ```
 
-Two short declaratives almost always read better. Flag advisory — let user decide.
+Two short declaratives almost always read better. Flag advisory: let user decide.
 
 ### 10. "Agentic" / "agents" in headlines and section headers
 
@@ -101,7 +101,7 @@ Buzzword posture: fluency-signal in body copy where accurate, NOT in H1/H2/H3 he
 
 ### 11. Hand-work and terminal commands on reader pages
 
-Readers work by asking Claude. A page should give a Claude prompt (a ` ```text ` block), not a terminal command, whenever Claude can do the job, and should never tell the reader to do by hand what Claude does or can do. See "Prompts over terminal commands" in `CLAUDE.md` for the allowed exceptions.
+Readers work by asking Claude. A page should give a Claude prompt (a ` ```text ` block), not a terminal command, whenever Claude can do the job, and should never tell the reader to do by hand what Claude does or can do. See "Prompts over terminal commands" in `.claude/rules/docs-writing.md` for the allowed exceptions.
 
 ```sh
 # Terminal blocks: each needs a stated reason the reader runs it themselves.
@@ -113,14 +113,14 @@ grep -rniE 'by hand|nothing runs it|run it yourself|you run (it|this|them)|edit 
 ```
 
 - **category-A**: hand-off phrasing ("nothing runs it for you", "run it by hand", "edit the file by hand") where Claude can do the step, and any script path under `.gaia/scripts/` or `.claude/hooks/` shown as something the reader runs.
-- **advisory**: every other terminal block. Pass it only when the surrounding sentence says why the reader runs it outside Claude (one of the `CLAUDE.md` exceptions).
-- Guard framing (advisory, read each hit): a guard described only as stopping something reads as work for the reader. Each hit should say what Claude does about it, or say plainly that this guard is the reader's to clear (rule 4 in `CLAUDE.md`).
+- **advisory**: every other terminal block. Pass it only when the surrounding sentence says why the reader runs it outside Claude (one of the `.claude/rules/docs-writing.md` exceptions).
+- Guard framing (advisory, read each hit): a guard described only as stopping something reads as work for the reader. Each hit should say what Claude does about it, or say plainly that this guard is the reader's to clear (rule 4 in `.claude/rules/docs-writing.md`).
 
   ```sh
   grep -rniE '\b(is|are|gets?|will be) (refused|blocked|denied|rejected)\b|\b(refuses|blocks|denies|rejects|halts)\b' src/content/docs/
   ```
 
-- Reader as a third party (advisory, read each hit): where the sentence means the reader, write "you" (rule 5 in `CLAUDE.md`).
+- Reader as a third party (advisory, read each hit): where the sentence means the reader, write "you" (rule 5 in `.claude/rules/docs-writing.md`).
 
   ```sh
   grep -rniE '\b(a|the|any) (person|human|user)\b|\bsomeone\b|\bpeople\b' src/content/docs/
@@ -132,7 +132,7 @@ grep -rniE 'by hand|nothing runs it|run it yourself|you run (it|this|them)|edit 
   grep -rnE '\bClaude (runs|re-runs|claims|posts|opens|files|stops|checks|creates|records|merges|names|offers|asks|commits|dispatches|prints|shows|walks|installs|releases|updates)\b' src/content/docs/
   ```
 
-- "Default branch" (advisory): say `main` instead. See "Say `main`, not 'default branch'" in `CLAUDE.md`.
+- "Default branch" (advisory): say `main` instead. See "Say `main`, not 'default branch'" in `.claude/rules/docs-writing.md`.
 
   ```sh
   grep -rniE 'default branch' src/content/docs/
@@ -140,20 +140,24 @@ grep -rniE 'by hand|nothing runs it|run it yourself|you run (it|this|them)|edit 
 
 - Also read for undefined shorthand: a config key, file, script, or internal term a reader meets with no plain explanation on that page or a link to the page that explains it. Grep cannot find these; flag them advisory.
 
+### 12. Read the added lines (category-A for what it finds)
+
+The greps above are a tripwire. When the scan is for an edit, dispatch one fresh read-only agent with the added lines (`git diff -U0` against the branch point, `+` lines only), `~/Development/gaia-react/studio/branding/VOICE.md` and `.claude/rules/docs-writing.md`. It reads every added line, table cells included, for explanatory colons, jargon or a term the page never defines or links, wording that reads a closed list as open, the wrong actor (GAIA or Claude), and anything the tight-pages rules would cut. Fold its findings into the report.
+
 ## Report format
 
 Output a single grouped report:
 
 ```
-voice-check report — <N> files scanned
+voice-check report: <N> files scanned
 
 ## category-A (must fix before publish)
-- src/content/docs/install.mdx:24 — em dash in body
-- src/content/docs/intro.md:7 — "powerful workflow"
+- src/content/docs/install.mdx:24: em dash in body
+- src/content/docs/intro.md:7: "powerful workflow"
 
 ## advisory (read and decide)
-- src/content/docs/usage.mdx:12 — semicolon in body copy
-- src/content/docs/intro.md:33 — "we" in declarative passage
+- src/content/docs/usage.mdx:12: semicolon in body copy
+- src/content/docs/intro.md:33: "we" in declarative passage
 
 clean: src/content/docs/index.mdx
 ```
@@ -164,4 +168,4 @@ Group by severity. Empty categories collapse. End with the list of clean files.
 
 - Does not auto-edit. Surface findings, let the user accept or reject each.
 - Does not replace reading `VOICE.md`. The grep list is a tripwire, not the full ruleset. Subtle voice issues (over-promising, missed earned drama, wrong register) need human review.
-- Does not check identity claims (audience, positioning) — that's the documentation-audit agent's job.
+- Does not check identity claims (audience, positioning): that's the documentation-audit agent's job.
