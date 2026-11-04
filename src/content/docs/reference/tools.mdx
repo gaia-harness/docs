@@ -78,13 +78,15 @@ The [Playwright CLI](https://github.com/microsoft/playwright-cli) lets Claude dr
 
 GAIA ships its own skill that checks React code with [React Doctor](https://github.com/millionco/react-doctor). `/gaia-init` installs it under `apps/web/.claude/skills/`, so it loads only in sessions that work on the app. `/setup-gaia` installs it if `/gaia-init` has not. It is per machine and not tracked in the repo.
 
-Every React Doctor run, from the skill or the [Code Audit Team](/workflow/code-audit-team/), uses one fixed version, so a new React Doctor release changes nothing until you move to it. [`/update-deps`](/maintenance/update-deps/) leaves that version alone. To move to a newer React Doctor, ask Claude:
+Every React Doctor scan, from the skill or the [Code Audit Team](/workflow/code-audit-team/), uses one fixed version, so a new React Doctor release changes nothing until you move to it. [`/update-deps`](/maintenance/update-deps/) leaves that version alone. To move to a newer React Doctor, ask Claude:
 
 ```text
 Update React Doctor to the latest release and keep it fixed there
 ```
 
 Merging an [`/update-gaia`](/maintenance/update-gaia/) pull request through Claude refreshes the skill.
+
+GAIA's lint config, `@gaia-harness/lint`, also checks 125 React Doctor rules every time ESLint runs, including on each commit. Those rules come with the lint config, so `/update-deps` moves them when it updates `@gaia-harness/lint`.
 
 ### TypeScript language server
 
