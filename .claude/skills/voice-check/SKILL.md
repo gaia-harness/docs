@@ -27,7 +27,7 @@ Run greps in this order. Report findings grouped by category, with file:line ref
 grep -rn '—' src/content/docs/
 ```
 
-Any hit is a violation. No exceptions for prose, alt text, code comments, or frontmatter. UI glyphs that mean "absent" must be en dashes (`–`).
+Any hit in prose, alt text, code comments, or frontmatter is a violation. The one exception is an em dash inside backticks or a code block that reproduces, verbatim, a string GAIA prints at runtime. It stays, so the page shows what the screen says. Check the gaia source that emits the string; if you cannot ground it as literal output, it is a violation. UI glyphs that mean "absent" must be en dashes (`–`).
 
 ### 2. AI tells: category-A check
 

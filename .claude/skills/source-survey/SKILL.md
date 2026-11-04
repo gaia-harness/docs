@@ -86,7 +86,7 @@ Ambiguities from this step, each a likely gaia bug worth raising:
 - An end with no start, or a start never closed.
 - A whole-line marker in a file no `SCRUB` transform covers: the block ships verbatim to adopters. Reported only when no transform covers the file, never when a covering transform simply found no block.
 
-After the layers, sweep every other file in the tree that is not release-excluded and that a `SCRUB` transform covers (the 2.1.0 tree has 13 `.gaia/scripts/*.sh`, `.gaia/statusline/gaia-statusline-right.sh` and `.prettierignore`). Each one with blocks is listed under UNWALKED MIXED with its block ranges. These are reported, not recorded: the snapshot tracks the documented layers only, and the list shows when a cited file grows maintainer-only content.
+After the layers, sweep every other file in the tree that is not release-excluded and that a `SCRUB` transform covers (for example `.gaia/scripts/*.sh`, `.gaia/statusline/gaia-statusline-right.sh` and `.prettierignore`). Each one with blocks is listed under UNWALKED MIXED with its block ranges. These are reported, not recorded: the snapshot tracks the documented layers only, and the list shows when a cited file grows maintainer-only content.
 
 Set `excluded_from_docs` when the item matches `DO_NOT_DOCUMENT`.
 
