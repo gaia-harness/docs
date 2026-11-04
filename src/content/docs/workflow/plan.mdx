@@ -104,7 +104,7 @@ The orchestrator runs in the fresh session:
 - **Where it runs** follows your team's [isolation policy](/workflow/work-lifecycle/#3-isolate): a separate worktree by default. The branch is `<type>/spec-<nnn>-<slug>` for a SPEC's plan or `<type>/plan-<nnn>-<slug>` otherwise, where `<type>` is the change's Conventional Commits type. The pull request title's type must match.
 - **Each phase** hands its tasks to sub-agents, Sonnet by default. Sub-agents only edit files. The orchestrator commits each phase after the Quality Gate passes. See [Who does what](/workflow/work-lifecycle/#who-does-what).
 - **A task that runs out of context** hands off to a fresh sub-agent. A task that would need a third handoff stops the plan and tells you.
-- **The pull request** opens as a draft. The orchestrator runs the [worthiness step](/workflow/tdd/#the-worthiness-step), the [overlap pass](/workflow/tdd/#the-overlap-pass), and the wiki update before the [Code Audit Team](/workflow/code-audit-team/) reviews it. Once the team clears it, the orchestrator shows a summary and the cost of the implementation, then asks you before it merges.
+- **The pull request** opens as a draft. The orchestrator runs the [worthiness step](/workflow/tdd/#the-worthiness-step), the [overlap pass](/workflow/tdd/#the-overlap-pass), and the wiki update before the [Code Audit Team](/workflow/code-audit-team/) reviews it. Once the team clears it, the orchestrator shows a summary and the cost of the implementation, then asks you before it merges, with holding the merge as the recommended answer.
 
 ### Resuming a plan
 

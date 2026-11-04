@@ -143,7 +143,7 @@ The loop needs **Claude Code 2.1.287 or later**. Run `claude update` if a unit s
 
 ### The branch checkpoint
 
-Each round's fixes need review in the next, so the loop needs a stopping point. From round 3 through round 9 it stops on its own when a round finds only ordinary Minor findings in what changed: nothing Critical, Major, security-related, or repeated from an earlier round. Those are recorded as accepted residuals. In an interactive run Claude lists them and asks once: **Merge** or **Fix chosen ones**. An unattended run does not ask; you decide them later with [`/gaia-residue`](/maintenance/residue/).
+Each round's fixes need review in the next, so the loop needs a stopping point. From round 3 through round 9 it stops on its own when a round finds only ordinary Minor findings in what changed: nothing Critical, Major, security-related, or repeated from an earlier round. Those are recorded as accepted residuals. In an interactive run Claude lists them and asks once, recommending neither: **Fix chosen ones** or **Merge**. An unattended run does not ask; you decide them later with [`/gaia-residue`](/maintenance/residue/).
 
 Otherwise, GAIA checks in with you when:
 
