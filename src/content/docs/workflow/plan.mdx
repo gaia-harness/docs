@@ -124,8 +124,8 @@ A plan keeps the steps it was generated with, even after a GAIA update, until yo
 | --- | --- | --- |
 | Story | One component, given its props, shows the outcome | An acceptance criterion in the owning task, tested on a [Storybook](https://storybook.js.org/) story |
 | Route | A request to a route shows it: a status, a redirect, returned data, a validation error, an authorization outcome, or a side effect | A [Vitest](https://vitest.dev/) test that calls the route's loader or action |
-| Real server | It needs the live server but no browser: middleware, a refused or forged request, or the HTML the server renders | A [Playwright](https://playwright.dev/) test that sends requests to the dev server and opens no page |
-| Browser | Only a browser shows it: hydration, focus, client navigation, a form submitted in the page, or a journey across pages | A Playwright test that walks one user flow in a real page |
+| Real server | It needs the live server but no browser: middleware, a refused or forged request, the HTML the server renders, a native form post, a multi-page workflow over native forms, or a flow with JavaScript turned off | A [Playwright](https://playwright.dev/) test that sends requests to the dev server and opens no page |
+| Browser | It needs one thing only a browser has: client JavaScript (an update without a reload), layout or visual position, focus or the keyboard, an accessibility scan of the rendered page, or browser navigation such as the back button. The plan names which one for each browser test, and GAIA's plan check holds Claude to it | A Playwright test that walks one user flow in a real page |
 | Non-UI | Harness, script, or documentation behavior | Assigned to the phase that owns it |
 
 Before Phase 1, each route, real-server, and browser UAT becomes a test that is expected to fail, under `apps/web/app/route-tests/<feature>/tests/` or `apps/web/.playwright/e2e/`, committed on its own. The phase that owns a test cannot commit until it passes, and sub-agents may not change its assertions to make it pass. A plan with an authorization UAT also gets one live-server check per guarded route.
