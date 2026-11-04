@@ -76,7 +76,15 @@ The [Playwright CLI](https://github.com/microsoft/playwright-cli) lets Claude dr
 
 ### React Doctor
 
-The [React Doctor](https://github.com/millionco/react-doctor) skill checks React code. `/gaia-init` installs it under `apps/web/.claude/skills/`, so it loads only in sessions that work on the app. `/setup-gaia` installs it if `/gaia-init` has not. It is per machine and not tracked in the repo.
+GAIA ships its own skill that checks React code with [React Doctor](https://github.com/millionco/react-doctor). `/gaia-init` installs it under `apps/web/.claude/skills/`, so it loads only in sessions that work on the app. `/setup-gaia` installs it if `/gaia-init` has not. It is per machine and not tracked in the repo.
+
+Every React Doctor run, from the skill or the [Code Audit Team](/workflow/code-audit-team/), uses one fixed version, so results only change when you change it. [`/update-deps`](/maintenance/update-deps/) leaves that version alone. To move to a newer React Doctor, ask Claude:
+
+```text
+Update React Doctor to the latest release and keep it fixed there
+```
+
+Merging an [`/update-gaia`](/maintenance/update-gaia/) pull request through Claude refreshes the skill.
 
 ### TypeScript language server
 
