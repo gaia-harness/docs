@@ -79,7 +79,7 @@ A test that passed from the start may not test anything. GAIA checks this in one
 
 For code that gives the same result every run (utilities, service parsers, most hooks, and route tests), a test must be seen failing before it passes. When Claude runs the tests, GAIA records every test that fails. If Claude tries to commit a new test with no recorded failure for its current content, a hook sends the commit back. Editing or renaming an existing test never needs a new failure.
 
-Claude writes the test against a function that does not exist yet, or a stub that returns the wrong value, so the test fails because the code is missing. Then it writes the code. It never breaks working code to force a failure.
+Claude first writes a placeholder for the new code, under its final name, that returns the wrong value. It writes the test against that, so the test fails because the real code is missing. Then it writes the code. It never breaks working code to force a failure.
 
 When the gate stops a commit, Claude runs the test file on its own, as a separate command, while it fails, so the failure is recorded, then makes it pass. See [the RED gate](/reference/gates/#test-seen-failing-first-red-gate) for the exemptions.
 
