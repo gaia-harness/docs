@@ -479,7 +479,7 @@ Gaps in coverage do not stop the audit: a file no member covers goes to `code-au
 ### Story accessibility opt-out
 
 - **Stops:** a story that skips its accessibility check, unless its id and a reason are recorded in `apps/web/test/story-a11y-opt-out.test.tsx`. A story skips the check when it sets `parameters.a11y.test` to `'todo'` or `'off'`, sets `parameters.a11y.disable`, turns on the `a11y.manual` global, has a `!test` tag, or uses `a11y` context, config, or options that differ from `.storybook/a11y.ts`.
-- **Why:** this check is the only light-theme accessibility scan a story gets. A second Storybook test run covers the dark theme. A story that quietly opted out would have no light-theme check at all.
+- **Why:** the Storybook test runs are the only accessibility scans a story gets, once in the light theme and once in the dark theme, and one opt-out skips both. A story that quietly opted out would have no accessibility check at all.
 - **When:** in the [Storybook](https://storybook.js.org/) test run, so at `git commit` for staged stories and in the Quality Gate.
 - **Who acts:** Claude. Nothing for you to do.
 - **Clear it:** Claude fixes the markup so the story passes. If the opt-out is truly needed, Claude adds the story id and its reason to the test's opt-out list.
