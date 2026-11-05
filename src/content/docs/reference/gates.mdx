@@ -318,13 +318,13 @@ When you turn on Claude Code's [sandbox](/getting-started/setup-gaia/#sandbox-de
 - **Who acts:** You, since you started the command.
 - **Clear it:** a session cannot leave its worktree, so the refusal asks you to move it. Open Claude Code in the main checkout the refusal names and run the command there. The commands that change files then make their own worktree.
 
-### Lagging GAIA version
+### Out-of-date or unpushed main
 
-- **Stops:** starting new work (a SPEC, a plan, a debt drain, a maintenance run, ad-hoc work) while your checkout's GAIA version is behind the remote's.
-- **Why:** the new work would branch from an out-of-date `main`.
+- **Stops:** starting new work (a SPEC, a plan, a debt drain, a maintenance run, ad-hoc work) while your checkout's GAIA version is behind the remote's, or while your local `main` has commits you have not pushed.
+- **Why:** the new work would branch from an out-of-date `main`. A new worktree is cut from the remote's `main`, so unpushed commits would be missing from the branch and its pull request.
 - **When:** at the start of the command. Resuming earlier work is never stopped.
-- **Who acts:** You, with one choice. In auto mode Claude makes it for you.
-- **Clear it:** Claude asks once; choose **Pull now and restart**, and Claude pulls and starts the command again. For a command only you can start, Claude prints it for you to paste. A command started in auto mode picks the pull without asking. Inside a linked worktree there is no pull option: open Claude Code in the main checkout, run `/update-gaia` there to pull, then start the command again.
+- **Who acts:** You. For a version behind, you make one choice, and in auto mode Claude makes it for you. For unpushed commits, only you can act, since Claude never pushes for you, and auto mode stops too.
+- **Clear it:** for a version behind, Claude asks once; choose **Pull now and restart**, and Claude pulls and starts the command again. For a command only you can start, Claude prints it for you to paste. A command started in auto mode picks the pull without asking. Inside a linked worktree there is no pull option: open Claude Code in the main checkout, run `/update-gaia` there to pull, then start the command again. For unpushed commits, Claude names how many and gives you the push to run, `git push origin main`, or asks you to reconcile `main` first when the remote moved too. Then start the command again. This check runs only in the main checkout, not inside a linked worktree. A repository with no remote, or whose `main` was never pushed, is not stopped.
 
 ### Ports
 

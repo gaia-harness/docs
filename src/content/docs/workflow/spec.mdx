@@ -58,7 +58,7 @@ Once the SPEC is saved, the UATs are the contract. [`/gaia-plan`](/workflow/plan
 ## Before it starts
 
 - **Model check.** The SPEC is written on your session's model. On a model other than Opus or Fable, Claude offers to stop so you can switch with `/model`.
-- **Pull check.** When the remote has a newer GAIA version than your checkout, Claude offers to pull first.
+- **Pull check.** When the remote has a newer GAIA version than your checkout, Claude offers to pull first. When your local `main` has unpushed commits, it stops until you push them. See [Out-of-date or unpushed main](/reference/gates/#out-of-date-or-unpushed-main).
 - **Resume.** When an unfinished draft exists, you choose to resume it or start new. A draft another open session is still writing is never offered.
 
 GAIA also clears out [notebook entries it no longer needs](/workflow/notebook/#how-entries-are-cleared).

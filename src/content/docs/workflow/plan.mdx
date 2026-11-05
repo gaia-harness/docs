@@ -59,7 +59,7 @@ Inside it:
 
 ## The flow
 
-1. **Before it starts.** GAIA clears out [notebook entries it no longer needs](/workflow/notebook/#how-entries-are-cleared), and Claude offers to pull when your GAIA version is behind the remote.
+1. **Before it starts.** GAIA clears out [notebook entries it no longer needs](/workflow/notebook/#how-entries-are-cleared), and Claude offers to pull when your GAIA version is behind the remote, or stops until you push your local `main` when it has unpushed commits. See [Out-of-date or unpushed main](/reference/gates/#out-of-date-or-unpushed-main).
 2. **Find the SPEC**, if you named one. If none matches, it stops instead of planning without it.
 3. **Pick the planner model.** On Opus or Fable the planner uses your model. Otherwise Claude asks: Opus (recommended), Fable, or your current model. The planner runs at your session's `/effort`, so a higher effort drafts a deeper plan.
 4. **Plan.** A planner sub-agent writes the folder.
