@@ -102,7 +102,8 @@ A finding about one spot, such as a wrong contract, is fixed in the plan's files
 The orchestrator runs in the fresh session:
 
 - **Where it runs** follows your team's [isolation policy](/workflow/work-lifecycle/#3-isolate): a separate worktree by default. The branch is `<type>/spec-<nnn>-<slug>` for a SPEC's plan or `<type>/plan-<nnn>-<slug>` otherwise, where `<type>` is the change's Conventional Commits type. The pull request title's type must match.
-- **Each phase** hands its tasks to sub-agents, Sonnet by default. Sub-agents only edit files. The orchestrator commits each phase after the Quality Gate passes. See [Who does what](/workflow/work-lifecycle/#who-does-what).
+- **Each phase** hands its tasks to sub-agents, Sonnet by default. Sub-agents only edit files. Each sub-agent typechecks its own work before it returns. The orchestrator commits each phase after the Quality Gate passes. See [Who does what](/workflow/work-lifecycle/#who-does-what).
+- **A failed phase gate** gets one retry when the typecheck or lint fails only on files that each belong to one task. Each of those tasks gets its errors in a fresh sub-agent, and the gate runs again. Any other failure (a test, a UAT, an error no single task owns, or a second failure in the same phase) stops the plan. A stop asks you one question, with **Stay halted** recommended, or **Discuss this** to talk it through.
 - **A task that runs out of context** hands off to a fresh sub-agent. A task that would need a third handoff stops the plan and tells you.
 - **The pull request** opens as a draft. The orchestrator runs the [worthiness step](/workflow/tdd/#the-worthiness-step), the [overlap pass](/workflow/tdd/#the-overlap-pass), and the wiki update before the [Code Audit Team](/workflow/code-audit-team/) reviews it. Once the team clears it, the orchestrator shows a summary and the cost of the implementation, then asks you before it merges, with holding the merge as the recommended answer.
 
@@ -113,6 +114,8 @@ Running the kickoff again on a plan with completed phases shows each one with it
 - **Resume** at the first incomplete phase
 - **Restart from Phase 1**
 - **Abandon**: stop without running, committing, merging, or deleting anything
+
+If the working tree has uncommitted changes, the plan does not resume. It asks the same **Stay halted** or **Discuss this** question and never offers to stash, discard, or commit your changes.
 
 A plan keeps the steps it was generated with, even after a GAIA update, until you regenerate it.
 
