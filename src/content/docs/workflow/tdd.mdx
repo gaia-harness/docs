@@ -70,7 +70,7 @@ A formatting helper, a thin wrapper, or a small string, array, or object utility
 
 **Stories are the component tests.** A story shows one visual state of a component, and each behavior is a named test attached to that story with `.test()`. The test clicks and types like a user and checks the result, in a real Chromium browser. A story can also have a play function, a script that clicks or types to bring the component into the state the story shows, but it checks nothing itself. Each test is reported by its own name, so a failure tells you which behavior broke. Claude does not write a separate test file that renders the component again.
 
-This is Storybook's newer story format, CSF Next. A story file still in the old format is sent back with the command that converts it. Every story is also checked for accessibility, and a story that opts out of that check fails the tests unless the opt-out is recorded with a reason in `apps/web/test/story-a11y-opt-out.test.tsx`.
+This is Storybook's newer story format, CSF Next. A story file still in the old format is sent back with the command that converts it. Every story is also checked for accessibility, and a story that opts out of that check fails the tests unless the opt-out is recorded with a reason in `apps/web/test/story-a11y-opt-out.test.tsx`. Each story then runs again in the dark theme, where it fails on an accessibility problem, a console error, or rendering nothing.
 
 Stories and hook tests need Chromium. [`/gaia-init`](/getting-started/gaia-init/) and [`/setup-gaia`](/getting-started/setup-gaia/) install it. On another machine, ask Claude to install the test browsers. The install adds system libraries and can ask for your password, so Claude hands you the command to type:
 
