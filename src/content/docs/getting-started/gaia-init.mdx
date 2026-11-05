@@ -62,7 +62,7 @@ Turn on TanStack Query for this project.
 
 ### 3. Build check
 
-Init runs the full [Quality Gate](/reference/gates/#quality-gate) (typecheck, lint, tests, and build) and stops if anything fails. This is the same check every later change must pass, and it is why init takes a few minutes.
+Init runs the typecheck, lint, unit tests, and build, and stops if anything fails.
 
 ### 4. Team settings
 
@@ -75,7 +75,7 @@ You can change either later with `/setup-gaia --reconfigure`.
 
 ### 5. Continue into /setup-gaia
 
-Init creates `apps/web/.env` from `apps/web/.env.example`, since the tests that check its commit need it, and commits its changes. Then Claude automatically runs [`/setup-gaia`](/getting-started/setup-gaia/).
+Init creates `apps/web/.env` from `apps/web/.env.example`, then runs the full [Quality Gate](/reference/gates/#quality-gate), end-to-end tests and dev server check included. This is the same check every later change must pass, and it is why init takes a few minutes. If a step fails, init stops before committing and says what blocks it. Once the gate passes, init commits its changes. Then Claude automatically runs [`/setup-gaia`](/getting-started/setup-gaia/).
 
 ## Resuming after a failure
 
