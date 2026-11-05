@@ -81,7 +81,7 @@ For code that gives the same result every run (utilities, service parsers, most 
 
 Claude first writes a placeholder for the new code, under its final name, that returns the wrong value. It writes the test against that, so the test fails because the real code is missing. Then it writes the code. It never breaks working code to force a failure.
 
-When the gate stops a commit, Claude runs the test file on its own, as a separate command, while it fails, so the failure is recorded, then makes it pass. See [the RED gate](/reference/gates/#test-seen-failing-first-red-gate) for the exemptions.
+When the gate stops a commit, Claude runs the test file on its own, as a separate command, while it fails, so the failure is recorded, then makes it pass. If the code already exists, the test can no longer fail honestly, so Claude names the test to you instead of breaking the code. See [the RED gate](/reference/gates/#test-seen-failing-first-red-gate) for the exemptions.
 
 ### Everything else: the worthiness review
 
