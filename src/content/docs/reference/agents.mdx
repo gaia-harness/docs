@@ -83,7 +83,7 @@ It judges each test on honesty and worthiness (see [the worthiness review](/work
 
 ### uat-fidelity-judge
 
-Before a SPEC plan's pull request is audited, it reads the SPEC and each generated acceptance test (UAT), a Playwright test or a Vitest route test, and judges whether each test body still checks what the SPEC promised. Differences in wording, selectors, or layout do not count; a weaker assertion, a changed user flow, or a mock of the guard its task names does, and an unclear case is judged as diverging. It writes one JSON verdict file and nothing else. A failure stops the plan. See [UAT specs](/workflow/plan/#uat-specs).
+Before a SPEC plan's pull request is audited, it reads the SPEC and each generated acceptance test (UAT), a Playwright test or a Vitest route test, and judges whether each test body still checks what the SPEC promised. Differences in wording, selectors, or layout do not count; a weaker assertion, a changed user flow, or a mock of the guard its task names does, and an unclear case is judged as diverging. It writes one JSON verdict file and nothing else. A resumed plan keeps its earlier verdicts and judges again only a test whose file, SPEC, or guard changed. A failure stops the plan. See [UAT specs](/workflow/plan/#uat-specs).
 
 ## Integration health
 
