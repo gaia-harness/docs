@@ -87,7 +87,7 @@ Each lens is a fresh sub-agent that reads the plan and your code for itself:
 | --- | --- |
 | (DP) Decomposition and dependencies | Side-by-side tasks that share state, edit the same files, need each other's output, or run project-wide checks (lint, type checks, Playwright, a dev server) that would collide. A phase order that ignores a real dependency. A contract two tasks read differently. A phase marked as infrastructure that delivers something a user can see. |
 | (CG) Contract grounding | Every file path, export, type, and signature a task names really exists in your code and installed packages. |
-| (COV) SPEC coverage | For a SPEC's plan only: every UAT and success criterion is covered, no task contradicts the SPEC, and no task brings back work the SPEC ruled out. |
+| (COV) SPEC coverage | For a SPEC's plan only: every UAT and success criterion is covered, no task contradicts the SPEC, and no task brings back work the SPEC ruled out. Each UAT's test starts from the state its Given describes, such as the same environment variable, seeded data, or server mode, never a different setup. |
 
 These checks have a clear yes-or-no answer against your code, so there is no refutation pass.
 
