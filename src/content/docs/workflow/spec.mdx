@@ -102,7 +102,7 @@ Each reviewer looks through one lens. Its short code, such as `COV`, appears in 
 | --- | --- |
 | (FG) Factual grounding | Every claim about your code, dependencies, file paths, and conventions is true. A new dependency is justified and pinned. |
 | (TST) UAT testability | Each UAT can fail: no way to pass while the feature is broken. |
-| (COV) Coverage and consistency | Every success criterion and promise has a UAT, the scope rules agree with the UATs, and the SPEC follows your conventions. |
+| (COV) Coverage and consistency | Every success criterion and promise has a UAT, the scope rules agree with the UATs, no UAT needs a control, step, or value the SPEC's own rules allow only in another state, and the SPEC follows your conventions. |
 | (RT) Red team and feasibility | A way every UAT passes yet the feature is not delivered, a check that cannot run, a missed file or caller, an assumption the plan would take as fact. |
 
 Specialist lenses join when the draft touches their area:
