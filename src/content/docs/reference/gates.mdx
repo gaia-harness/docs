@@ -474,7 +474,7 @@ Gaps in coverage do not stop the audit: a file no member covers goes to `code-au
 - **Why:** a later reader, human or agent, needs to know why the rule was turned off at that spot. Without the reason, nobody can tell whether the disable is still needed or safe to remove.
 - **When:** at lint, so at `git commit` through the pre-commit hook and in the Quality Gate.
 - **Who acts:** Claude. Nothing for you to do.
-- **Clear it:** Claude fixes the code so the rule passes, or adds the reason: `// eslint-disable-next-line <rule> -- <why>`.
+- **Clear it:** Claude fixes the code so the rule passes. It disables the rule only when the fix would be worse (a false positive, a gap in a library's typings, or a rule that does not fit the case), and the reason after `--` says which. The [frontend audit](/reference/agents/#code-audit-frontend) checks each disable a change adds.
 
 ### Story accessibility opt-out
 
