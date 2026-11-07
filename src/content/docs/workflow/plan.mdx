@@ -63,7 +63,7 @@ Inside it:
 2. **Find the SPEC**, if you named one. If none matches, it stops instead of planning without it.
 3. **Pick the planner model.** On Opus or Fable the planner uses your model. Otherwise Claude asks: Opus (recommended), Fable, or your current model. The planner runs at your session's `/effort`, so a higher effort drafts a deeper plan.
 4. **Plan.** A planner sub-agent writes the folder.
-5. **Verify.** A script checks that every required file is there and every UAT in the SPEC is assigned to a task. For a SPEC's plan, it also sends back a phase with no UAT, unless the plan marks that phase as infrastructure (work with nothing a user can see) and says why.
+5. **Verify.** A script checks that every required file is there and every UAT in the SPEC is assigned to a task. For a SPEC's plan, it also sends back a phase with no UAT, unless the plan marks that phase as infrastructure (work with nothing a user can see) and says why. It also checks each planned route, real-server, and browser test's file name against your project's lint rules, so a name lint would refuse, such as one with `dev` for `development`, is fixed while planning.
 6. **Plan audit.** Reviewers check the plan before anything is built from it. See [The plan audit](#the-plan-audit).
 7. **Report.** A [cost line](/models-and-context/cost/#what-you-see), then the prompt:
 
