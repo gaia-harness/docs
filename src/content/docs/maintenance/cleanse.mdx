@@ -72,7 +72,7 @@ Each entry is classified:
 ## The flow
 
 1. **Research.** A Sonnet sub-agent writes a report to `.gaia/local/cleanse/` (gitignored). Each proposed change names the path, the content it expects there, and what replaces it.
-2. **Verification round** (recommended, optional). When the report proposes changes, three reviewers check each one against the memory files, the wiki, and the repository, and drop or fix any that are wrong. Memory lives outside git, so a wrong delete can't be undone; this round catches it before you approve.
+2. **Verification round** (recommended, optional). When the report proposes changes, three reviewers check each one against the memory files, the wiki, and the repository, and drop or fix any that are wrong. One of the three also rechecks the memory entries the report leaves alone, looking for ones that tell Claude to do or avoid something. If such an entry contradicts a setting or default the wiki states, and a second reviewer agrees, the round adds a CONFLICT change for it. Memory lives outside git, so a wrong delete can't be undone; this round catches it before you approve.
 3. **One question**, in your session:
    - **Apply**: asks which of your own files it may edit, then applies the report on its own branch, files any out-of-scope problem as a `tech-debt` issue, commits, opens a pull request, and merges it.
    - **Discuss / refine**: talk it through. Claude updates the report and asks again.
