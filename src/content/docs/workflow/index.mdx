@@ -21,7 +21,7 @@ Ask for a component, a fix, a refactor:
 > Add a date-range filter to the saved-search panel.
 ```
 
-Notice that this prompt did not ask for a test. GAIA's rule is to test what matters. Once the code exists, every critical user flow gets a test, and so does a route worth locking in, tricky logic, or a fixed bug. A separate reviewer [checks that each test is worth keeping](/workflow/tdd/#the-worthiness-review). None of this needs you to ask.
+Notice that this prompt did not ask for a test. GAIA's rule is to test what matters. Once the code exists, every critical user flow gets a test, and so does a route worth locking in, tricky logic, or a fixed bug. A separate reviewer [checks that each test is worth keeping](/workflow/testing/#the-worthiness-review). None of this needs you to ask.
 
 ## Every task follows one lifecycle
 
@@ -35,7 +35,7 @@ The `/gaia-*` commands are for specific moments, not everyday driving:
 
 | When you're... | Reach for | Why |
 | --- | --- | --- |
-| Starting a feature whose shape isn't settled | [`/gaia-spec`](/workflow/spec/) | Pins down intent and acceptance tests, saves a SPEC, and plans it in the same session. |
+| Starting a feature whose shape isn't settled | [`/gaia-spec`](/workflow/spec/) | Pins down intent and the critical user flows, saves a SPEC, and plans it in the same session. |
 | Turning a big feature into parallel work | [`/gaia-plan`](/workflow/plan/) | Splits it into phases, defines the shared types and interfaces the phases build on, and writes a kickoff prompt you paste to start the work. |
 | Tech-debt issues have piled up | [`/gaia-debt`](/workflow/debt/) | Fixes the backlog, highest severity first, through the audit gate. |
 
@@ -43,8 +43,8 @@ Small, clear changes do not need a spec or a plan. When your request would benef
 
 ## A feature, start to finish
 
-1. **Define what to build.** Run `/gaia-spec add saved-search filters`. It asks a few questions, confirms the intent and the acceptance tests in plain language, and saves a SPEC. Then it plans the SPEC in the same session and ends with a kickoff prompt.
-2. **Build it.** Run `/clear` and paste the kickoff prompt. GAIA turns the SPEC's acceptance tests into failing [Playwright](https://playwright.dev/) tests, builds each phase, commits it through the Quality Gate, and opens a draft pull request.
+1. **Define what to build.** Run `/gaia-spec add saved-search filters`. It asks a few questions, confirms the intent and the critical user flows in plain language, and saves a SPEC. Then it plans the SPEC in the same session and ends with a kickoff prompt.
+2. **Build it.** Run `/clear` and paste the kickoff prompt. GAIA builds each phase, commits it through the Quality Gate, and opens a draft pull request. A final phase then writes a [test for each critical flow](/workflow/plan/#flow-tests) the SPEC names.
 3. **Audit and merge.** The [Code Audit Team](/workflow/code-audit-team/) reviews the pull request and GAIA fixes what it finds. Once the review passes, GAIA posts the `GAIA-Audit` check and asks whether to merge.
 
 [Onboarding, as you build](/getting-started/onboarding/) walks through when each of these first steps in.

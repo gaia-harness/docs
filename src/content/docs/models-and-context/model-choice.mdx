@@ -39,7 +39,6 @@ A step not listed here runs on your session's model. That covers `/gaia-debt`, `
 | [`/gaia-spec`](/workflow/spec/) | Writing the SPEC, asking you questions, its audit | Your model. On a model other than Opus or Fable, Claude first offers to stop so you can switch with `/model`. Auto mode skips the offer. |
 | [`/gaia-plan`](/workflow/plan/) | The planner | Opus or Fable. On Opus or Fable it keeps your model. Otherwise Claude asks: Opus (recommended), Fable, or your model. Auto mode uses Opus without asking. |
 | | Each phase's task sub-agents | Sonnet. The planner can raise a phase to Opus when it judges that phase to be deep design work, and names the phase and the reason in the plan. |
-| | [`uat-fidelity-judge`](/reference/agents/#uat-fidelity-judge) | Opus |
 | | [`overlap-evaluator`](/reference/agents/#overlap-evaluator) | Opus |
 | [Code Audit Team](/workflow/code-audit-team/) | [`audit-loop-unit`](/reference/agents/#audit-loop-unit), which runs the rounds | Opus |
 | | Members: [`code-audit-frontend`](/reference/agents/#code-audit-frontend), [`code-audit-github-workflows`](/reference/agents/#code-audit-github-workflows), [`code-audit-shell`](/reference/agents/#code-audit-shell) | Opus |
@@ -47,7 +46,7 @@ A step not listed here runs on your session's model. That covers `/gaia-debt`, `
 | | [`audit-refuter`](/reference/agents/#audit-refuter), for `code-audit-frontend`'s own Critical and Major findings | Sonnet |
 | | [`audit-light-reviewer`](/reference/agents/#audit-light-reviewer) | Sonnet |
 | | The fixer | Sonnet |
-| [`tdd` skill](/workflow/tdd/) | [`worthiness-evaluator`](/reference/agents/#worthiness-evaluator) | Opus |
+| [`tdd` skill](/workflow/testing/#test-driven-development-with-tdd) | [`worthiness-evaluator`](/reference/agents/#worthiness-evaluator) | Opus |
 | [`/gaia-fitness`](/maintenance/fitness/) | [`fitness-judge`](/reference/agents/#fitness-judge), and the agent that proposes fixes | Sonnet |
 | [`/gaia-cleanse`](/maintenance/cleanse/) | Writing the report, then applying it | Sonnet, one agent each |
 | [`/gaia-wiki`](/maintenance/wiki/) | Sync, and finding consolidate issues | Sonnet |

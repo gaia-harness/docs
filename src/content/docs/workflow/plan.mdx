@@ -63,7 +63,7 @@ Inside it:
 2. **Find the SPEC**, if you named one. If none matches, it stops instead of planning without it.
 3. **Pick the planner model.** On Opus or Fable the planner uses your model. Otherwise Claude asks: Opus (recommended), Fable, or your current model. The planner runs at your session's `/effort`, so a higher effort drafts a deeper plan.
 4. **Plan.** A planner sub-agent writes the folder.
-5. **Verify.** A script checks that every required file is there and every UAT in the SPEC is assigned to a task. For a SPEC's plan, it also sends back a phase with no UAT, unless the plan marks that phase as infrastructure (work with nothing a user can see) and says why. It also checks each planned route, real-server, and browser test's file name against your project's lint rules, so a name lint would refuse, such as one with `dev` for `development`, is fixed while planning.
+5. **Verify.** A script checks that every required file is there. For a SPEC's plan, it also checks that each [critical flow](/workflow/spec/#critical-flows) belongs to exactly one task in the [closing flow-test phase](#flow-tests), that the task names the flow's test file at its expected path, and that the phase runs every flow test before it commits.
 6. **Plan audit.** Reviewers check the plan before anything is built from it. See [The plan audit](#the-plan-audit).
 7. **Report.** A [cost line](/models-and-context/cost/#what-you-see), then the prompt:
 
@@ -85,9 +85,9 @@ Each lens is a fresh sub-agent that reads the plan and your code for itself:
 
 | Lens | What it checks |
 | --- | --- |
-| (DP) Decomposition and dependencies | Side-by-side tasks that share state, edit the same files, need each other's output, or run project-wide checks (lint, type checks, Playwright, a dev server) that would collide. A phase order that ignores a real dependency. A contract two tasks read differently. A phase marked as infrastructure that delivers something a user can see. A task that builds what a later phase's new test checks, so that test could never be seen failing first. |
+| (DP) Decomposition and dependencies | Side-by-side tasks that share state, edit the same files, need each other's output, or run project-wide checks (lint, type checks, Playwright, a dev server) that would collide. A phase order that ignores a real dependency. A contract two tasks read differently. Acceptance criteria that cannot be checked on their own. |
 | (CG) Contract grounding | Every file path, export, type, and signature a task names really exists in your code and installed packages. |
-| (COV) SPEC coverage | For a SPEC's plan only: every UAT and success criterion is covered, no task contradicts the SPEC, and no task brings back work the SPEC ruled out. Each UAT's test starts from the state its Given describes, such as the same environment variable, seeded data, or server mode, never a different setup. |
+| (COV) SPEC coverage | For a SPEC's plan only. Every flow and success criterion is covered, each flow has one task in the closing phase that names its test file, no build phase writes a flow test, no task contradicts the SPEC, and no task brings back work the SPEC ruled out. |
 
 These checks have a clear yes-or-no answer against your code, so there is no refutation pass.
 
@@ -102,10 +102,15 @@ A finding about one spot, such as a wrong contract, is fixed in the plan's files
 The orchestrator runs in the fresh session:
 
 - **Where it runs** follows your team's [isolation policy](/workflow/work-lifecycle/#3-isolate): a separate worktree by default. The branch is `<type>/spec-<nnn>-<slug>` for a SPEC's plan or `<type>/plan-<nnn>-<slug>` otherwise, where `<type>` is the change's Conventional Commits type. The pull request title's type must match.
-- **Each phase** hands its tasks to sub-agents, Sonnet by default. Sub-agents only edit files. Each sub-agent typechecks its own work before it returns. A task that adds tests goes to two sub-agents in turn. The first writes only the tests and records each one [failing first](/workflow/tdd/#code-with-predictable-output-seen-failing-first). GAIA then checks that every new test has a recorded failure, and a reviewer checks that each test asserts what its task and SPEC call for, no more and no less, and that working code can pass it. A test that fails either check goes back to the first sub-agent once. A second miss stops the plan and names the test. Only then does the second sub-agent write the code, and it may not change those tests. The orchestrator commits each phase after the Quality Gate passes. See [Who does what](/workflow/work-lifecycle/#who-does-what).
-- **A failed phase gate** gets one retry when each failing file belongs to one task and fails only on a typecheck or lint error, or is an acceptance test that does not itself make the call its checks read, such as a route test that leaves its loader or action call to a helper. Each of those tasks gets its errors in a fresh sub-agent, and the gate runs again. A browser or real-server test a task wrote itself, not from a UAT, goes to two fresh sub-agents at once when it fails as it runs. One may fix the test if it is wrong, never loosen a correct one, and the other may fix only the app code. A typecheck or lint error in that test goes to the test-writing sub-agent alone. A browser or real-server test from outside the phase that passed before and now fails goes to the sub-agents whose app code the phase changed, and they never edit the test. One retry covers every failure in the gate. Any other failure (any other test or UAT failure, an outside test with no earlier pass or that fails because of the test environment, a typecheck or lint error in any other test a task wrote, an error no single task owns, a new test the [seen-failing-first check](/reference/gates/#test-seen-failing-first-red-gate) refuses because its code already exists, or a second failure in the same phase) stops the plan. A stop asks you one question, with **Stay halted** recommended, or **Discuss this** to talk it through.
+- **Each phase** hands its tasks to sub-agents, Sonnet by default. Sub-agents only edit files. Each one builds its task, writes only the tests [worth having](/workflow/testing/#what-gets-a-test) for it, and typechecks its own work before it returns. The phase gate runs typecheck, lint, and the existing tests, and the orchestrator commits each phase once it passes. See [Who does what](/workflow/work-lifecycle/#who-does-what).
+- **A failed phase gate** gets one retry in these three cases. The one retry covers every failure in the gate.
+  - A typecheck or lint error in files that each belong to one task. Each of those tasks gets its errors in a fresh sub-agent.
+  - A [flow test](#flow-tests) that fails in the closing phase. It goes to a fresh sub-agent for the task that owns it, which may fix the code or the test, whichever is wrong.
+  - A Playwright test from outside the phase that passed before and now fails, when the test environment is not the cause. It goes to the sub-agents whose app code the phase changed. They fix the code, or update the test when the phase changed that behavior on purpose.
+
+  The gate then runs again. Any other failure, or a second failure in the same phase, stops the plan. A stop asks you one question, with **Stay halted** recommended, or **Discuss this** to talk it through.
 - **A task that runs out of context** hands off to a fresh sub-agent. A task that would need a third handoff stops the plan and tells you.
-- **The pull request** opens as a draft. The orchestrator runs the [worthiness step](/workflow/tdd/#the-worthiness-step), the [overlap pass](/workflow/tdd/#the-overlap-pass), and the wiki update before the [Code Audit Team](/workflow/code-audit-team/) reviews it. Once the team clears it, the orchestrator shows a summary and the cost of the implementation, then asks you before it merges, with holding the merge as the recommended answer.
+- **The pull request** opens as a draft after the first phase commits. After the last phase, the orchestrator runs the [checks on each flow test](#flow-tests) for a SPEC's plan, then the [worthiness step](/workflow/testing/#the-worthiness-step), the [overlap pass](/workflow/testing/#the-overlap-pass), and the wiki update, all before the [Code Audit Team](/workflow/code-audit-team/) reviews it. Once the team clears it, the orchestrator shows a summary and the cost of the implementation, then asks you before it merges, with holding the merge as the recommended answer.
 
 ### Resuming a plan
 
@@ -115,22 +120,21 @@ Running the kickoff again on a plan with completed phases shows each one with it
 - **Restart from Phase 1**
 - **Abandon**: stop without running, committing, merging, or deleting anything
 
+When every phase is already complete, the run picks up at the checks on each flow test, or at the worthiness step for a plan with no SPEC.
+
 If the working tree has uncommitted changes, the plan does not resume. It asks the same **Stay halted** or **Discuss this** question and never offers to stash, discard, or commit your changes.
 
 A plan keeps the steps it was generated with, even after a GAIA update, until you regenerate it.
 
-### UAT specs
+### Flow tests
 
-[`/gaia-spec`](/workflow/spec/#uats) writes the UATs. The planner routes each one to the lowest layer that can show its outcome, because a browser is the slowest and most expensive way to check anything:
+A plan built from a SPEC ends with one closing phase after the build. It has one task per [critical flow](/workflow/spec/#critical-flows), each writing that flow's test, and no earlier phase writes one.
 
-| Route | When | How it is tested |
-| --- | --- | --- |
-| Story | One component, given its props, shows the outcome | An acceptance criterion in the owning task, tested on a [Storybook](https://storybook.js.org/) story |
-| Route | A request to a route shows it: a status, a redirect, returned data, a validation error, an authorization outcome, or a side effect. This holds even when the SPEC words it as page text, such as a heading that shows data the loader returns, or names the page or error page that shows a refusal or error | A [Vitest](https://vitest.dev/) test that calls the route's loader or action |
-| Real server | It needs the live server but not a browser, such as middleware, the HTTP status a guarded route serves for a refusal, cookies and the session, a forged request whose guard a direct loader or action call skips, the form the server serves, a flow through several plain HTML forms, or server-rendered HTML that is itself the SPEC's requirement. When a UAT's guard and its served HTML are separate requirements, the UAT gets a route test and its phase adds a real-server check. The plan names, for each one, what a route test cannot show, and GAIA's plan check refuses a real-server test with no reason given | A [Playwright](https://playwright.dev/) test that sends requests to the dev server and opens no page |
-| Browser | It needs client JavaScript (an update without a reload), layout or position on screen, focus or the keyboard, an accessibility scan of the rendered page, or browser navigation such as the back button. Nothing else needs a browser. JavaScript turned off, or a plain HTML form, only rules out the browser, and the UAT routes by the rows above. The plan names which one each browser test needs, and GAIA's plan check holds Claude to it | A Playwright test that walks one user flow in a real page |
-| Non-UI | Harness, script, or documentation behavior | Assigned to the phase that owns it |
+- **A web flow** gets one [Playwright](https://playwright.dev/) test at `apps/web/.playwright/flows/<name>.spec.ts`, where `<name>` is the flow's short name. A comment at its top, the `@covers` line, names the app folders the flow runs through.
+- **A command-line flow** gets the test file the SPEC names.
 
-Before Phase 1, each route, real-server, and browser UAT becomes a test that is expected to fail, under `apps/web/app/route-tests/<feature>/tests/` or `apps/web/.playwright/e2e/`, committed on its own. The cases the SPEC lists for a UAT are rows of that one test, never a second test file. The phase that owns a test cannot commit until it passes, and sub-agents may not change its assertions to make it pass. A plan with an authorization UAT also gets one live-server check per guarded route.
+Each flow test is one file that covers the flow's happy path and each error path the code has. The closing phase's gate runs every flow test before it commits.
 
-Before the audit, the [`uat-fidelity-judge`](/reference/agents/#uat-fidelity-judge) agent checks that each test still tests what the SPEC says. When the code and a UAT no longer agree, the plan stops so you can [reopen the SPEC](/workflow/spec/#reopening-a-saved-spec).
+After the last phase, GAIA checks each flow. Its test file must exist and have changed on the branch, and a SPEC or flow id such as `FLOW-001` must not appear in it. A web flow's test must also be one Playwright runs, with an `@covers` line that names every folder the SPEC lists for the flow and the branch changed. A failed check goes to the sub-agent for the task that owns that flow, for one round of fixes, and then the checks run again. A second failure, a failure no task owns, or a check that cannot run stops the plan with the same **Stay halted** or **Discuss this** question.
+
+The [worthiness review](/workflow/testing/#the-worthiness-review) then judges each flow test against its flow.

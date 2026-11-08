@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-GAIA ships eleven [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.claude/agents/`. You never start one yourself: a workflow starts each one when it needs it. Each sub-agent starts with a fresh context, so a reviewer judges the work without the reasoning of the session that wrote it, and its reading stays out of your session's context. Each agent uses a [fixed model](/models-and-context/model-choice/) and runs at your session's [`/effort` level](/models-and-context/model-choice/#effort). Each agent can use only the tools listed in its definition, which keeps what it starts with small.
+GAIA ships ten [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.claude/agents/`. You never start one yourself: a workflow starts each one when it needs it. Each sub-agent starts with a fresh context, so a reviewer judges the work without the reasoning of the session that wrote it, and its reading stays out of your session's context. Each agent uses a [fixed model](/models-and-context/model-choice/) and runs at your session's [`/effort` level](/models-and-context/model-choice/#effort). Each agent can use only the tools listed in its definition, which keeps what it starts with small.
 
 | Agent | Model | Started by | Edits files? |
 |---|---|---|---|
@@ -17,7 +17,6 @@ GAIA ships eleven [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.
 | [`audit-loop-unit`](#audit-loop-unit) | Opus | the merge workflow | Commits fix rounds |
 | [`audit-light-reviewer`](#audit-light-reviewer) | Sonnet | the audit loop, for a light review | No (read-only) |
 | [`worthiness-evaluator`](#worthiness-evaluator) | Opus | the worthiness step, the `tdd` skill | No |
-| [`uat-fidelity-judge`](#uat-fidelity-judge) | Opus | a SPEC plan's orchestrator | Writes its verdict file only |
 | [`overlap-evaluator`](#overlap-evaluator) | Opus | a plan run's overlap pass | Writes its proposals file only |
 | [`fitness-judge`](#fitness-judge) | Sonnet | `/gaia-fitness` | No (read-only) |
 
@@ -71,25 +70,21 @@ Turn on light review for the <member> Code Audit Team member, with a line cap of
 
 It also takes the first review of a small, purely presentational change, before any member has read the branch. A script admits only presentational shapes (static text, swapping one HTML tag for another, static class changes, translation text with the same keys and placeholders, story `args:` values). See [Light review](/workflow/code-audit-team/#light-review).
 
-## Tests and acceptance
+## Tests
 
-How these two fit into building with tests is described in [Test-driven development](/workflow/tdd/).
+How it fits into testing is described in [Testing](/workflow/testing/).
 
 ### worthiness-evaluator
 
-The reviewer for every test the work changed. It always starts in a fresh context, since the session that wrote the tests would share their blind spots. The `tdd` skill starts it once the tests pass, and its verdicts are advice there. The [worthiness step](/workflow/tdd/#the-worthiness-step) starts it before the first audit round and acts on its verdicts. It reads only the tests the work changed plus the test files next to them, and reads source code only to judge whether a test goes through the public interface. It edits no test or source file. The only file it writes is its list of verdicts.
+The reviewer for every test the work changed. It always starts in a fresh context, since the session that wrote the tests would share their blind spots. The `tdd` skill starts it once the tests pass, and its verdicts are advice there. The [worthiness step](/workflow/testing/#the-worthiness-step) starts it before the first audit round and acts on its verdicts. It reads only the tests the work changed plus the test files next to them, and reads source code only to judge whether a test goes through the public interface. For a test of one of a SPEC's [critical flows](/workflow/spec/#critical-flows), it also reads that flow in the SPEC and the code the flow runs through. It gives that test a `fix` when an error path the code has goes untested, when the test never checks the flow's outcome, or, for a web flow, when the test's list of the folders it covers misses one the branch changed for that flow. It edits no test or source file. The only file it writes is its list of verdicts.
 
-It judges each test on honesty and worthiness (see [the worthiness review](/workflow/tdd/#the-worthiness-review)) and returns one verdict per test: `keep`, `fix`, or `delete`. Every `fix` or `delete` carries evidence: the defect for a fix, and for a delete the reason, such as the redundant assertion and the test that already covers it. A delete whose cited assertion it cannot find in the sibling file is downgraded, never proposed. Each verdict is recorded, keyed to the test's current content, and the [worthiness verdict](/reference/gates/#worthiness-verdict) gate checks that record at merge.
-
-### uat-fidelity-judge
-
-Before a SPEC plan's pull request is audited, it reads the SPEC and each generated acceptance test (UAT), a Playwright test or a Vitest route test, and judges whether each test body still checks what the SPEC promised. Differences in wording, selectors, or layout do not count; a weaker assertion, a changed user flow, or a mock of the guard its task names does, and an unclear case is judged as diverging. It writes one JSON verdict file and nothing else. A resumed plan keeps its earlier verdicts and judges again only a test whose file, SPEC, or guard changed. A failure stops the plan. See [UAT specs](/workflow/plan/#uat-specs).
+It judges each test on honesty and worthiness (see [the worthiness review](/workflow/testing/#the-worthiness-review)) and returns one verdict per test: `keep`, `fix`, or `delete`. Every `fix` or `delete` carries evidence: the defect for a fix, and for a delete the reason, such as the redundant assertion and the test that already covers it. A delete whose cited assertion it cannot find in the sibling file is downgraded, never proposed. Each verdict is recorded, keyed to the test's current content, and the [worthiness verdict](/reference/gates/#worthiness-verdict) gate checks that record at merge.
 
 ## Integration health
 
 ### overlap-evaluator
 
-Started once by a plan run's [overlap pass](/workflow/tdd/#the-overlap-pass), after the worthiness step. It reads the tests the branch changed, the tests that might already cover the same thing on the same or another layer, and source code only to judge whether a claim holds. For each duplicate it proposes to drop it, merge it, move it to another layer, or keep both. It can also propose deleting several tests that one existing route, story, or real-server test already covers. It also proposes moving a browser test that needs no browser to a [real-server test](/workflow/tdd/#where-tests-go). It edits no tracked file. The only file it writes is its list of proposals, which a script checks before you approve any of them.
+Started once by a plan run's [overlap pass](/workflow/testing/#the-overlap-pass), after the worthiness step. It reads the tests the branch changed, the tests that might already cover the same thing on the same or another layer, and source code only to judge whether a claim holds. For each duplicate it proposes to drop it, merge it, move it to another layer, or keep both. It can also propose deleting several tests that one existing route, story, or real-server test already covers. It also proposes moving a browser test that needs no browser to a [real-server test](/workflow/testing/#where-tests-go). It edits no tracked file. The only file it writes is its list of proposals, which a script checks before you approve any of them.
 
 ### fitness-judge
 

@@ -23,7 +23,7 @@ A GAIA project is a [pnpm](https://pnpm.io/) workspace, one repo holding several
 | `apps/`, `packages/` | Your workspace packages. A new project has `apps/web/` and an empty `packages/`. GAIA's checks cover every [package](/reference/gaia-folder/#packagesjson). |
 | `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` | The workspace, with one lockfile for the whole repo |
 
-`pnpm typecheck`, `pnpm lint`, and `pnpm test:ci` run in every package that has a script of that name, and keep going after a package fails so you see every error in one run. `pnpm dev`, `pnpm test`, `pnpm pw`, `pnpm build`, and `pnpm storybook` run in the web app. `pnpm test:shell` runs the [bats](https://github.com/bats-core/bats-core) tests for your shell scripts in `tests/shell/` (see [Testing another stack](/workflow/tdd/#testing-another-stack)).
+`pnpm typecheck`, `pnpm lint`, and `pnpm test:ci` run in every package that has a script of that name, and keep going after a package fails so you see every error in one run. `pnpm dev`, `pnpm test`, `pnpm pw`, `pnpm build`, and `pnpm storybook` run in the web app. `pnpm test:shell` runs the [bats](https://github.com/bats-core/bats-core) tests for your shell scripts in `tests/shell/` (see [Testing another stack](/workflow/testing/#testing-another-stack)).
 
 ### Pinned dependencies
 
@@ -38,7 +38,7 @@ Every dependency is pinned to an exact version, so every install gets the versio
 | `apps/web/app/` | The [React Router](https://reactrouter.com/) app: `routes/`, `pages/`, `components/` (with [shadcn/ui](https://ui.shadcn.com/) in `components/ui/`), `hooks/`, `services/`, `state/`, `languages/`, `styles/` |
 | `apps/web/test/` | Test setup, mocks, and utilities |
 | `apps/web/.storybook/` | [Storybook](https://storybook.js.org/) config |
-| `apps/web/.playwright/` | [Playwright](https://playwright.dev/) specs and helpers |
+| `apps/web/.playwright/` | [Playwright](https://playwright.dev/) specs and helpers. `flows/` holds one test for each of a SPEC's [critical flows](/workflow/spec/#critical-flows), named after the flow |
 | `apps/web/.env` | Your environment file (gitignored), copied from `apps/web/.env.example` |
 
 File and folder names are kebab-case:
@@ -57,7 +57,7 @@ Your main copy of the repo and each worktree get their own dev, Storybook, and P
 - **shadcn/ui** on [Base UI](https://base-ui.com/), with [`lucide-react`](https://lucide.dev/) icons and [Conform](https://conform.guide/) for forms.
 - **[Tailwind](https://tailwindcss.com/) v4 with role tokens.** Every color is a named role (primary, muted) defined once in `apps/web/app/styles/theme.css`.
 - **Services** use [Ky](https://github.com/sindresorhus/ky) for requests and [Zod](https://zod.dev/) to check every response. A route loads data on the server, in the browser, or through [TanStack Query](https://tanstack.com/query/latest).
-- **Testing built in** ([how it works](/workflow/tdd/)). Each story is one visual state, with behavior tests attached, run in a real browser under [Vitest](https://vitest.dev/) and checked for accessibility. [MSW](https://mswjs.io/) mocks the API, so tests run without a backend. [Chromatic](https://www.chromatic.com/) screenshots each story in light and dark mode.
+- **Testing built in** ([how it works](/workflow/testing/)). Each story is one visual state, with behavior tests attached, run in a real browser under [Vitest](https://vitest.dev/) and checked for accessibility. [MSW](https://mswjs.io/) mocks the API, so tests run without a backend. [Chromatic](https://www.chromatic.com/) screenshots each story in light and dark mode.
 - **Translations (i18n)** with react-i18next (unless you removed them during `/gaia-init`).
 - **`@gaia-harness/lint`** for [ESLint](https://eslint.org/), [Stylelint](https://stylelint.io/), and [commitlint](https://commitlint.js.org/), with [Prettier](https://prettier.io/) and [Knip](https://knip.dev/).
 

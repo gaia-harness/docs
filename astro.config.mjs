@@ -47,6 +47,8 @@ export default defineConfig({
 		'/contributors/health-audit': '/contributors/release/',
 		// Retired with 2.4.0: the 1.x migration page.
 		'/getting-started/upgrading': '/maintenance/update-gaia/',
+		// Renamed with 2.4.0: test-first became opt-in.
+		'/workflow/tdd': '/workflow/testing/',
 	},
 	integrations: [
 		starlight({
@@ -154,7 +156,7 @@ export default defineConfig({
 						{ label: 'Work lifecycle', slug: 'workflow/work-lifecycle' },
 						{ label: '/gaia-spec', slug: 'workflow/spec', attrs: { class: 'sidebar-child' } },
 						{ label: '/gaia-plan', slug: 'workflow/plan', attrs: { class: 'sidebar-child' } },
-						{ label: 'Test-driven development', slug: 'workflow/tdd' },
+						{ label: 'Testing', slug: 'workflow/testing' },
 						{ label: 'Code Audit Team', slug: 'workflow/code-audit-team' },
 						{ label: 'Tech debt', slug: 'workflow/tech-debt' },
 						{ label: '/gaia-debt', slug: 'workflow/debt', attrs: { class: 'sidebar-child' } },

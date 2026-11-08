@@ -23,7 +23,7 @@ Every task gets a draft pull request, even when you did not ask for one. If you 
 
 When you ask for work without naming a command, GAIA first checks whether it deserves a spec or a plan, and asks when it does:
 
-- A new feature that adds user-visible rules, data, or flows gets a recommendation for [`/gaia-spec`](/workflow/spec/), even when your request is long and detailed. A SPEC turns those rules into checked acceptance tests.
+- A new feature that adds user-visible rules, data, or flows gets a recommendation for [`/gaia-spec`](/workflow/spec/), even when your request is long and detailed. A SPEC names the critical user flows, and each one gets a test once the code is built.
 - Clear internal work worth planning first gets a recommendation for [`/gaia-plan`](/workflow/plan/): several phases, parallel streams, a rollout across many files, or a migration of stored data.
 - A bug fix or a small contained change proceeds with no question.
 
@@ -169,7 +169,7 @@ A draft tells reviewers the pull request is still in progress. GAIA marks it rea
 
 ## 5. Audit
 
-GAIA audits every pull request before merge, including small one-off changes, though a small change can get a [light review](/workflow/code-audit-team/#light-review). Before the first round, GAIA runs the [worthiness step](/workflow/tdd/#the-worthiness-step) on tests that need it. See [Code Audit Team](/workflow/code-audit-team/).
+GAIA audits every pull request before merge, including small one-off changes, though a small change can get a [light review](/workflow/code-audit-team/#light-review). Before the first round, GAIA runs the [worthiness step](/workflow/testing/#the-worthiness-step) on tests that need it. See [Code Audit Team](/workflow/code-audit-team/).
 
 For ad-hoc work you did not ask to merge, GAIA stops here and reports the pull request as ready to merge.
 

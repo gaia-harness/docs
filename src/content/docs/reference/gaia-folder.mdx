@@ -24,7 +24,7 @@ You rarely edit anything here by hand. When you want to change a setting, ask Cl
 | `cli/` | The `gaia` CLI and the templates the scaffolders use | Committed | The release | Merged |
 | `scripts/` | Scripts that hooks, commands, and skills run | Committed | The release | Merged |
 | `statusline/` | The statusline scripts | Committed | The release | Merged |
-| `templates/` | Starting files for your README and for UAT specs | Committed | The release | Merged |
+| `templates/` | Starting files for your README and for the React Doctor skill | Committed | The release | Merged |
 | `migrations/` | Upgrade notes for steps a file merge cannot do | Committed | The release | Merged |
 | `audit-ci.yml` | The Code Audit Team roster | Committed | The release, then you | Merged key by key |
 | `labels.json` | Your repository's GitHub labels | Committed | The release | Merged |
@@ -85,8 +85,7 @@ The scripts that draw GAIA's statusline: the left side, the right side, and the 
 ### templates/
 
 - `templates/README.md` is the starting README for your project. `/gaia-init` replaces GAIA's own README with this template and fills in your project's title.
-- `templates/spec/uat-spec.ts.tmpl` is the starting file for a UAT spec, the test that checks one of a SPEC's acceptance criteria. See [`/gaia-plan`](/workflow/plan/#uat-specs).
-- `templates/spec/uat-route-test.ts.tmpl` is the starting file for a UAT route test, the Vitest version for an outcome a request to a route shows.
+- `templates/react-doctor/` is the [React Doctor](https://github.com/millionco/react-doctor) skill GAIA installs into your web app, with the React Doctor version GAIA pins filled in.
 
 ### migrations/
 
@@ -174,7 +173,7 @@ A linked worktree's `.gaia/local` is a link to the main checkout's copy, so ever
 | `telemetry/token-rates.override.json` | Your own token prices, if you set any. See [Prices](/models-and-context/cost/#prices). |
 | `audit/` | The Code Audit Team's clearances, findings, and security reports. |
 | `runs/` | Per-branch run state, such as the `STATE.md` a long piece of work saves before you resume it. |
-| `red-ledger/`, `worthiness-ledger/` | Records of tests seen failing first and of worthiness verdicts, one set per worktree. See [Test-driven development](/workflow/tdd/). |
+| `worthiness-ledger/` | Records of worthiness verdicts, one set per worktree. See [Testing](/workflow/testing/#the-worthiness-review). |
 | `forensics/` | [`/gaia-forensics`](/maintenance/forensics/) reports. |
 | `codify/`, `cleanse/`, `debt/` | State for [`/gaia-codify`](/maintenance/codify/), [`/gaia-cleanse`](/maintenance/cleanse/), and [`/gaia-debt`](/workflow/debt/). |
 | `fitness/` | The harness files an `/update-gaia` run blended. A `/gaia-fitness` run stops them counting toward its nudge. See [The statusline nudge](/maintenance/fitness/#the-statusline-nudge). |
