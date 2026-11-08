@@ -15,7 +15,6 @@ Everything GAIA installs is on from your first session; nothing needs switching 
 
 - **Work happens on its own branch.** By default GAIA does the [work](/workflow/work-lifecycle/) in a git worktree ([why](/reference/gates/#worktree-path-mismatch)). If the work closes an issue, GAIA claims it first ([why](/reference/gates/#issue-claim)).
 - **Checks before the commit.** GAIA runs typecheck, lint, unit and end-to-end tests, and a production build, then asks you to approve the commit. See [Quality Gate](/workflow/code-audit-team/#quality-gate).
-- **Test seen failing first.** A new test for plain logic must fail before it passes, which proves it can catch a bug ([why](/reference/gates/#test-seen-failing-first-red-gate)).
 - **Git hooks.** Pre-commit checks the staged files ([why](/reference/gates/#pre-commit-floor)) and commit-msg checks the message format ([why](/reference/gates/#commit-message-format)). Neither can be skipped ([why](/reference/gates/#no-verify)).
 
 ## First pull request

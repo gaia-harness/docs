@@ -11,7 +11,7 @@ The SPEC and its plan are saved in the [Notebook](/workflow/notebook/).
 
 ## When to use it
 
-Use `/gaia-spec` when the scope is not clear yet, or when a new feature adds user-visible rules, data, or flows, however well you have described it: the SPEC turns those rules into checked acceptance tests.
+Use `/gaia-spec` when the scope is not clear yet, or when a new feature adds user-visible rules, data, or flows, however well you have described it: the SPEC names the flows that must not break, and each one gets a test.
 
 For a bug fix, a refactor, or a copy edit, just ask Claude, or go straight to [`/gaia-plan`](/workflow/plan/). See [Spec, plan, or just do it](/workflow/work-lifecycle/#spec-plan-or-just-do-it).
 
@@ -39,21 +39,19 @@ Everything lands in `.notebook/specs/SPEC-NNN/`:
 
 | File | Purpose |
 | --- | --- |
-| `SPEC.md` | The locked SPEC: intent, success criteria, UATs, scope rules (always, ask first, never), and the decisions settled along the way with their reasons. |
+| `SPEC.md` | The locked SPEC: intent, success criteria, [critical flows](#critical-flows), scope rules (always, ask first, never), and the decisions settled along the way with their reasons. |
 | `AUDIT.md` | The [SPEC audit](#the-spec-audit)'s report: instructions the plan must follow, fixes folded into the SPEC, and findings that were disproved. |
 | `plan/` | The plan, written by [`/gaia-plan`](/workflow/plan/#what-gets-produced). |
 
 Each SPEC number is reserved by pushing a `spec/NNN` git tag, so teammates never get the same number. See [Numbers do not travel](/workflow/notebook/#why-it-stays-on-your-machine) for a repository with no remote.
 
-### UATs
+### Critical flows
 
-A UAT (user acceptance test) is an automated acceptance test written into the SPEC. Each one has three parts:
+A critical flow is a path through the feature that, if it broke, would block a user's main task or put data, money, or security at risk. A SPEC has as many as the feature needs, with no set number. Each flow has an id such as `FLOW-001`, a short kebab-case name that becomes its test's file name, a one-line title, and why it is critical. A web flow also lists the app folders it covers. A command-line flow names its test file instead.
 
-- **Given**: the starting state
-- **When**: one action, by the user or the system
-- **Then**: an outcome a test can check
+A flow names a path, never a list of cases. The rules the feature must follow go in the intent and the success criteria.
 
-Once the SPEC is saved, the UATs are the contract. [`/gaia-plan`](/workflow/plan/#uat-specs) turns them into tests, and changing one means [reopening the SPEC](#reopening-a-saved-spec).
+Once the SPEC is saved, the plan must test every flow. [`/gaia-plan`](/workflow/plan/) builds the feature first, then writes one test per flow.
 
 ## Before it starts
 
@@ -66,27 +64,17 @@ GAIA also clears out [notebook entries it no longer needs](/workflow/notebook/#h
 ## The flow
 
 1. **Draft.** Claude reserves the SPEC number and writes a first draft.
-2. **Gate 1: shape.** Before asking anything, Claude shows in plain language what it thinks you want, with every proposed UAT. You confirm or revise. Later steps check the SPEC against what you confirmed here.
+2. **Gate 1: shape.** Before asking anything, Claude shows in plain language what it thinks you want and proposes the critical flows, with its recommended set marked. You confirm, or drop, add, or edit flows. Later steps check the SPEC against what you confirmed here.
 3. **Questions.** One at a time, each built on your last answer, until every topic is settled or after 10 questions (5 in auto mode). When Claude needs facts, it researches them itself.
-4. **Self-review.** A sub-agent checks that the draft matches gate 1 and does not contradict itself. It also flags several UATs that each need a browser, walk the same user flow, and differ only in one step. It recommends folding them into one browser test of the whole flow, with each rule kept as its own UAT. A check that someone without access is turned away gets split out of a browser flow into its own UAT. A layout word such as "beside" or "above" is flagged when it only stands for a relationship, with the testable requirement proposed instead (an error message linked to its field, for example), unless the layout itself is the requirement. It fixes minor problems. Critical and major ones come to you as one list with recommended fixes: accept all, or revise the ones you name.
+4. **Self-review.** A sub-agent checks that the draft matches gate 1 and does not contradict itself. It flags a flow that names no path a user would see or that lists cases, and a critical path with no flow. A layout word such as "beside" or "above" is flagged when it only stands for a relationship, with the testable requirement proposed instead (an error message linked to its field, for example). It fixes minor problems. Critical and major ones come to you as one list with recommended fixes: accept all, or revise the ones you name.
 5. **SPEC audit.** Independent reviewers check the draft against your code. See [The SPEC audit](#the-spec-audit).
-6. **Gate 2: the brief.** Claude shows what the SPEC changes, why, what success looks like, every UAT, what the plan will do because of the audit, the costs and risks you accept, and anything still open. Revise until it is right.
+6. **Gate 2: the brief.** Claude shows what the SPEC changes, why, what success looks like, every flow with the folders it covers or its test file, what the plan will do because of the audit, the costs and risks you accept, and anything still open. Revise until it is right.
 7. **Save.** The SPEC is saved and locked.
 8. **Plan.** GAIA runs `/gaia-plan` on the SPEC in the same session. The run ends with a [cost box](/models-and-context/cost/) and the KICKOFF prompt to paste into a fresh session.
 
 <Aside type="caution">
-Confirming gate 2 locks the SPEC. Changing it later means reopening it with a written reason. Get it right before you confirm.
+Confirming gate 2 locks the SPEC, and nothing edits it after that. Get it right before you confirm.
 </Aside>
-
-### Reopening a saved SPEC
-
-When a plan stops because a UAT can no longer hold, type:
-
-```
-/gaia-spec reopen SPEC-<NNN>
-```
-
-Claude asks why the UAT cannot hold, proposes the new UAT and any plan change that follows, and asks you to confirm. It records your reason and the old UAT in the SPEC, offers to discard the stopped phase's unfinished edits, and gives you the plan's KICKOFF prompt to paste into a fresh session.
 
 ## The SPEC audit
 
@@ -101,9 +89,9 @@ Each reviewer looks through one lens. Its short code, such as `COV`, appears in 
 | Lens | What it checks |
 | --- | --- |
 | (FG) Factual grounding | Every claim about your code, dependencies, file paths, and conventions is true. A new dependency is justified and pinned. |
-| (TST) UAT testability | Each UAT can fail: no way to pass while the feature is broken. |
-| (COV) Coverage and consistency | Every success criterion and promise has a UAT, the scope rules agree with the UATs, no UAT needs a control, step, or value the SPEC's own rules allow only in another state, and the SPEC follows your conventions. |
-| (RT) Red team and feasibility | A way every UAT passes yet the feature is not delivered, a check that cannot run, a missed file or caller, an assumption the plan would take as fact. |
+| (TST) Flow and criteria testability | Each flow and success criterion can fail: no way to pass while the feature is broken. |
+| (COV) Coverage and consistency | Every promise in the intent has a flow, no critical flow is missing, the scope rules agree with the flows, no flow needs a control, step, or value the SPEC's own rules allow only in another state, and the SPEC follows your conventions. |
+| (RT) Red team and feasibility | A way every flow passes yet the feature is not delivered, a check that cannot run, a missed file or caller, an assumption the plan would take as fact. |
 
 Specialist lenses join when the draft touches their area:
 
@@ -123,8 +111,8 @@ With more than 24 critical or major findings on Standard, or more than 8 on Deep
 
 ### Findings that survive
 
-- **The SPEC is wrong** (a UAT that could pass on broken code, a rule no UAT proves, a wrong intent): the fix goes into the draft. A rule whose behavior an existing UAT already states becomes one of that UAT's listed cases. Only a new behavior gets a new UAT. Critical and major fixes come to you as one list. Minor ones are folded in.
-- **The SPEC is right, but the build needs steering** (for example, a file the change must also update): it becomes an instruction in `AUDIT.md` that the plan must follow. The instruction says what a test must prove or what the code must meet. It never asks for a new test or names which kind of test to write, so the plan still picks each test's [layer](/workflow/plan/#uat-specs) itself. An instruction the plan could meet only with a new test is listed as a follow-up in the plan's `README.md` instead.
+- **The SPEC is wrong** (a flow or success criterion that could pass on broken code, a rule nothing in the SPEC states, a wrong intent): the fix goes into the draft. A rule on a path an existing flow already covers goes into the intent or a success criterion, never into the flow as a case. Only a critical path no flow names gets a new flow. Critical and major fixes come to you as one list. Minor ones are folded in.
+- **The SPEC is right, but the build needs steering** (for example, a file the change must also update): it becomes an instruction in `AUDIT.md` that the plan must follow. The instruction says what a test must prove or what the code must meet. It never asks for a new test or names which kind of test to write, so the [plan](/workflow/plan/) still picks how each one is tested. The plan meets it in the code or inside a flow test. An instruction that would need any other test is listed as a follow-up in the plan's `README.md` instead.
 
 In auto mode, a clear fix is applied, and a finding with more than one reasonable fix is left open for you.
 

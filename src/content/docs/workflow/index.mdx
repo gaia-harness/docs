@@ -21,7 +21,7 @@ Ask for a component, a fix, a refactor:
 > Add a date-range filter to the saved-search panel.
 ```
 
-Notice that this prompt did not ask for a test. But GAIA enforces [test-driven development (TDD)](/workflow/tdd/), so Claude writes a failing test first, then the code that makes it pass. A separate reviewer [checks that each test is worth keeping](/workflow/tdd/#the-worthiness-review). TDD happens without you asking, so you know every test works and earns its place.
+Notice that this prompt did not ask for a test. GAIA's rule is to test what matters. Once the code exists, every critical user flow gets a test, and so does a route worth locking in, tricky logic, or a fixed bug. A separate reviewer [checks that each test is worth keeping](/workflow/tdd/#the-worthiness-review). None of this needs you to ask.
 
 ## Every task follows one lifecycle
 
