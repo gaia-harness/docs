@@ -1,6 +1,6 @@
 ---
 title: Statusline
-description: What GAIA's statusline shows. The left side tracks your session (project, branch, model, and how full the context is). The right side names the maintenance commands that are due.
+description: What GAIA's statusline shows. The left side tracks your session (project, branch, model, how full the context is, and how much of your usage limits you have used). The right side names the maintenance commands that are due.
 ---
 
 export const S = ({ c, children }) => <span style={{ color: c, fontWeight: 700 }}>{children}</span>;
@@ -13,14 +13,14 @@ export const Row = ({ children }) => (
 
 GAIA adds a [statusline](https://code.claude.com/docs/en/statusline) to Claude Code: the row under the prompt. It has two sides, and each answers a different question:
 
-- **The left side** is about the session you are in: which project and branch, which model, and how full Claude's context is.
+- **The left side** is about the session you are in: which project and branch, which model, how full Claude's context is, and how much of your usage limits you have used.
 - **The right side** is about the project: which GAIA commands are due, and why.
 
 Both sides share one row. They are shown separately below.
 
 ## The left side
 
-<Row><S c="#60a5fa">my-app</S> │ <S c="#4ade80">🌳 feat/login</S> │ <S c="#22d3ee">Opus 5.5 (High)</S> │ <S c="#4ade80">▓▓░░░░░░░░</S> 18%</Row>
+<Row><S c="#60a5fa">my-app</S> │ <S c="#4ade80">🌳 feat/login</S> │ <S c="#22d3ee">Opus 5.5 (High)</S> │ <S c="#4ade80">▓▓░░░░░░░░</S> 18% │ 🕔 <S c="#4ade80">23%</S> │ 📅 <S c="#4ade80">41%</S></Row>
 
 | Segment | What it shows |
 | --- | --- |
@@ -28,6 +28,7 @@ Both sides share one row. They are shown separately below.
 | Branch | The branch the session is on. A `🌳` in front means the session is in a linked worktree, a separate copy of the repo on its own branch. |
 | Model and effort | The model, with its effort level in parentheses when one is set: `Low`, `Medium`, `High`, `XHigh`, or `Max`. |
 | Context bar | How full the context window is: ten cells, then the percentage of the window used. |
+| Usage limits | How much of your 5-hour (`🕔`) and 7-day (`📅`) limits you have used. See [Usage limits](#usage-limits). |
 
 ### The context bar
 
@@ -44,6 +45,16 @@ A model's answers get worse as its context fills, and Claude cannot see how full
 The examples use a 1M-token window. Where each band starts is on [Token efficiency](/models-and-context/token-efficiency/#context-bands); what happens at each is on [Work lifecycle](/workflow/work-lifecycle/#resuming-long-work).
 
 The statusline also saves each reading, which is how GAIA [tells Claude](/models-and-context/token-efficiency/#context-bands) when the context reaches a band. Without GAIA's statusline, Claude gets no band warnings, and the [audit checkpoint](/reference/gates/#audit-checkpoint) counts rounds instead.
+
+### Usage limits
+
+`🕔` and `📅` each appear only when Claude Code reports that limit. A limit it doesn't report shows nothing, not 0%. The color shows how close you are:
+
+| Used | Example |
+| --- | --- |
+| Below 75% | <code style={{ background: '#1a1b26' }}>🕔 <S c="#4ade80">23%</S></code> |
+| 75% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#facc15">78%</S></code> |
+| 90% or more, with the time until the limit resets | <code style={{ background: '#1a1b26' }}>🕔 <S c="#f87171">92%</S> (1h2m)</code> |
 
 ### Using your own statusline
 
