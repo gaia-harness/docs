@@ -25,7 +25,7 @@ Before any commit that stages source code (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`,
 
 | Step | Passes when |
 |---|---|
-| Simplify | Claude has run the `simplify` skill on the change and applied what it recommends. |
+| Simplify | Claude has run the `simplify` skill on the change and applied what it recommends. A plan's commits and an audit fix round's commit skip this step. A plan makes [one pass over the whole branch](/workflow/plan/#execution) after its last phase instead. |
 | Localization | No user-facing text is hardcoded, and no translation key is missing its value. |
 | Typecheck (`pnpm typecheck`) | Zero errors. |
 | Lint (`pnpm lint`) | Zero errors and zero warnings. Lint also fixes formatting, because [Prettier](https://prettier.io/) runs as an ESLint rule. |

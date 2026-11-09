@@ -95,7 +95,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 ### Quality Gate
 
-- **Stops:** Claude committing source changes before every step of the gate passes with zero warnings. An audit fix round of only Minor, non-security fixes runs every step except the end-to-end tests, the dev server check and the build, which then run once before the audit status posts.
+- **Stops:** Claude committing source changes before every step of the gate passes with zero warnings. An audit fix round skips simplify. One of only Minor, non-security fixes also skips the end-to-end tests, the dev server check and the build, which then run once before the audit status posts.
 - **Why:** the commit hook checks only the files you staged. The full gate catches what breaks elsewhere, including warnings that would otherwise ship.
 - **When:** before any commit that touches source code or config that affects these checks. This is a rule Claude follows (`.claude/rules/quality-gate.md`), not a hook. The [pre-commit floor](#pre-commit-floor) is the part that runs no matter what.
 - **Who acts:** Claude. Nothing for you to do.

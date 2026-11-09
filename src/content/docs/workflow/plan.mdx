@@ -110,7 +110,8 @@ The orchestrator runs in the fresh session:
 
   The gate then runs again. Any other failure, or a second failure in the same phase, stops the plan. A stop asks you one question, with **Stay halted** recommended, or **Discuss this** to talk it through.
 - **A task that runs out of context** hands off to a fresh sub-agent. A task that would need a third handoff stops the plan and tells you.
-- **The pull request** opens as a draft after the first phase commits. After the last phase, the orchestrator runs the [checks on each flow test](#flow-tests) for a SPEC's plan, then the [worthiness step](/workflow/testing/#the-worthiness-step), the [overlap pass](/workflow/testing/#the-overlap-pass), and the wiki update, all before the [Code Audit Team](/workflow/code-audit-team/) reviews it. Once the team clears it, the orchestrator shows a summary and the cost of the implementation, then asks you before it merges, with holding the merge as the recommended answer.
+- **The simplify pass** runs once, after the last phase commits. A sub-agent runs the `simplify` skill over the whole branch, and the orchestrator commits its edits through the [Quality Gate](/workflow/code-audit-team/#what-it-checks). If the gate fails or the pass stops partway, the edits are discarded and saved as a patch. Only a refused push or a failed discard stops the plan. The final summary says whether the pass applied, changed nothing, did not run, or was discarded, and where any patch is.
+- **The pull request** opens as a draft after the first phase commits. After the simplify pass, the orchestrator runs the [checks on each flow test](#flow-tests) for a SPEC's plan, then the [worthiness step](/workflow/testing/#the-worthiness-step), the [overlap pass](/workflow/testing/#the-overlap-pass), and the wiki update, all before the [Code Audit Team](/workflow/code-audit-team/) reviews it. Once the team clears it, the orchestrator shows a summary and the cost of the implementation, then asks you before it merges, with holding the merge as the recommended answer.
 
 ### Resuming a plan
 
@@ -120,7 +121,7 @@ Running the kickoff again on a plan with completed phases shows each one with it
 - **Restart from Phase 1**
 - **Abandon**: stop without running, committing, merging, or deleting anything
 
-When every phase is already complete, the run picks up at the checks on each flow test, or at the worthiness step for a plan with no SPEC.
+When every phase is already complete, the run picks up at the simplify pass and skips any step that already finished.
 
 If the working tree has uncommitted changes, the plan does not resume. It asks the same **Stay halted** or **Discuss this** question and never offers to stash, discard, or commit your changes.
 
