@@ -1,29 +1,11 @@
 ---
 title: Code skills
-description: Skills that shape how Claude writes and edits TypeScript, React, Tailwind, tests, names, and browser automation in your project.
+description: Skills that shape how Claude writes and edits React, Tailwind, tests, names, and browser automation in your project.
 sidebar:
   order: 1
 ---
 
 These skills shape how Claude writes and reviews code. Each loads on its own when the task matches its trigger ([how triggering works](/skills/#how-triggering-works)). You don't call them by name.
-
-## TypeScript
-
-Patterns and conventions for [TypeScript](https://www.typescriptlang.org/):
-
-- `type` rather than `interface` ([why](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces)).
-- Explicit return types on exported functions ([why](https://typescript-eslint.io/rules/explicit-module-boundary-types/)).
-- No enums: use `as const` objects with types derived from them ([why](https://www.typescriptlang.org/docs/handbook/enums.html#objects-vs-enums)).
-- No `switch`: use an object map or `if`/`else`.
-- At most three positional parameters, with an options object beyond that ([why](https://eslint.org/docs/latest/rules/max-params)).
-- `undefined` rather than `null` for a missing value your own code sets.
-- [Zod](https://zod.dev/) 4's [`z.literal([...])`](https://zod.dev/api#literals) rather than `z.enum()`, with values sorted alphabetically.
-
-**One source of truth.** Before Claude defines a constant list, union type, schema, or lookup map, it searches for an existing one and imports it. Every other form of the same set (a type, a schema) is derived from that one source. A map keyed by a union uses `satisfies Record<Union, ...>`, so when you add a member to the union, TypeScript reports an error everywhere the new member is not handled yet ([why](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator)).
-
-**Triggers** when writing or reviewing TypeScript: typing exports, choosing between `type` and `interface`, defining Zod schemas, defining a shared constant list or union, structuring function parameters, or avoiding switch statements and enums.
-
-**Example phrasing:** "type this Zod schema", "should this be a type or an interface", "add a status to this union".
 
 ## Naming Conventions
 
