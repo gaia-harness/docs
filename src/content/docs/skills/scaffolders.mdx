@@ -55,7 +55,7 @@ A route not connected to a service can still get a `loader` for the page title a
 
 ## New Service
 
-Creates an API service in your API's folder under `app/services/` (shipped as `gaia/`, often renamed for your API). It writes [Ky](https://github.com/sindresorhus/ky) request functions that check responses against [Zod](https://zod.dev/) schemas, plus the schemas, URL constants, and types, and optionally MSW mocks under `test/mocks/<name>/`. With TanStack Query installed and a `get` endpoint, it also writes `queries.ts` with query keys and `queryOptions`.
+Creates an API service in your API's folder under `app/services/`, which [`/gaia-init`](/getting-started/gaia-init/) names after your project. It writes [Ky](https://github.com/sindresorhus/ky) request functions that check responses against [Zod](https://zod.dev/) schemas, plus the schemas, URL constants, and types, and optionally MSW mocks under `test/mocks/<name>/`. With TanStack Query installed and a `get` endpoint, it also writes `queries.ts` with query keys and `queryOptions`.
 
 **Confirms:** name (kebab-case), endpoints (any of `get`, `post`, `put`, `delete`), the schema as `name:type` pairs, and whether to include mocks.
 

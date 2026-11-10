@@ -85,6 +85,7 @@ Every file the merge overwrites or deletes is backed up first, under `.gaia-back
 - **`.gaia/packages.json`**, the list of packages in your workspace. It is yours from the start.
 - **`.gaia/finding-classes.json`**, your project's own [audit finding classes](/maintenance/codify/#your-own-finding-classes). It ships empty and is yours from the start.
 - **Your design system, once it is established.** After you settle your project's design (the `Design System` wiki page is marked established), that page and `apps/web/.claude/rules/design-baseline.md` become yours, and later updates skip both.
+- **Your service layer, once it is no longer `apps/web/app/services/gaia/`.** [`/gaia-init`](/getting-started/gaia-init/) renames that sample folder after your project. Once it is renamed or deleted, updates never re-create it. If a release changes the sample, the summary lists those files so you can bring over any change you want.
 - **`apps/web/.claude/settings.json`.** It is never merged. GAIA rebuilds it from the root `.claude/settings.json` plus `apps/web/.claude/settings.overlay.json`, so put frontend-only settings in the overlay.
 
 `package.json`, `pnpm-workspace.yaml` and `.gaia/audit-ci.yml` are merged key by key. A key only you added, or one you removed, is never touched. A key GAIA changed that you left alone takes GAIA's value. A key you both changed becomes a question. Your dependencies, overrides, build approvals and [Code Audit Team](/workflow/code-audit-team/) entries stay as you set them.
