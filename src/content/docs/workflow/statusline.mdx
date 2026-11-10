@@ -48,13 +48,13 @@ The statusline also saves each reading, which is how GAIA [tells Claude](/models
 
 ### Usage limits
 
-`🕔` and `📅` each appear only when Claude Code reports that limit. A limit it doesn't report shows nothing, not 0%. The color shows how close you are:
+`🕔` and `📅` each appear only when Claude Code reports that limit. A limit it doesn't report shows nothing, not 0%. The color shows how close you are, and the time in brackets is how long until the limit resets. The 5-hour limit shows that time from 75%, since its reset is near enough to plan around. The 7-day limit shows it from 90%, since at 75% its reset can still be days away.
 
-| Used | Example |
-| --- | --- |
-| Below 75% | <code style={{ background: '#1a1b26' }}>🕔 <S c="#4ade80">23%</S></code> |
-| 75% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#facc15">78%</S></code> |
-| 90% or more, with the time until the limit resets | <code style={{ background: '#1a1b26' }}>🕔 <S c="#f87171">92%</S> (1h2m)</code> |
+| Used | 5-hour | 7-day |
+| --- | --- | --- |
+| Below 75% | <code style={{ background: '#1a1b26' }}>🕔 <S c="#4ade80">23%</S></code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#4ade80">41%</S></code> |
+| 75% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#facc15">78%</S> (1h40m)</code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#facc15">80%</S></code> |
+| 90% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#f87171">92%</S> (1h2m)</code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#f87171">93%</S> (1d6h)</code> |
 
 ### Using your own statusline
 
