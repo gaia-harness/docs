@@ -16,7 +16,7 @@ Once the code exists, Claude writes these tests.
 
 Writing the test first is optional. See [Test-driven development with `/tdd`](#test-driven-development-with-tdd).
 
-GAIA follows the [testing trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications). Most tests check pieces working together, and there are not too many of them. Each behavior a user can observe gets one test, and one test that runs over a table of cases (`test.each`) counts as one. Nothing the type checker or lint already proves gets a test. A tiny app gets few tests.
+GAIA follows the [testing trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications). Most tests check pieces working together, and there are not too many of them. A behavior a user can observe gets at most one test, and one test that runs over a table of cases (`test.each`) counts as one. That is a limit, not a target. A behavior a flow test already covers gets no test of its own, but the tests listed above are still written. Nothing the type checker or lint already proves gets a test. A tiny app gets few tests.
 
 Claude writes a unit test only when both of these hold.
 
@@ -119,7 +119,7 @@ Seeing a test fail before the code exists shows it can catch the bug it describe
 
 ### The loop
 
-1. **Plan.** Claude picks the layer the test belongs in (see [Where tests go](#where-tests-go)). It names each behavior a user can observe and the test that covers it, one test per behavior, not one per function. It asks you to approve that plan or revise it. It focuses on the critical paths and the complex logic, not every edge case.
+1. **Plan.** Claude picks the layer the test belongs in (see [Where tests go](#where-tests-go)). It names each behavior a user can observe and the one test that covers it, not one test per function. One test can cover several behaviors, and a behavior that already has a test extends that test instead of getting a second. It asks you to approve that plan or revise it. It focuses on the critical paths and the complex logic, not every edge case.
 2. **One tracer test.** One test that checks one thing from start to finish, to prove the test setup works before real coverage is added.
 3. **One behavior at a time.** For each remaining behavior, one failing test, then only enough code to pass it. Claude never writes all the tests first and all the code after, because tests written in bulk describe how Claude imagines the code will behave, not how it does.
 4. **Refactor on green.** Once every test passes, Claude removes duplication from the code this cycle wrote and moves complexity behind simpler interfaces, running the tests after each step.
