@@ -28,7 +28,7 @@ Some steps never leave your session: a step that asks you something (a sub-agent
 
 ### Effort
 
-GAIA never sets effort. Every sub-agent runs at your session's `/effort` level, the same as work your session does itself, so a low-effort session reviews at low and a high-effort one at high. The `CLAUDE_CODE_EFFORT_LEVEL` environment variable overrides the level on a machine. Set it in your shell profile, then restart Claude Code. GAIA chooses the model. You choose the effort.
+GAIA sets no effort, with one exception. Every sub-agent runs at your session's `/effort` level, the same as work your session does itself, so a low-effort session reviews at low and a high-effort one at high. The exception is the [Code Audit Team](/workflow/code-audit-team/)'s [code review](/workflow/code-audit-team/#the-code-review), which always runs `/code-review` at its `high` level. That level is `/code-review`'s own depth setting, not `/effort`. The `CLAUDE_CODE_EFFORT_LEVEL` environment variable overrides the level on a machine. Set it in your shell profile, then restart Claude Code. GAIA chooses the model. You choose the effort, except for the code review.
 
 ## Model at each step
 
@@ -47,6 +47,7 @@ A step not listed here runs on your session's model. That covers `/gaia-debt`, `
 | | [`audit-refuter`](/reference/agents/#audit-refuter), for `code-audit-frontend`'s own Critical and Major findings | Sonnet |
 | | [`audit-light-reviewer`](/reference/agents/#audit-light-reviewer) | Sonnet |
 | | The fixer | Sonnet |
+| | The [code review](/workflow/code-audit-team/#the-code-review), Claude Code's `/code-review` | Opus, at the `high` review level |
 | [`tdd` skill](/workflow/testing/#test-driven-development-with-tdd) | [`worthiness-evaluator`](/reference/agents/#worthiness-evaluator) | Opus |
 | [`/gaia-fitness`](/maintenance/fitness/) | [`fitness-judge`](/reference/agents/#fitness-judge), and the agent that proposes fixes | Sonnet |
 | [`/gaia-cleanse`](/maintenance/cleanse/) | Writing the report, then applying it | Sonnet, one agent each |

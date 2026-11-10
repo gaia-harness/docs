@@ -117,6 +117,8 @@ A small change since a member's last full review can go to a cheaper Sonnet revi
 
 The same reviewer can take a first review of a small, purely presentational frontend change (copy edits, swapped HTML tags, static class changes, translation text). It checks accessibility, translations, and theme color names, and asks one question: does anything need to block the merge? If yes, or unsure, the full member reviews it.
 
+A member handed findings from the [code review](#the-code-review) always gets the full review.
+
 ## Severity
 
 | Severity | Effect on approval |
@@ -140,6 +142,12 @@ Security findings are never filed publicly. See [Security findings](/workflow/te
 An `audit-loop-unit` sub-agent runs the rounds a few at a time, outside your main session. In each round the members review, a fixer repairs what they found, a script checks the repairs, and the Quality Gate runs before the fixes are committed. Your session holds only a short report per unit, so a long audit does not fill your context.
 
 The loop needs **Claude Code 2.1.287 or later**. Run `claude update` if a unit stops and names the version.
+
+### The code review
+
+Before the first full member review, the loop runs Claude Code's `/code-review` once over the whole branch, at its `high` level, in a separate session that can only read. Each finding goes to the member that owns its file, or to `code-audit-frontend` for any other file. The member keeps a finding unless the member shows evidence that it is wrong, and a kept finding is fixed like one of the member's own. The review never clears a branch. Members alone do.
+
+It runs once per branch, with one retry when a second try could pass, and has no setting to turn it off. The review is skipped when the light reviewer clears the branch on its first review, and on a GAIA update branch. On Claude Code older than 2.1.296, `## Audit rounds` shows the review as `not run` and the audit continues without it. A review that does not run never counts as clean and never blocks the merge. Only a review that changes your files, or runs past its time limit, stops the audit until you look.
 
 ### The branch checkpoint
 
@@ -185,7 +193,7 @@ A pull request merged from the GitHub UI without going through Claude (a raw [De
 
 ## What lands in the pull request
 
-- **`## Audit rounds`**: total rounds, rounds per member, light reviews, and rounds you granted.
+- **`## Audit rounds`**: total rounds, rounds per member, light reviews, rounds you granted, and the code review's outcome and cost.
 - **`## Accepted residuals (recorded, not fixed)`**: accepted findings, which [`/gaia-residue`](/maintenance/residue/) reads later.
 - **A findings comment**, posted on merge, with every round's findings. Security and Critical findings appear only as a count.
 
@@ -220,7 +228,7 @@ Many teams run review, lint, and tests only on CI. GAIA runs them on your machin
 
 CI still runs. The [Tests workflow](/workflow/git-conventions/#github-workflows-that-ship) runs lint and the test suites on every pull request, and once a repo admin has run `/setup-gaia`, its checks are required. The `GAIA-Audit` check confirms the local audit ran.
 
-## Why not Claude Code's built-in review
+## Why the built-in review is not the gate
 
 Claude Code's own review commands, such as `/code-review` and `/security-review`, are good reviewers. A merge gate needs four things they do not give you:
 
@@ -229,7 +237,7 @@ Claude Code's own review commands, such as `/code-review` and `/security-review`
 - **It holds the merge.** Claude cannot merge until every member has cleared. A built-in review only prints findings, and Anthropic's managed review on GitHub does not block a merge.
 - **Every finding is dealt with.** Each one is fixed, waived with a reason, or filed as [tech debt](/workflow/tech-debt/), and recurring kinds feed [`/gaia-codify`](/maintenance/codify/). A built-in review's findings stay in the conversation.
 
-You can still run a built-in review as a second opinion. Its findings are advice only: nothing it says clears or blocks a merge.
+So the audit uses `/code-review` only to [hand findings to the members](#the-code-review). When a Claude Code update changes what it checks, no member's clearance is voided, and it never clears or blocks a merge. You can still run it yourself as a second opinion.
 
 ## Whole-app security audits
 
