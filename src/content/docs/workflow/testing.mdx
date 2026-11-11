@@ -16,7 +16,7 @@ Once the code exists, Claude writes these tests.
 
 Writing the test first is optional. See [Test-driven development with `/tdd`](#test-driven-development-with-tdd).
 
-GAIA follows the [testing trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications). Most tests check pieces working together, and there are not too many of them. A behavior a user can observe gets at most one test, and one test that runs over a table of cases (`test.each`) counts as one. That is a limit, not a target. A happy path a flow test walks gets no test of its own, and a flow test repeats no refusal another test already checks. Nothing the type checker or lint already proves gets a test. A tiny app gets few tests.
+GAIA follows the [testing trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications). Most tests check pieces working together, and there are not too many of them. A behavior a user can observe gets at most one test, and one test that runs over a table of cases (`test.each`) counts as one. That is a limit, not a target. A happy path gets no test of its own when a flow test walks it and checks its effect, but an effect the flow test cannot see keeps its own route test, and a flow test repeats no refusal another test already checks. Nothing the type checker or lint already proves gets a test. A tiny app gets few tests.
 
 Claude writes a unit test only when both of these hold.
 
