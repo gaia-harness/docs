@@ -9,14 +9,14 @@ GAIA's rule is to test what matters, after the code exists. The rule is part of 
 
 Once the code exists, Claude writes these tests.
 
-- **One test per critical user flow**, starting where a user starts it, covering its happy path and each error path the code has. A SPEC names these flows (see [Flow tests from a SPEC](#flow-tests-from-a-spec)).
-- **A route test** where a route's behavior is worth locking in.
+- **One test per critical user flow**, starting where a user starts it, covering its journey through the happy path and the effects that take several requests or sessions to set up, such as signing out ending a session. A SPEC names these flows (see [Flow tests from a SPEC](#flow-tests-from-a-spec)).
+- **A test for each refusal or validation error** the code adds, at the lowest layer that shows it, usually a route test. A route test also goes wherever a route's behavior is worth locking in.
 - **A unit test** for tricky logic.
 - **A test that reproduces the bug**, for each bug fix.
 
 Writing the test first is optional. See [Test-driven development with `/tdd`](#test-driven-development-with-tdd).
 
-GAIA follows the [testing trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications). Most tests check pieces working together, and there are not too many of them. A behavior a user can observe gets at most one test, and one test that runs over a table of cases (`test.each`) counts as one. That is a limit, not a target. A behavior a flow test already covers gets no test of its own, but the tests listed above are still written. Nothing the type checker or lint already proves gets a test. A tiny app gets few tests.
+GAIA follows the [testing trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications). Most tests check pieces working together, and there are not too many of them. A behavior a user can observe gets at most one test, and one test that runs over a table of cases (`test.each`) counts as one. That is a limit, not a target. A happy path a flow test walks gets no test of its own, and a flow test repeats no refusal another test already checks. Nothing the type checker or lint already proves gets a test. A tiny app gets few tests.
 
 Claude writes a unit test only when both of these hold.
 
@@ -79,7 +79,7 @@ Nothing checks mechanically that a test can fail, so this review is what judges 
 
 For an interactive component, the reviewer also expects its story tests to drive it from the keyboard and check where focus lands. An accessibility scan of a rendered component tests neither.
 
-A flow test is also judged against its flow in the SPEC. The reviewer names each error path the code has that no test in the file exercises, an outcome the test never checks (a heading after submit, but never that the save took effect), and, for a web app flow, any app folder the branch changed for the flow that the test's `@covers` line leaves out. That line is a comment at the top of the test that lists the app folders the flow runs through. Any of these makes the verdict a fix.
+A flow test is also judged against its flow in the SPEC. The reviewer names each error path the code has that neither the flow test nor a route, unit, or real-server test exercises, an outcome the test never checks (a heading after submit, but never that the save took effect), and, for a web app flow, any app folder the branch changed for the flow that the test's `@covers` line leaves out. That line is a comment at the top of the test that lists the app folders the flow runs through. Any of these makes the verdict a fix. An untested refusal or validation error that one request shows is fixed with a new route or real-server test, never by adding it to the flow test.
 
 Each test gets a keep, fix, or delete verdict. The reviewer edits no test or source file itself.
 
