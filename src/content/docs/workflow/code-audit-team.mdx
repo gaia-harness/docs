@@ -161,7 +161,7 @@ Otherwise, GAIA checks in with you when:
 
 Claude shows where things stand (rounds, findings per round, what remains by severity, and the cost so far) and asks:
 
-- **Continue audit in this session** or **in a new session**: one more batch of rounds. The new-session option prints a prompt to paste after `/clear`.
+- **Continue audit in this session** or **in a new session**: one more batch of rounds. The new-session option prints a prompt to paste after `/clear`. On a [`/gaia-plan`](/workflow/plan/) build, that prompt returns to the plan, so its summary and merge question still come before the merge.
 - **Accept the remainder**: offered only when the loop has a reason to stop, nothing Critical or security-related remains and every member's report came back complete. One last review round runs with no fixes, and what remains is recorded as accepted residuals.
 - **Stop and file the remainder**: files the remaining findings as tech-debt issues and leaves the pull request open.
 
