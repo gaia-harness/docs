@@ -91,7 +91,7 @@ A plan run, a plain request, and `/gaia-debt` each finish this review once the d
 - **Fix**: a fresh sub-agent fixes the test, GAIA commits the fix, and the reviewer judges the changed test once more. When a flow test misses an error path that belongs in a route, unit, or real-server test, the sub-agent adds it there, and the reviewer then judges the flow test again. If it still gets a fix verdict, or the fixer cannot fix it, it becomes an [accepted residual](/maintenance/residue/#what-a-residual-is). If it now gets a delete verdict, the delete steps below apply. A fix for a test this branch did not change goes to [tech debt](/workflow/tech-debt/) instead.
 - **Delete**: Claude shows you the evidence (the redundant assertion and the test that already covers it) and asks you to confirm the delete or keep the test. An approved delete goes to the same fixer. A refused delete keeps the test with no residual. In an unattended run, the test stays and a residual is recorded.
 
-If an audit fixer changes a test after it was judged and it now gets a fix verdict, Claude asks you. Fixing it means another review and one more CI run. The alternative is an accepted residual.
+If an audit fixer adds or changes a test and it then gets a fix or delete verdict, Claude lists those tests and recommends keeping each as an accepted residual, so the finished audit stands. You can pick tests to repair instead, which costs another audit round and one more CI run. In an unattended run they become residuals.
 
 ### The overlap pass
 
