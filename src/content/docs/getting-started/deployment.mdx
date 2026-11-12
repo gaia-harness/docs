@@ -54,7 +54,7 @@ The image installs exactly what the lockfile pins, keeps only production depende
 | Variable | Required | What it does |
 |---|---|---|
 | `API_URL` | Yes | The base URL of your backend API, used by both the server and the browser. |
-| `SESSION_SECRET` | Yes | Signs the app's cookies, such as the language and toast cookies. Use a long random value, never the `local` placeholder from `.env.example`. |
+| `SESSION_SECRET` | Yes | Signs the app's cookies, such as the language and toast cookies. In production it must be at least 32 characters, or the app refuses to start. A local `pnpm start` runs as production too, so it needs one as well; `pnpm dev` works with the short value from `.env.example`. Generate one with `openssl rand -hex 32`. |
 | `SITE_URL` | Yes | Your site's public URL, including the scheme (`https://example.com`). Pages tell search engines not to index them unless the request's `Host` header matches this URL's host and port, so a preview deployment stays out of search results. If a proxy in front of the server changes the `Host` header, every page is marked this way. |
 | `PORT`, `HOST` | No | Where the server listens. |
 | `COMMIT_SHA` | No | Adds the first six characters of the commit to the app's version string. The shipped Dockerfile doesn't pass it; ask Claude to. |
