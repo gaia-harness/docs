@@ -54,7 +54,7 @@ Each file goes to the first member whose pattern matches, with the default membe
 
 `code-audit-frontend` also runs three tools and lists their findings as advice that never blocks approval: [React Doctor](https://github.com/millionco/react-doctor) when the change touches a `.ts` or `.tsx` file, [Knip](https://knip.dev/) (unused files, exports, and dependencies) when it touches one of those, a `package.json`, or the lockfile, and a dependency security advisory check on every review.
 
-Members only report. A separate fixer makes the repairs, and a script checks each repair before it is kept. A repair that adds a guard, refusal, or validation also adds a test that makes it refuse, unless no test can reach it, which the fixer then reports.
+Members only report. A separate fixer makes the repairs, and a script checks each repair before it is kept. A repair that adds a guard, refusal, or validation also adds a test that makes it refuse, unless no test can reach it, which the fixer then reports. The fixer adds such a rule only when the SPEC, a decision page in the wiki, or your existing code or docs already call for it. A rule that only a finding proposes stays open, and the [branch checkpoint](#the-branch-checkpoint) asks you what to do with it, such as filing it or stating it as a requirement.
 
 ### Covering new code
 
