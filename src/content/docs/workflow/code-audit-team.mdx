@@ -124,7 +124,7 @@ A member handed findings from the [code review](#the-code-review) always gets th
 | Severity | Effect on approval |
 |---|---|
 | **Critical** | Must be fixed. |
-| **Major** | Must be fixed, or acknowledged with a stated reason. |
+| **Major** | Must be fixed, unless you accept it at the [branch checkpoint](#the-branch-checkpoint) and it is not security-related. |
 | **Minor** | Never blocks approval. Fixed by default. |
 
 Every finding, Minor included, gets an outcome. By default it is fixed. Otherwise it is waived, filed as an issue, or accepted as a known trade-off (a [residual](/maintenance/residue/#what-a-residual-is)), each with a reason. Only the loop's own stop or you can accept a residual. Findings about architecture come to you. A non-security finding on a line the branch wrote [is fixed or accepted](/reference/gates/#tech-debt-on-the-branchs-own-code), never filed.
@@ -215,7 +215,7 @@ If Claude tries to merge before the audit is done, the merge hook turns it back 
 
 | Claude sees | What it means | Next step |
 |---|---|---|
-| A member has no clearance for the current change | That member has not reviewed the latest commit to its files, or refused it | Claude runs the audit loop. A refusal clears only when the finding is fixed or you acknowledge a Major finding with a reason. |
+| A member has no clearance for the current change | That member has not reviewed the latest commit to its files, or refused it | Claude runs the audit loop. A refusal clears only when the finding is fixed or you accept that Major finding at the [branch checkpoint](#the-branch-checkpoint), after which Claude runs that member again so its approval replaces the refusal. |
 | The base tip is not a commit in this checkout | Your checkout has not fetched the base branch | Claude fetches it and retries. |
 | GitHub cannot be reached | The audit cannot read the pull request's base branch | Claude shows the `gh` error. If it is a sign-in problem, run `gh auth login` yourself, since it opens a browser sign-in. |
 | More than one merge base with the base tip | Git cannot tell what your branch changed | Claude merges the base branch into yours and retries. |

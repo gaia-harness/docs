@@ -153,7 +153,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 - **Stops:** `gh pr merge` until every Code Audit Team member responsible for the changed files has approved the current version of the change.
 - **Why:** unreviewed code reaching `main` is exactly what the audit exists to prevent.
 - **When:** before `gh pr merge` runs (`pr-merge-audit-check`).
-- **Who acts:** Claude, and you only when a member refuses and you decide to accept its Major finding with a reason.
+- **Who acts:** Claude, and you only when a member refuses over a Major finding and you accept it at the [branch checkpoint](/workflow/code-audit-team/#the-branch-checkpoint). A Critical or security-related finding cannot be accepted.
 - **Clear it:** Claude runs the [audit loop](/workflow/code-audit-team/#the-audit-loop), fixes what it finds, and merges once every member approves. Pull requests outside the audit's scope, and `chore(deps)` pull requests that only change dependency manifests, are approved by the hook itself.
 
 ### Audit base unreadable
