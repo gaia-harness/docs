@@ -1,16 +1,16 @@
 ---
 title: Testing
-description: What GAIA has Claude test once the code exists, where each kind of test goes, how GAIA judges every test, and when to reach for test-driven development with /tdd.
+description: What GAIA has Claude test once the code exists, where each kind of test goes, how a plan decides its tests up front, how GAIA judges every test, and when to reach for test-driven development with /tdd.
 ---
 
-GAIA's rule is to test what matters, after the code exists. The rule is part of the coding guidelines every session loads, so you don't need to ask for tests. Every test the work changes then gets an independent [worthiness review](#the-worthiness-review), and a merge gate checks that the review ran.
+GAIA's rule is to test what matters, after the code exists. GAIA's testing rules decide which test to write and at which layer, and every session and sub-agent follows them, so you don't need to ask for tests. A plan decides its tests before any code exists, in a [test-design table](#the-test-design-table). Other work gets an independent [worthiness review](#the-worthiness-review). A [merge gate](/reference/gates/#worthiness-verdict) checks that every changed test was judged.
 
 ## What gets a test
 
-Once the code exists, Claude writes these tests.
+Claude tests only what was asked for. That means a SPEC's flows, success criteria, and answered questions, a plan's description, or your issue or request. A corner case or error path none of them names gets no test. Once the code exists, Claude writes these tests.
 
 - **One test per critical user flow**, starting where a user starts it, covering its journey through the happy path and the effects that take several requests or sessions to set up, such as signing out ending a session. A SPEC names these flows (see [Flow tests from a SPEC](#flow-tests-from-a-spec)).
-- **A test for each refusal or validation error** the code adds, at the lowest layer that shows it, usually a route test. A route test also goes wherever a route's behavior is worth locking in.
+- **A test for each guard** the code adds, meaning code that refuses, such as an access check or a validation. The test makes the guard refuse, at the lowest layer that shows it, usually a route test. A test that only watches a guard pass cannot tell a working guard from a broken one.
 - **A unit test** for tricky logic.
 - **A test that reproduces the bug**, for each bug fix.
 
@@ -66,11 +66,53 @@ A [SPEC](/workflow/spec/) names the feature's [critical flows](/workflow/spec/#c
 
 ## How GAIA judges tests
 
-A test that passes may still check nothing. GAIA has a separate reviewer judge every changed test, then fixes the ones that fall short and asks you before deleting any.
+A test that passes may still check nothing. A plan checks its tests against its [test-design table](#the-test-design-table) with the [drift check](#the-drift-check). Other work, such as a plain request, `/gaia-debt`, or a plan made by an older GAIA version, gets the [worthiness review](#the-worthiness-review) on every test it changes.
+
+### The test-design table
+
+[`/gaia-plan`](/workflow/plan/) decides every test before any code is written. The plan's table gives each test a row. A row names the requirement the test proves, the case, its file and exact title, its layer, the task that writes it, and one action.
+
+- **New**: write a test no existing test holds.
+- **Reuse**: an existing test already checks the case. It stays unchanged.
+- **Extend**: add the case to an existing test's table of cases.
+- **Change**: the plan changes the behavior an existing test checks, so the test changes too.
+- **Retire**: the new work replaces an existing test, so it is deleted.
+
+The planner first reads the existing tests for the code the plan touches, so a case they already check is reused or extended, not written again. Every requirement maps to at least one row and every row to a requirement, so a missing or duplicate test shows up in the table, before the build. The [plan audit](/workflow/plan/#the-plan-audit) reviews the table, and approving the plan approves it, retired tests included. The plan's `README.md` shows it under `## Test design`.
+
+Each task's sub-agent writes the tests its rows give it, under the planned titles, and never edits the table.
+
+### Security tests
+
+A security row is a row whose test proves one of three things:
+
+- **Access**: who may act or see something.
+- **Forgery**: a forged or edited value is refused.
+- **Secrets**: a secret never appears where it must not.
+
+The table marks each security row with a flag. A separate sub-agent, `security-test-writer`, writes these tests at the end of the phase that builds the code. It writes each one from the row and the plan's shared contracts, and reads the code only to find where to call it, so its test cannot repeat the code's mistake.
+
+When a security test fails, a fresh sub-agent fixes the code, never the test. If it fails again, the plan stops and asks you what to do. Only you can rule a security row wrong or retire a security test.
+
+Before merge, a gate stops the merge while an approved security row has no test from the writer. See [the security test gate](/reference/gates/#security-test-missing).
+
+### The drift check
+
+Drift is any gap between the branch's tests and the approved table. After the last phase, a script compares the two and GAIA routes each gap:
+
+- **A test that matches its row** gets an honesty read. A separate checker confirms the test really checks its row's case. A hollow test is fixed and read again.
+- **A planned test that is missing** is written from its row. A security row's test goes back to the security writer.
+- **A planned test that was only renamed** keeps its row, which GAIA retitles.
+- **A test no row names, or one moved to another file,** gets the [worthiness review](#the-worthiness-review). A test it keeps gains a row with a reason. GAIA asks you before any delete.
+- **A test the branch deleted that no row retires** comes to you. GAIA recommends keeping it, which restores the test.
+
+A test is hollow when its check can never fail. A guard test that never makes the guard refuse counts. So does a test that checks the app's own copy of a string instead of the wording you stated, one that tests a mock instead of the app, and one whose check sits in a story's play function. A skipped, to-do, or empty test counts as no test.
+
+An unchanged test no row names is not drift. The [Code Audit Team](/workflow/code-audit-team/) runs the same check after each round that commits a fix, on the tests that round changed, and once more after the audit clears. Those runs ask you nothing. A delete becomes a residual, and a test deleted without a retire row is restored.
 
 ### The worthiness review
 
-Every test the work changes in the React app gets this review once the tests pass, and so does every flow test. A separate reviewer with no shared context reads each one, plus the test files next to it and, for a test of a shared helper, the tests of the helper's other callers. The session that wrote the tests never judges them, since it would share their blind spots.
+Work without a test-design table gets this review on every test it changes in the React app, flow tests included, once the tests pass. A plan uses it only for the tests its table does not name. A separate reviewer with no shared context reads each test, plus the test files next to it and, for a test of a shared helper, the tests of the helper's other callers. The session that wrote the tests never judges them, since it would share their blind spots.
 
 Nothing checks mechanically that a test can fail, so this review is what judges it. Each test is judged on two questions:
 
@@ -79,33 +121,25 @@ Nothing checks mechanically that a test can fail, so this review is what judges 
 
 When a component's own code handles keys or moves focus (a menu's arrow keys, or focus moved when a dialog opens or closes or when an error appears), the reviewer also expects its story tests to drive it from the keyboard and check where focus lands. Without that, the verdict is a fix. An accessibility scan of a rendered component tests neither. Native form controls in their normal order get this from the browser and need no keyboard test. The reviewer gives a delete verdict to a test that only checks their tab order, or a `required` attribute set as a plain prop. A `required` attribute your form's schema sets is yours to test.
 
-A flow test is also judged against its flow in the SPEC. The reviewer names each error path the code has that neither the flow test nor a route, unit, or real-server test exercises, an outcome the test never checks (a heading after submit, but never that the save took effect), and, for a web app flow, any app folder the branch changed for the flow that the test's `@covers` line leaves out. That line is a comment at the top of the test that lists the app folders the flow runs through. Any of these makes the verdict a fix. An untested refusal or validation error that one request shows is fixed with a new route or real-server test, never by adding it to the flow test.
+A flow test is also judged against its flow in the SPEC. The verdict is a fix when the test never checks the flow's outcome (a heading after submit, but never that the save took effect) or, for a web app flow, when its `@covers` line leaves out an app folder the branch changed for the flow. That line is a comment at the top of the test that lists the app folders the flow runs through. The reviewer never asks for a test of an error path nothing stated.
 
 Each test gets a keep, fix, or delete verdict. The reviewer edits no test or source file itself.
 
 ### The worthiness step
 
-A plan run, a plain request, and `/gaia-debt` each finish this review once the draft pull request is open and before the first audit round. If no changed test needs a verdict, the step ends with no commit.
+A plain request, `/gaia-debt`, and a plan without a test-design table each finish this review once the draft pull request is open and before the first audit round. If no changed test needs a verdict, the step ends with no commit.
 
 - **Keep**: nothing more happens. A test that already has a keep for its current content is not reviewed again.
-- **Fix**: a fresh sub-agent fixes the test, GAIA commits the fix, and the reviewer judges the changed test once more. When a flow test misses an error path that belongs in a route, unit, or real-server test, the sub-agent adds it there, and the reviewer then judges the flow test again. If it still gets a fix verdict, or the fixer cannot fix it, it becomes an [accepted residual](/maintenance/residue/#what-a-residual-is). If it now gets a delete verdict, the delete steps below apply. A fix for a test this branch did not change goes to [tech debt](/workflow/tech-debt/) instead.
+- **Fix**: a fresh sub-agent fixes the test, GAIA commits the fix, and the reviewer judges the changed test once more. If it still gets a fix verdict, or the fixer cannot fix it, it becomes an [accepted residual](/maintenance/residue/#what-a-residual-is). If it now gets a delete verdict, the delete steps below apply. A fix for a test this branch did not change goes to [tech debt](/workflow/tech-debt/) instead.
 - **Delete**: Claude shows you the evidence (the redundant assertion and the test that already covers it) and asks you to confirm the delete or keep the test. An approved delete goes to the same fixer. A refused delete keeps the test with no residual. In an unattended run, the test stays and a residual is recorded.
 
 The [Code Audit Team](/workflow/code-audit-team/) runs this step again after each round in which its fixer commits a repair, on the tests that repair added or changed. A fix is made right away, so the next round reviews it, and a delete becomes a residual. If a changed test still reaches the end of the audit without a verdict, such as one committed outside the audit, and it then gets a fix or delete verdict, Claude lists those tests and recommends keeping each as an accepted residual, so the finished audit stands. You can pick tests to repair instead, which costs another audit round and one more CI run. In an unattended run they become residuals.
 
-### The overlap pass
-
-A check one test already proves does not need a second test. After the worthiness step, a plan run looks for tests the branch changed that repeat what another test already checks, across stories and unit tests, route tests, real-server tests, and browser tests. It also finds browser tests that check only a status, a redirect, or server-rendered text, which a real-server test can check without a browser. It runs once per plan run, if the branch changed any test.
-
-An `overlap-evaluator` sub-agent proposes, for each duplicate, to drop it, merge it into the other test, move it to another layer, or keep both. It can also propose deleting several tests when one existing route, story, or real-server test already checks everything they check. When combining them would need a new test, the proposal is only listed in the summary and the pull request description, never applied. A proposal to drop or move a route, real-server, or browser test and leave only a unit test covering it must say why both [unit-test conditions](#what-gets-a-test) hold.
-
-A browser test that needs no browser is proposed as a real-server test even when no other test covers it yet, but a flow's only browser test always stays. So does the only test below the browser layer that makes a guard, refusal, or validation refuse, even when a browser or flow test checks the same thing. You see every proposal in one list, with the test it would rely on, and answer once, to accept all as recommended or revise. Proposals the sub-agent is unsure of are marked `Uncertain:` and come last, and any changed test with no proposal is named with the reason. Proposals on code the branch did not write are listed for information and never applied. In an unattended run nothing changes, and the proposals are listed in the plan's progress file and the final summary.
-
 ### What you see at the end
 
-The summary at the end of the work lists what the worthiness step decided, such as accepted residuals, deletes you refused, and fixes filed as tech debt. A plan run's summary adds the overlap pass result.
+The summary at the end of the work lists what the drift check or the worthiness step decided, such as accepted residuals, deletes you refused, and fixes filed as tech debt.
 
-Before merging, a hook checks that every changed test has a review on record for its current content. See [the worthiness verdict gate](/reference/gates/#worthiness-verdict).
+Before merging, a hook checks that every changed test has a verdict on record for its current content. See [the worthiness verdict gate](/reference/gates/#worthiness-verdict).
 
 ## Test-driven development with `/tdd`
 

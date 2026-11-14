@@ -31,7 +31,8 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 | `block-fork-pr-checkout` | `gh pr checkout` or a `git fetch` of `pull/<n>/head` or `pull/<n>/merge` for a pull request from a fork, or one that `gh` cannot identify as fork or not. |
 | `block-handrolled-pr-poll` | A shell loop that checks `gh pr view` or `gh pr checks` over and over without reading `mergeable`. Claude uses GAIA's merge wait instead. |
 | `pr-merge-audit-check` | `gh pr merge` until every Code Audit Team member responsible for the changed files has approved it. For a pull request outside the audit's scope, or a `chore(deps)` pull request that only changes dependency manifests, it posts the `skipped:` status itself. |
-| `worthiness-presence-check` | `gh pr merge` when a changed test has no worthiness record for its current content. It covers every test in the React app, including stories, [Playwright](https://playwright.dev/) tests, route tests, and utility, service, and hook tests. It checks only that the record exists, not its verdict. |
+| `test-design-merge-gate` | `gh pr merge` while a security test the approved plan calls for is missing, unmarked, or [hollow](/workflow/testing/#the-drift-check). A row you let through with `test-row-grant <row id>` passes. See [Security test missing](/reference/gates/#security-test-missing). |
+| `worthiness-presence-check` | `gh pr merge` when a changed test has no worthiness or honesty record for its current content. It covers every test in the React app, including stories, [Playwright](https://playwright.dev/) tests, route tests, and utility, service, and hook tests. It checks only that the record exists, not its verdict. |
 | `block-audit-loop-write` | Writes to the audit loop's protected state and context readings, running by hand the scripts that record your grant, and running the local-state cleanup scripts that only a hook may start. |
 
 ### Edit, Write, and MultiEdit
@@ -58,6 +59,7 @@ These hooks never turn anything back. They record what happened (grants, usage) 
 |---|---|---|
 | `audit-loop-grant` | UserPromptSubmit | Records `audit-grant <n>`, `audit-accept`, or `audit-accept-finding <n>`, typed as your whole message in an interactive session. |
 | `audit-loop-ask-grant` | PostToolUse (AskUserQuestion) | Records your answer to the audit checkpoint's question. |
+| `test-row-grant` | UserPromptSubmit | Records `test-row-grant <row id>`, typed as your whole message in an interactive session, to let one security row past the [security test gate](/reference/gates/#security-test-missing). |
 | `post-findings-block-on-merge` | PreToolUse (`gh pr merge`) | Posts one comment collecting the pull request's audit findings, which `/gaia-codify` later counts. Never blocks. |
 | `capture-gh-artifact` | PostToolUse (`gh pr create`) | Links the pull request to its branch in the usage ledger. |
 | `pr-merge-cost` | PostToolUse (`gh pr merge`) | Prints the pull request's cost box. |

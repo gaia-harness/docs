@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-GAIA ships ten [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.claude/agents/`. You never start one yourself: a workflow starts each one when it needs it. Each sub-agent starts with a fresh context, so a reviewer judges the work without the reasoning of the session that wrote it, and its reading stays out of your session's context. Each agent uses a [fixed model](/models-and-context/model-choice/) and runs at your session's [`/effort` level](/models-and-context/model-choice/#effort). Each agent can use only the tools listed in its definition, which keeps what it starts with small.
+GAIA ships eleven [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.claude/agents/`. You never start one yourself: a workflow starts each one when it needs it. Each sub-agent starts with a fresh context, so a reviewer judges the work without the reasoning of the session that wrote it, and its reading stays out of your session's context. Each agent uses a [fixed model](/models-and-context/model-choice/) and runs at your session's [`/effort` level](/models-and-context/model-choice/#effort). Each agent can use only the tools listed in its definition, which keeps what it starts with small.
 
 | Agent | Model | Started by | Edits files? |
 |---|---|---|---|
@@ -16,8 +16,9 @@ GAIA ships ten [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.cla
 | [`audit-refuter`](#audit-refuter) | Sonnet | `code-audit-frontend` | No (read-only) |
 | [`audit-loop-unit`](#audit-loop-unit) | Opus | the merge workflow | Commits fix rounds |
 | [`audit-light-reviewer`](#audit-light-reviewer) | Sonnet | the audit loop, for a light review | No (read-only) |
-| [`worthiness-evaluator`](#worthiness-evaluator) | Opus | the worthiness step, the `tdd` skill | No |
-| [`overlap-evaluator`](#overlap-evaluator) | Opus | a plan run's overlap pass | Writes its proposals file only |
+| [`worthiness-evaluator`](#worthiness-evaluator) | Opus | the worthiness step, the drift check, the `tdd` skill | No |
+| [`test-honesty-checker`](#test-honesty-checker) | Sonnet | the drift check | No |
+| [`security-test-writer`](#security-test-writer) | Sonnet | a plan run's security tests, the audit loop | Writes security tests only |
 | [`fitness-judge`](#fitness-judge) | Sonnet | `/gaia-fitness` | No (read-only) |
 
 ## The Code Audit Team
@@ -76,15 +77,19 @@ How it fits into testing is described in [Testing](/workflow/testing/).
 
 ### worthiness-evaluator
 
-The reviewer for every test the work changed. It always starts in a fresh context, since the session that wrote the tests would share their blind spots. The `tdd` skill starts it once the tests pass, and its verdicts are advice there. The [worthiness step](/workflow/testing/#the-worthiness-step) starts it before the first audit round, and again after each audit round that commits a repair, and acts on its verdicts. It reads only the tests the work changed plus the test files next to them (and, for a test of a shared helper, the tests of the helper's other callers), and reads source code only to judge whether a test goes through the public interface. For a test of one of a SPEC's [critical flows](/workflow/spec/#critical-flows), it also reads that flow in the SPEC, the code the flow runs through, and the route, unit, and real-server tests for that code, only to see which error paths they cover. It gives that test a `fix` when an error path the code has goes untested by the flow test and by every route, unit, and real-server test, when the test never checks the flow's outcome, or, for a web flow, when the test's list of the folders it covers misses one the branch changed for that flow. It edits no test or source file. The only file it writes is its list of verdicts.
+The reviewer for every test the work changed. It always starts in a fresh context, since the session that wrote the tests would share their blind spots. The `tdd` skill starts it once the tests pass, and its verdicts are advice there. The [worthiness step](/workflow/testing/#the-worthiness-step) starts it before the first audit round, and again after each audit round that commits a repair, and acts on its verdicts. On a plan, the [drift check](/workflow/testing/#the-drift-check) starts it only for tests the plan's [test-design table](/workflow/testing/#the-test-design-table) does not name, and a test it keeps is added to the table. It reads only the tests the work changed plus the test files next to them (and, for a test of a shared helper, the tests of the helper's other callers), and reads source code only to judge whether a test goes through the public interface. For a test of one of a SPEC's [critical flows](/workflow/spec/#critical-flows), it also reads that flow in the SPEC and the code the flow runs through. It gives that test a `fix` when the test never checks the flow's outcome or, for a web flow, when the test's list of the folders it covers misses one the branch changed for that flow. It edits no test or source file. The only file it writes is its list of verdicts.
 
 It judges each test on honesty and worthiness (see [the worthiness review](/workflow/testing/#the-worthiness-review)) and returns one verdict per test: `keep`, `fix`, or `delete`. Every `fix` or `delete` carries evidence: the defect for a fix, and for a delete the reason, such as the redundant assertion and the test that already covers it. A delete whose cited assertion it cannot find in the sibling file is downgraded, never proposed. Each verdict is recorded, keyed to the test's current content, and the [worthiness verdict](/reference/gates/#worthiness-verdict) gate checks that record at merge.
 
+### test-honesty-checker
+
+Started by the [drift check](/workflow/testing/#the-drift-check) for each planned test that matches its row in the plan's [test-design table](/workflow/testing/#the-test-design-table). It judges honesty alone, since the table already decided the test is worth having. It checks whether the test really checks its row's case or is [hollow](/workflow/testing/#the-drift-check). It returns `keep` or `fix`, never `delete`. It edits no test or source file. The only file it writes is its list of verdicts, which the [worthiness verdict gate](/reference/gates/#worthiness-verdict) checks at merge.
+
+### security-test-writer
+
+Writes the tests of a plan's [security rows](/workflow/testing/#security-tests) at the end of the phase that builds the code, and the security rows an audit fix adds. It writes each test from the row and the plan's shared contracts, reading the code only to find where to call it, so the test cannot repeat the code's mistake. When the contract and the code disagree, the contract wins and the test fails. It edits only the test files its rows name, never weakens a test to make it pass, and reports a row it cannot write instead of writing a weaker test.
+
 ## Integration health
-
-### overlap-evaluator
-
-Started once by a plan run's [overlap pass](/workflow/testing/#the-overlap-pass), after the worthiness step. It reads the tests the branch changed, the tests that might already cover the same thing on the same or another layer, and source code only to judge whether a claim holds. For each duplicate it proposes to drop it, merge it, move it to another layer, or keep both. It can also propose deleting several tests that one existing route, story, or real-server test already covers. It also proposes moving a browser test that needs no browser to a [real-server test](/workflow/testing/#where-tests-go). It edits no tracked file. The only file it writes is its list of proposals, which a script checks before you approve any of them.
 
 ### fitness-judge
 

@@ -191,7 +191,7 @@ Claude never types any of these lines for you. In an unattended run, Claude push
 
 ## Posting GAIA-Audit
 
-Claude posts the `GAIA-Audit` success status last: once every involved member has approved the current change, every finding is fixed or recorded, the steps a [smaller gate](#what-it-checks) skipped have passed, and the last push has landed. If one of those steps fails, the loop reopens a round to fix it. Posting success also marks the draft pull request ready for review.
+Claude posts the `GAIA-Audit` success status last: once every involved member has approved the current change, every finding is fixed or recorded, the steps a [smaller gate](#what-it-checks) skipped have passed, and the last push has landed. If one of those steps fails, the loop reopens a round to fix it. On a plan, GAIA also holds the success status while an approved [security row](/workflow/testing/#security-tests) has no test that passes the [security test gate](/reference/gates/#security-test-missing). Posting success also marks the draft pull request ready for review.
 
 A member's refusal posts a `GAIA-Audit` failure at once, so GitHub's auto-merge cannot merge the pull request.
 
