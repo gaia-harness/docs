@@ -54,7 +54,7 @@ Each file goes to the first member whose pattern matches, with the default membe
 
 `code-audit-frontend` also runs three tools and lists their findings as advice that never blocks approval: [React Doctor](https://github.com/millionco/react-doctor) when the change touches a `.ts` or `.tsx` file, [Knip](https://knip.dev/) (unused files, exports, and dependencies) when it touches one of those, a `package.json`, or the lockfile, and a dependency security advisory check on every review.
 
-Members only report. A separate fixer makes the repairs, and a script checks each repair before it is kept. A repair that adds a guard, refusal, or validation also adds a test that makes it refuse, unless no test can reach it, which the fixer then reports. The fixer adds such a rule only when the SPEC, a decision page in the wiki, or your existing code or docs already call for it. A rule that only a finding proposes stays open, and the [branch checkpoint](#the-branch-checkpoint) asks you what to do with it, such as filing it or stating it as a requirement.
+Members only report. A separate fixer makes the repairs, and a script checks each repair before it is kept. A repair that adds a guard, refusal, or validation also adds a test that makes it refuse, unless no test can reach it, which the fixer then reports. The fixer adds a guard, refusal, or validation only when the SPEC, a decision page in the wiki, or your existing code or docs already call for it. Otherwise it refuses the fix, and the [branch checkpoint](#the-branch-checkpoint) lists it so you can state the rule, accept the finding, or file it.
 
 ### Covering new code
 
@@ -165,6 +165,16 @@ Claude shows where things stand (rounds, findings per round, what remains by sev
 - **Accept the remainder**: offered only when the loop has a reason to stop, nothing Critical or security-related remains and every member's report came back complete. One last review round runs with no fixes, and what remains is recorded as accepted residuals.
 - **Stop and file the remainder**: files the remaining findings as tech-debt issues and leaves the pull request open.
 
+When the fixer refuses a fix because no rule requires it, or because it conflicts with one, the question lists each refused fix by number, with its location, severity, and the fixer's reason. **State the rule, then continue** replaces **Continue audit in this session**. Pick it, then tell Claude the rule in your own words and where it belongs (the SPEC, a decision page in the wiki, or your code or docs). Claude writes it there as you said it, so the fixer can cite it in the next rounds. GAIA recommends this option once the same fix is refused two rounds running, unless your context reached its line or **Accept the remainder** leads. If no rule should require the fix, pick **Stop and file the remainder**.
+
+To keep one refused fix as an accepted residual instead, dismiss the question and type this as the whole prompt, with the fix's number:
+
+```text
+audit-accept-finding <n>
+```
+
+Claude then asks the question again for you to answer. Later rounds can keep that finding as an accepted residual, and the pull request marks it `Human decision:`. This does not work on a Critical or security-related finding, which is always fixed.
+
 Only you can answer. If the question is not available, type one of these as the whole prompt:
 
 ```text
@@ -175,7 +185,7 @@ audit-grant <n>
 audit-accept
 ```
 
-Claude never types either line for you. In an unattended run, Claude pushes the round's fixes, leaves the pull request open, and prints the `audit-grant` line for you to type later.
+Claude never types any of these lines for you. In an unattended run, Claude pushes the round's fixes, leaves the pull request open, and prints the `audit-grant` line for you to type later.
 
 **Why:** a loop nobody watches keeps spending with no limit, and "is another round worth it?" should not be decided by the session least able to judge it. See the [gate reference](/reference/gates/#audit-checkpoint).
 

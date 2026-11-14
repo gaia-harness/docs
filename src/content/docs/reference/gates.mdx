@@ -186,7 +186,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 - **Why:** each round's fixes can lead to another round, so a loop nobody watches could keep spending without limit. The decision "is another round worth it" should not be left to the session least able to judge it.
 - **When:** when your context reaches its checkpoint line, when rounds stop making progress, or at the hard limit on rounds (`audit-loop-bound`). A late round that finds only ordinary Minor findings ends the loop without a checkpoint (see [the branch checkpoint](/workflow/code-audit-team/#the-branch-checkpoint)).
 - **Who acts:** You. Only you can answer, so Claude cannot decide this one for itself.
-- **Clear it:** answer the question shown, or type `audit-grant <n>` or `audit-accept` as your whole message. See [the branch checkpoint](/workflow/code-audit-team/#the-branch-checkpoint).
+- **Clear it:** answer the question shown, or type `audit-grant <n>` or `audit-accept` as your whole message. To keep one fix the audit refused, type `audit-accept-finding <n>` first. It does not clear the checkpoint by itself. See [the branch checkpoint](/workflow/code-audit-team/#the-branch-checkpoint).
 
 ### Worthiness verdict
 

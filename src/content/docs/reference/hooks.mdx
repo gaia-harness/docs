@@ -56,7 +56,7 @@ These hooks never turn anything back. They record what happened (grants, usage) 
 
 | Hook | Event | What it does |
 |---|---|---|
-| `audit-loop-grant` | UserPromptSubmit | Records `audit-grant <n>` or `audit-accept`, typed as your whole message in an interactive session. |
+| `audit-loop-grant` | UserPromptSubmit | Records `audit-grant <n>`, `audit-accept`, or `audit-accept-finding <n>`, typed as your whole message in an interactive session. |
 | `audit-loop-ask-grant` | PostToolUse (AskUserQuestion) | Records your answer to the audit checkpoint's question. |
 | `post-findings-block-on-merge` | PreToolUse (`gh pr merge`) | Posts one comment collecting the pull request's audit findings, which `/gaia-codify` later counts. Never blocks. |
 | `capture-gh-artifact` | PostToolUse (`gh pr create`) | Links the pull request to its branch in the usage ledger. |
