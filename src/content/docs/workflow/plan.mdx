@@ -36,7 +36,7 @@ With no description, `/gaia-plan` asks for one.
 Auto mode is for runs nobody is watching. It removes two questions:
 
 - **Planner model.** On a model other than Opus or Fable, the planner uses Opus without asking.
-- **Plan audit.** Clear fixes are applied without asking. A finding with more than one reasonable fix is written to `## Audit notes` in the plan's `README.md`. A plan that retires a security test, even the test of code the plan deletes, or a fix that would remove a security row or clear its flag, is also listed there, held for you to decide before merge. The security row stays until you rule on it. Read it before you paste the kickoff prompt.
+- **Plan audit.** Clear fixes are applied without asking. A finding with more than one reasonable fix is written to `## Audit notes` in the plan's `README.md`. A plan that retires a security test, even the test of code the plan deletes, or a fix that would remove a security row or clear its flag, is also listed there, held for you to decide before merge. The security row stays until you rule on it. When the planner rewrites the plan and loses a security row, GAIA restores it and notes it there, and stops the run, naming the row, if the restored plan no longer verifies. Read it before you paste the kickoff prompt.
 
 A headless run has nobody to answer questions, so with or without `auto` the planner uses Opus and every security test retire is held for you before merge.
 
@@ -99,7 +99,7 @@ The DP, CG, and COV checks have a clear yes-or-no answer against your code, so t
 
 Critical and major findings are printed as one list headed **Plan audit**, each with its evidence and recommended fix, then one question: **Accept all as recommended** or **Revise**. Each planned retire of a security test is listed too, recommended as planned, counting retires any fix adds, minor ones included. The one exception is the security test of code the plan deletes: approving the plan approves that retire. Minor findings are applied without asking, with one exception: no fix removes a security row or clears its flag on its own. That row stays and is listed as its own item, recommended to keep, and only your ruling removes it.
 
-A finding about one spot, such as a wrong contract, is fixed in the plan's files. A finding that the task split itself is wrong sends the plan back to the planner, and the rewritten plan is verified again (step 5).
+A finding about one spot, such as a wrong contract, is fixed in the plan's files. A finding that the task split itself is wrong sends the plan back to the planner, and the rewritten plan is verified again (step 5). GAIA then compares the old and new test-design tables. Each security row the rewrite dropped, unmarked, or gave another kind is shown on a second list, recommended to restore, before the plan is approved. A dropped row for the security test of code the rewritten plan deletes is recommended to drop instead.
 
 ## Execution
 
