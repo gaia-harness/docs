@@ -87,7 +87,7 @@ Each task's sub-agent writes the tests its rows give it, under the planned title
 A security row is a row whose test proves one of three things:
 
 - **Access**: who may act or see something.
-- **Forgery**: a forged or edited value is refused.
+- **Forgery**: a forged or edited value is refused. So is an untrusted destination the server would send the user or a request to, such as an off-site redirect target or an unregistered callback URL, or the server swaps in an allowed one.
 - **Secrets**: a secret never appears where it must not.
 
 The table marks each security row with a flag. A separate sub-agent, `security-test-writer`, writes these tests at the end of the phase that builds the code. It writes each one from the row and the plan's shared contracts, and reads the code only to find where to call it, so its test cannot repeat the code's mistake.
