@@ -92,6 +92,8 @@ A security row is a row whose test proves one of three things:
 
 The table marks each security row with a flag. A separate sub-agent, `security-test-writer`, writes these tests at the end of the phase that builds the code. It writes each one from the row and the plan's shared contracts, and reads the code only to find where to call it, so its test cannot repeat the code's mistake.
 
+The flag is decided for each case a test checks, not for the test as a whole. When one test checks cases of different kinds, such as a signed-out redirect beside a signed-in page, each kind gets its own row, so the refusal is flagged and goes to the security writer. A test that runs one case per table entry keeps the cases together with a row for each. Any other test is split, one test per kind. Splitting a test never removes a flag.
+
 When a security test fails, a fresh sub-agent fixes the code, never the test. If it fails again, the plan stops and asks you what to do. Only you can rule a security row wrong or retire a security test. Approving a plan approves retiring the security test of code the plan deletes. A run no one approved, such as [auto mode](/workflow/plan/#auto-mode) or a headless run, holds every security test retire for you to decide before merge.
 
 Before merge, a gate stops the merge while an approved security row has no test from the writer. See [the security test gate](/reference/gates/#security-test-missing).
