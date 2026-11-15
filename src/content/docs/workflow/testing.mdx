@@ -62,7 +62,7 @@ Stories and hook tests need Chromium. [`/gaia-init`](/getting-started/gaia-init/
 
 ## Flow tests from a SPEC
 
-A [SPEC](/workflow/spec/) names the feature's [critical flows](/workflow/spec/#critical-flows). When [`/gaia-plan`](/workflow/plan/) builds from it, the build comes first, then a final phase writes one test per flow. For a flow in the web app, the test is a Playwright test in `apps/web/.playwright/flows/`, named after the flow, and it may drive a real browser even when a cheaper layer could check the same thing. A command-line flow's test goes where the SPEC says. Before the audit, GAIA checks that every flow has its test and that the branch changed it. See [Flow tests](/workflow/plan/#flow-tests).
+A [SPEC](/workflow/spec/) names the feature's [critical flows](/workflow/spec/#critical-flows). When [`/gaia-plan`](/workflow/plan/) builds from it, the build comes first, then a final phase writes one test per flow, except a flow made only of refusals that the build's tests already check (see [Flow tests](/workflow/plan/#flow-tests)). For a flow in the web app, the test is a Playwright test in `apps/web/.playwright/flows/`, named after the flow, and it may drive a real browser even when a cheaper layer could check the same thing. A command-line flow's test goes where the SPEC says. Before the audit, GAIA checks that every flow has its test and that the branch changed it. See [Flow tests](/workflow/plan/#flow-tests).
 
 ## How GAIA judges tests
 

@@ -44,7 +44,7 @@ Small, clear changes do not need a spec or a plan. When your request would benef
 ## A feature, start to finish
 
 1. **Define what to build.** Run `/gaia-spec add saved-search filters`. It asks a few questions, confirms the intent and the critical user flows in plain language, and saves a SPEC. Then it plans the SPEC in the same session and ends with a kickoff prompt.
-2. **Build it.** Run `/clear` and paste the kickoff prompt. GAIA builds each phase, commits it through the Quality Gate, and opens a draft pull request. A final phase then writes a [test for each critical flow](/workflow/plan/#flow-tests) the SPEC names.
+2. **Build it.** Run `/clear` and paste the kickoff prompt. GAIA builds each phase, commits it through the Quality Gate, and opens a draft pull request. A final phase then writes a [test for each critical flow](/workflow/plan/#flow-tests) the SPEC names, except a flow the build's tests already cover.
 3. **Audit and merge.** The [Code Audit Team](/workflow/code-audit-team/) reviews the pull request and GAIA fixes what it finds. Once the review passes, GAIA posts the `GAIA-Audit` check and asks whether to merge.
 
 [Onboarding, as you build](/getting-started/onboarding/) walks through when each of these first steps in.

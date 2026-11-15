@@ -51,7 +51,7 @@ A critical flow is a path through the feature that, if it broke, would block a u
 
 A flow names a path, never a list of cases. The rules the feature must follow go in the intent and the success criteria.
 
-Once the SPEC is saved, the plan must test every flow. [`/gaia-plan`](/workflow/plan/) builds the feature first, then writes one test per flow.
+Once the SPEC is saved, the plan must test every flow. [`/gaia-plan`](/workflow/plan/) builds the feature first, then writes one test per flow. A flow made only of refusals that the build's tests already check needs no test of its own (see [Flow tests](/workflow/plan/#flow-tests)).
 
 ## Before it starts
 
