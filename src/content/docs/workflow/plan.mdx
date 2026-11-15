@@ -36,7 +36,7 @@ With no description, `/gaia-plan` asks for one.
 Auto mode is for runs nobody is watching. It removes two questions:
 
 - **Planner model.** On a model other than Opus or Fable, the planner uses Opus without asking.
-- **Plan audit.** Clear fixes are applied without asking. A finding with more than one reasonable fix is written to `## Audit notes` in the plan's `README.md`. A plan that retires a security test, even the test of code the plan deletes, or a fix that would remove a security row or clear its flag, is also listed there, held for you to decide before merge. The security row stays until you rule on it. When the planner rewrites the plan and loses a security row, GAIA restores it and notes it there, and stops the run, naming the row, if the restored plan no longer verifies. Read it before you paste the kickoff prompt.
+- **Plan audit.** Clear fixes are applied without asking. A finding with more than one reasonable fix is written to `## Audit notes` in the plan's `README.md`. A plan that retires a security test, even the test of code the plan deletes, or a fix that would remove a security row or clear its flag, is also listed there, held for you to decide before merge. The security row stays until you rule on it. When the planner rewrites the plan and loses a security row, GAIA restores it and notes it there (it only notes a row for code the plan deletes, or one it cannot pick out for sure), and stops the run, naming the row, if the restored plan no longer verifies. Read it before you paste the kickoff prompt.
 
 A headless run has nobody to answer questions, so with or without `auto` the planner uses Opus and every security test retire is held for you before merge.
 
