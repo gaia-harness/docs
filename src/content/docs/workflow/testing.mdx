@@ -96,7 +96,7 @@ The flag is decided for each case a test checks, not for the test as a whole. Wh
 
 A row that retires or changes an existing test is a security row too when that test is one, or when the row cites a security requirement as its reason, whatever the old test checked. Retiring it counts as retiring a security test.
 
-When a security test fails, a fresh sub-agent fixes the code, never the test. If it fails again, the plan stops and asks you what to do. Only you can rule a security row wrong or retire a security test. Approving a plan approves retiring the security test of code the plan deletes. A run no one approved, such as [auto mode](/workflow/plan/#auto-mode) or a headless run, holds every security test retire for you to decide before merge.
+When a security test fails, a fresh sub-agent fixes the code, never the test. If it fails again, the plan stops and asks you what to do. Only you can rule a security row wrong or retire a security test. Approving a plan approves retiring the security test of code the plan deletes, and no other. Any other security test retire is held for you to decide before merge, and so is that one if the code is still there at merge. A run no one approved, such as [auto mode](/workflow/plan/#auto-mode) or a headless run, holds every security test retire.
 
 Before merge, a gate stops the merge while an approved security row has no test from the writer. See [the security test gate](/reference/gates/#security-test-missing).
 
