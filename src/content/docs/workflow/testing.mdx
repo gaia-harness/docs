@@ -78,7 +78,7 @@ A test that passes may still check nothing. A plan checks its tests against its 
 - **Change**: the plan changes the behavior an existing test checks, so the test changes too.
 - **Retire**: the new work replaces an existing test, so it is deleted.
 
-The planner first reads the existing tests for the code the plan touches, so a case they already check is reused or extended, not written again. Every requirement maps to at least one row and every row to a requirement, so a missing or duplicate test shows up in the table, before the build. The [plan audit](/workflow/plan/#the-plan-audit) reviews the table, and approving the plan approves it, retired tests included. The plan's `README.md` shows it under `## Test design`.
+The planner first reads the existing tests for the code the plan touches, so a case they already check is reused or extended, not written again. Every requirement maps to at least one row and every row to a requirement, so a missing or duplicate test shows up in the table, before the build. A SPEC scope boundary that steers the build instead of saying what the app does, such as "ask before adding a dependency", gets no row. The plan records it with what it directs instead. The [plan audit](/workflow/plan/#the-plan-audit) reviews the table, and approving the plan approves it, retired tests included. The plan's `README.md` shows it under `## Test design`.
 
 Each task's sub-agent writes the tests its rows give it, under the planned titles, and never edits the table.
 
