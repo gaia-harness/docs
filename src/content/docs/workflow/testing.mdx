@@ -96,7 +96,7 @@ The flag is decided for each case a test checks, not for the test as a whole. Wh
 
 A security row can sit on a story, such as a check that a control is hidden from a user who may not use it. It adds to the route or real-server test the guard needs, never replaces it. A forgery check goes on a story only as a change to an existing story test, beside its server-side test.
 
-A row that retires or changes an existing test is a security row too when that test is one, or when a security requirement forbids what the old test checked, such as a value the plan now keeps on the server that the old test showed reaching the browser. It takes that requirement's kind. Retiring it counts as retiring a security test.
+A row that retires or changes an existing test is a security row too when that test is one, or when a security requirement forbids what the old test checked, such as a value the plan now keeps on the server that the old test showed reaching the browser. It takes that requirement's kind. So does a row that retires a test a security row for the same requirement now covers; it takes that row's kind. Retiring either counts as retiring a security test.
 
 When a security test fails, a fresh sub-agent fixes the code, never the test. If it fails again, the plan stops and asks you what to do. Only you can rule a security row wrong or retire a security test. Approving a plan approves retiring the security test of code the plan deletes, and no other. Any other security test retire is held for you to decide before merge, and so is that one if the code is still there at merge. A run no one approved, such as [auto mode](/workflow/plan/#auto-mode) or a headless run, holds every security test retire.
 
