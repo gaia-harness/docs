@@ -88,7 +88,7 @@ A security row is a row whose test proves one of three things:
 
 - **Access**: who may act or see something. This includes signing in and its refusals, such as a wrong password, as well as roles, ownership, and account states such as a suspended account.
 - **Forgery**: a forged or edited value is refused. So is an untrusted destination the server would send the user or a request to, such as an off-site redirect target or an unregistered callback URL, or the server swaps in an allowed one.
-- **Secrets**: a secret never appears where it must not.
+- **Secrets**: a secret never appears where it must not. Any value a requirement keeps on the server counts, even one that looks harmless, such as an API base URL.
 
 The table marks each security row with a flag. A separate sub-agent, `security-test-writer`, writes these tests at the end of the phase that builds the code. It writes each one from the row and the plan's shared contracts, and reads the code only to find where to call it, so its test cannot repeat the code's mistake.
 
