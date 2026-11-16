@@ -9,7 +9,7 @@ GAIA's rule is to test what matters, after the code exists. GAIA's testing rules
 
 Claude tests only what was asked for. That means a SPEC's flows, success criteria, and answered questions, a plan's description, or your issue or request. A corner case or error path none of them names gets no test. Once the code exists, Claude writes these tests.
 
-- **One test per critical user flow**, starting where a user starts it, covering its journey through the happy path and the effects that take several requests or sessions to set up, such as signing out ending a session. A SPEC names these flows (see [Flow tests from a SPEC](#flow-tests-from-a-spec)).
+- **One test per critical user flow**, starting where a user starts it, covering its journey through the happy path and the happy path's effects that take several requests or sessions to set up, such as signing out ending a session. A SPEC names these flows (see [Flow tests from a SPEC](#flow-tests-from-a-spec)).
 - **A test for each guard** the code adds, meaning code that refuses, such as an access check or a validation. The test makes the guard refuse, at the lowest layer that shows it, usually a route test. A test that only watches a guard pass cannot tell a working guard from a broken one.
 - **A unit test** for tricky logic.
 - **A test that reproduces the bug**, for each bug fix.
