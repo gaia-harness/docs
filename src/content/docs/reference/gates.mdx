@@ -156,6 +156,14 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 - **Who acts:** Claude, and you only when a member refuses over a Major finding and you accept it at the [branch checkpoint](/workflow/code-audit-team/#the-branch-checkpoint). A Critical or security-related finding cannot be accepted.
 - **Clear it:** Claude runs the [audit loop](/workflow/code-audit-team/#the-audit-loop), fixes what it finds, and merges once every member approves. Pull requests outside the audit's scope, and `chore(deps)` pull requests that only change dependency manifests, are approved by the hook itself.
 
+### Pull request summary not re-checked
+
+- **Stops:** posting the `GAIA-Audit` success status, and `gh pr merge` after an audit, until the pull request's summary has been checked against its latest commit.
+- **Why:** a summary written when the pull request opened can describe work the branch later changed, and reviewers read the summary, not every commit.
+- **When:** before the [audit](/workflow/code-audit-team/#posting-gaia-audit) posts its success status, and before `gh pr merge` runs (`pr-merge-audit-check`).
+- **Who acts:** Claude. Nothing for you to do.
+- **Clear it:** Claude reads the summary against the branch's commits and final diff, fixes any claim that is no longer true, marks the summary as checked for the latest commit, and tries again. A pull request whose `GAIA-Audit` status posted before you updated to a GAIA release with this check needs the same pass once; the update summary suggests it.
+
 ### Audit base unreadable
 
 - **Stops:** `gh pr merge` when the gate cannot confirm the base branch it compares the change against: GitHub is unreachable, the latest base commit has not been fetched, or the branch has more than one merge base.
