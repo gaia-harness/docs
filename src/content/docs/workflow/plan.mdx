@@ -66,7 +66,7 @@ Inside it:
 2. **Find the SPEC**, if you named one. If none matches, it stops instead of planning without it.
 3. **Pick the planner model.** On Opus or Fable the planner uses your model. Otherwise Claude asks: Opus (recommended), Fable, or your current model. The planner runs at your session's `/effort`, so a higher effort drafts a deeper plan.
 4. **Plan.** A planner sub-agent writes the folder.
-5. **Verify.** A script checks that every required file is there. For a SPEC's plan, it also checks that each [critical flow](/workflow/spec/#critical-flows) belongs to exactly one task in the [closing flow-test phase](#flow-tests), or is one the plan records as [covered by build tests](#flow-tests), that the task names the flow's test file at its expected path, and that the phase runs every flow test before it commits. For every plan, it checks that each requirement has a row in the test-design table, or, for a scope boundary or SPEC audit instruction that only steers the build, a record of what it directs, and that each task names exactly the tests its rows give it. For a rule stated as which roles may take each action, or which statuses each action starts from, it checks that some row tests every action with every role, and every action with every status.
+5. **Verify.** A script checks that every required file is there. For a SPEC's plan, it also checks that each [critical flow](/workflow/spec/#critical-flows) belongs to exactly one task in the [closing flow-test phase](#flow-tests), or is one the plan records as [covered by build tests](#flow-tests), that the task names the flow's test file at its expected path, and that the phase runs every flow test before it commits. For every plan, it checks that each requirement has a row in the test-design table, or, for a scope boundary or SPEC audit instruction that only steers the build, a record of what it directs, and that each task names exactly the tests its rows give it. For a rule stated as which roles may take each action, or which statuses each action starts from, it checks that some row tests every action with every role, and every action with every status. It also checks that no [security row](/workflow/testing/#security-tests) holds cases of two kinds.
 6. **Plan audit.** Reviewers check the plan before anything is built from it. See [The plan audit](#the-plan-audit). The test-design table is then approved and frozen.
 7. **Report.** A [cost line](/models-and-context/cost/#what-you-see), then the prompt:
 
@@ -131,7 +131,7 @@ When every phase is already complete, the run picks up at the simplify pass and 
 
 If the working tree has uncommitted changes, the plan does not resume. It asks the same **Stay halted** or **Discuss this** question and never offers to stash, discard, or commit your changes.
 
-A plan keeps the steps it was generated with, even after a GAIA update, until you regenerate it.
+A plan keeps the steps it was generated with, even after a GAIA update, until you regenerate it. Its test-design table is still checked by the updated GAIA, so when an update tightens that check, [the update's summary](/maintenance/update-gaia/) says what an older plan's table needs. Ask Claude to add it, or regenerate the plan.
 
 ### Flow tests
 
