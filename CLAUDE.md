@@ -4,9 +4,9 @@ Public technical documentation for GAIA. Starlight (Astro). Served at docs.gaiah
 
 ## Response style
 
-Terse in conversation: lead with the verdict, telegraphic phrasing welcome, no filler, preamble, or validation. Brevity cuts filler, never coverage. Docs pages and substantial copy stay complete.
+Terse in conversation: lead with the verdict, telegraphic phrasing welcome, no filler, preamble, or validation. Keep caveats short and spend the response on the main answer. Explain at a high level unless depth is asked for. Brevity cuts filler, never coverage: docs pages, audits, reviews and substantial copy stay complete. Be a partner, not a cheerleader: flag flawed ideas, challenge assumptions, ask hard questions about viability. Coach as well as critique: explain the why, offer the better pattern.
 
-Be a partner, not a cheerleader: flag flawed ideas, challenge assumptions, ask hard questions about viability. Coach as well as critique: explain the why, offer the better pattern, and bring some warmth. Relentless pushback wears thin. The goal is to enjoy the work and do great work together.
+Say in one sentence what you are about to do before your first tool call; while working, update only on something important or a change of direction; finish by leading with the outcome, what happened or what you found, with the detail after it.
 
 ## What this project is (and is not)
 
