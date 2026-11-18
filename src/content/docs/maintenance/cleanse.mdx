@@ -42,6 +42,12 @@ A hint in quotes narrows which memory stores or files the research looks at. It 
 
 Applies the most recent report again, to finish an interrupted run or retry changes that were skipped.
 
+```
+/gaia-cleanse --cross-file
+```
+
+Looks for the same instructions written in two or more files instead. See [Duplicates across instruction files](#duplicates-across-instruction-files). A path in quotes after it limits the run to duplicates that involve that file or folder.
+
 ## What it looks at
 
 | Store | Path | Auto-loaded? |
@@ -66,19 +72,29 @@ Each entry is classified:
 
 - **Conflicts between instruction files.** When two `CLAUDE.md` files, rules, skills, commands, or agents disagree with each other, this command does not decide between them. Run `/doctor prompt-audit` for those. An instruction file that contradicts the wiki is reported and filed as a `tech-debt` issue, never edited.
 - **Files you do not own.** It edits only your project's own files and memory, and asks you per file. A problem in a file GAIA ships is reported for [`/update-gaia`](/maintenance/update-gaia/), and one in a third-party file for its vendor. Agent memory shared across the machine is only reported; ask Claude if an entry there needs changing.
-- **The wiki's own redundancy and broken links.** Those belong to [`/gaia-wiki`](/maintenance/wiki/).
+- **The wiki's own redundancy and broken links.** Those belong to [`/gaia-wiki`](/maintenance/wiki/), though a `--cross-file` run can point a wiki page's copy of an instruction at its owner.
 - **Rules from [`/gaia-codify`](/maintenance/codify/) are never removed because their problem stopped showing up.** That means the rule is working.
+
+## Duplicates across instruction files
+
+A procedure, list, threshold, or convention written in two files drifts the first time one of them changes. `--cross-file` replaces the usual research with a search for those copies. A script compares your `CLAUDE.md` files, the Markdown under `.claude/` (rules, skills, commands, agents), and the wiki, and groups passages from different files that share several distinctive commands, paths, flags, or numbers. Sonnet sub-agents read each group and decide whether the passages really state the same thing.
+
+For each real duplicate, one file is picked as the owner, the file you would open for that topic. Each copy keeps only what applies to its own file, plus a pointer to the owner. A copy gets no pointer where Claude already has the owner loaded, such as an always-loaded rule.
+
+A copy that disagrees with its owner is never edited, since choosing the right version is yours. It is reported and, on Apply, filed as a `tech-debt` issue. A few copies stay on purpose, such as one a script or hook reads word for word.
+
+The rest of the run is the same [flow](#the-flow), except that a cross-file report always asks you before applying, even when it proposes no changes.
 
 ## The flow
 
 1. **Research.** A Sonnet sub-agent writes a report to `.gaia/local/cleanse/` (gitignored). Each proposed change names the path, the content it expects there, and what replaces it.
-2. **Verification round** (recommended, optional). When the report proposes changes, three reviewers check each one against the memory files, the wiki, and the repository, and drop or fix any that are wrong. One of the three also rechecks the memory entries the report leaves alone, looking for ones that tell Claude to do or avoid something. If such an entry contradicts a setting or default the wiki states, and a second reviewer agrees, the round adds a CONFLICT change for it. Memory lives outside git, so a wrong delete can't be undone; this round catches it before you approve.
+2. **Verification round** (recommended, optional). When the report proposes changes, three reviewers check each one against the memory files, the wiki, and the repository, and drop or fix any that are wrong. A `--cross-file` report gets a fourth, who checks that each owner really says the same thing, each copy keeps what only it says, and each pointer leads to a real file and section. One of the three also rechecks the memory entries the report leaves alone, looking for ones that tell Claude to do or avoid something. If such an entry contradicts a setting or default the wiki states, and a second reviewer agrees, the round adds a CONFLICT change for it. Memory lives outside git, so a wrong delete can't be undone; this round catches it before you approve.
 3. **One question**, in your session:
    - **Apply**: asks which of your own files it may edit, then applies the report on its own branch, files any out-of-scope problem as a `tech-debt` issue, commits, opens a pull request, and merges it.
    - **Discuss / refine**: talk it through. Claude updates the report and asks again.
    - **Decline**: delete the report. Nothing is applied, filed, or published.
 
-When the report proposes no changes, the run finishes on its own, once a check confirms the report covered every memory and rules file. If it did not, Claude says what was missed and asks the usual question.
+When the report proposes no changes, the run finishes on its own once a check confirms the report covered every memory and rules file. If it did not, Claude says what was missed and asks the usual question. A `--cross-file` report always asks.
 
 <Aside type="tip" title="Safe by default">
 Running `/gaia-cleanse` researches and reports. Nothing in memory, rules, or the wiki changes until you choose Apply.
