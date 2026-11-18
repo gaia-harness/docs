@@ -156,6 +156,7 @@ export default defineConfig({
 						{ label: 'Work lifecycle', slug: 'workflow/work-lifecycle' },
 						{ label: '/gaia-spec', slug: 'workflow/spec', attrs: { class: 'sidebar-child' } },
 						{ label: '/gaia-plan', slug: 'workflow/plan', attrs: { class: 'sidebar-child' } },
+						{ label: '/gaia-test', slug: 'workflow/test-stage', attrs: { class: 'sidebar-child' } },
 						{ label: 'Testing', slug: 'workflow/testing' },
 						{ label: 'Code Audit Team', slug: 'workflow/code-audit-team' },
 						{ label: 'Tech debt', slug: 'workflow/tech-debt' },

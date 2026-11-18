@@ -1,13 +1,13 @@
 ---
 title: Testing
-description: What GAIA has Claude test once the code exists, where each kind of test goes, how a plan decides its tests up front, how GAIA judges every test, and when to reach for test-driven development with /tdd.
+description: What GAIA has Claude test once the code exists, where each kind of test goes, how the test stage decides a plan's tests, how GAIA judges every test, and when to reach for test-driven development with /tdd.
 ---
 
-GAIA's rule is to test what matters, after the code exists. GAIA's testing rules decide which test to write and at which layer, and every session and sub-agent follows them, so you don't need to ask for tests. A plan decides its tests before any code exists, in a [test-design table](#the-test-design-table). Other work gets an independent [worthiness review](#the-worthiness-review). A [merge gate](/reference/gates/#worthiness-verdict) checks that every changed test was judged.
+GAIA's rule is to test what matters, after the code exists. GAIA's testing rules decide which test to write and at which layer, and every session and sub-agent follows them, so you don't need to ask for tests. A plan's tests are listed before the build by the [test stage](/workflow/test-stage/). Every test a change adds or changes then gets an independent [worthiness review](#the-worthiness-review). A [merge gate](/reference/gates/#worthiness-verdict) checks that every changed test was judged.
 
 ## What gets a test
 
-Claude tests only what was asked for. That means a SPEC's flows, success criteria, and answered questions, a plan's description, or your issue or request. A corner case or error path none of them names gets no test. Once the code exists, Claude writes these tests.
+Claude tests only what was asked for. That means a SPEC's behaviors, flows, success criteria, and answered questions, a plan's description, or your issue or request. A corner case or error path none of them names gets no test. Once the code exists, Claude writes these tests.
 
 - **One test per critical user flow**, starting where a user starts it, covering its journey through the happy path and the happy path's effects that take several requests or sessions to set up, such as signing out ending a session. A SPEC names these flows (see [Flow tests from a SPEC](#flow-tests-from-a-spec)).
 - **A test for each guard** the code adds, meaning code that refuses, such as an access check or a validation. The test makes the guard refuse, at the lowest layer that shows it, usually a route test. A test that only watches a guard pass cannot tell a working guard from a broken one.
@@ -24,6 +24,14 @@ Claude writes a unit test only when both of these hold.
 - **The logic is important or likely to fail.** Important means a wrong result would corrupt data, break sign-in or another access check, mishandle input from users or other systems, or miscalculate money, dates, or other values you rely on. Likely to fail means code that parses or cleans up input, applies rules with many edge cases, or runs work at the same time.
 
 A formatting helper, a thin wrapper, or a small string, array, or object utility is covered by the tests that use it, or needs no test if nothing uses it.
+
+### Cases a test holds
+
+- **Every case a requirement lists.** A condition with several parts is one case per part, so "an open, unlocked account" needs a closed account and a locked account. A rule about the order of checks is one case per pair of neighboring checks, with an input that passes every earlier check and fails both checks of the pair, to show the earlier one refused.
+- **One table of cases per rule.** A rule about statuses, roles, or moves between states keeps all its cases in one table. When the rule says which roles may take each action and which statuses each action starts from, the table has a case for each action with each role, allowed or not, and for each action with each status, allowed or not, and every role that may act is tested at each status. Each case is named by its values, never as "every role" or one sample.
+- **Stated wording as stated.** A role, accessible name, exact wording, or attribute (such as a field's `name`) that a requirement states is checked as written, never through the app's own copy of the string, which only proves the app agrees with itself.
+- **Each value of a mapping.** A stated mapping from a value the app reads to what it shows, such as a stored `2` shown as `Shipped`, gets a case for each value, tested where the mapping runs. A story given the already mapped text never runs the mapping.
+- **No test of a mock.** When another test already covers the same path, a test that can only catch the app disagreeing with a mock, fixture, or seed data tests the mock, not your app.
 
 ## What a good test looks like
 
@@ -44,7 +52,7 @@ In the React app, a route test is the default home for a behavior, story tests c
 | Real server | [Playwright](https://playwright.dev/) sending requests to the dev server, with no page, in `apps/web/.playwright/e2e/`. Rendered HTML is read with the `parseHtml` helper in `apps/web/.playwright/html.ts` | What only the live server shows, such as middleware, the HTTP status a guarded route serves for a refusal, a forged request whose guard a direct loader or action call skips, the form the server serves, plain HTML form posts that belong to no [critical flow's test](#flow-tests-from-a-spec), or server-rendered HTML that is a requirement of its own. `serializeForm`, in the same file, builds the form body from the page the server returned |
 | Browser | Playwright driving a real page against the dev server, in `apps/web/.playwright/e2e/` | Client JavaScript (an update without a reload), layout or position on screen, focus or the keyboard, an accessibility scan of the rendered page, or browser navigation such as the back button. Nothing else needs a browser, and a [critical flow's test](#flow-tests-from-a-spec) is the one exception. One browser test per user flow |
 
-**What a route test cannot prove.** A route test that calls the loader or action directly skips middleware. A middleware guard is tested by a route test that runs the real middleware chain, or else by a live-server check, never by a unit test that calls the middleware itself, which cannot show the guard is wired in. On a single-fetch request, a parent route's loader guards neither a child's action nor its loader, so each write action guards itself and its own test proves it, and a parent-loader guard on a read needs a live-server check. And it cannot prove an authorization outcome an upstream API owns, because the MSW handler answers however the test wrote it. What your app does with an upstream refusal, such as creating no session and showing the error, is still tested, as an access [security row](#security-tests).
+**What a route test cannot prove.** A route test that calls the loader or action directly skips middleware. A middleware guard is tested by a route test that runs the real middleware chain, or else by a live-server check, never by a unit test that calls the middleware itself, which cannot show the guard is wired in. On a single-fetch request, a parent route's loader guards neither a child's action nor its loader, so each write action guards itself and its own test proves it, and a parent-loader guard on a read needs a live-server check. And it cannot prove an authorization outcome an upstream API owns, because the MSW handler answers however the test wrote it. What your app does with an upstream refusal, such as creating no session and showing the error, is still tested, as an access [security test](#security-tests).
 
 **Playwright workers each get their own mock data.** A Playwright test can run against a dev server of its own for each parallel worker. Test setup adds the records a test needs to that server's mock API through builders, so workers never share data. Keep the builders in a file you own, such as `apps/web/.playwright/project-fixtures.ts`, because GAIA replaces its `fixtures.ts` on update.
 
@@ -62,67 +70,33 @@ Stories and hook tests need Chromium. [`/gaia-init`](/getting-started/gaia-init/
 
 ## Flow tests from a SPEC
 
-A [SPEC](/workflow/spec/) names the feature's [critical flows](/workflow/spec/#critical-flows). When [`/gaia-plan`](/workflow/plan/) builds from it, the build comes first, then a final phase writes one test per flow, except a flow whose every step the build's tests already check (see [Flow tests](/workflow/plan/#flow-tests)). For a flow in the web app, the test is a Playwright test in `apps/web/.playwright/flows/`, named after the flow, and it may drive a real browser even when a cheaper layer could check the same thing. A command-line flow's test goes where the SPEC says. Before the audit, GAIA checks that every flow has its test and that the branch changed it. See [Flow tests](/workflow/plan/#flow-tests).
+A [SPEC](/workflow/spec/) names the feature's [critical flows](/workflow/spec/#critical-flows). The [test stage](/workflow/test-stage/) adds a final phase to the plan, after the build, that writes one test per flow. For a flow in the web app, the test is a Playwright test in `apps/web/.playwright/flows/`, named after the flow, and it may drive a real browser even when a cheaper layer could check the same thing. A command-line flow's test goes where the SPEC says. Before the audit, GAIA checks that every flow has its test and that the branch changed it, or reports a gap when the test stage was skipped. See [Flow tests](/workflow/plan/#flow-tests).
 
 ## How GAIA judges tests
 
-A test that passes may still check nothing. A plan checks its tests against its [test-design table](#the-test-design-table) with the [drift check](#the-drift-check). Other work, such as a plain request, `/gaia-debt`, or a plan made by an older GAIA version, gets the [worthiness review](#the-worthiness-review) on every test it changes.
-
-### The test-design table
-
-[`/gaia-plan`](/workflow/plan/) decides every test before any code is written. The plan's table gives each test a row. A row names the requirement the test proves, the case, its file and exact title, its layer, the task that writes it, and one action.
-
-- **New**: write a test no existing test holds.
-- **Reuse**: an existing test already checks the case. It stays unchanged.
-- **Extend**: add the case to an existing test's table of cases.
-- **Change**: the plan changes the behavior an existing test checks, so the test changes too.
-- **Retire**: the new work replaces an existing test, so it is deleted.
-
-The planner first reads the existing tests for the code the plan touches, so a case they already check is reused or extended, not written again. Every requirement maps to at least one row and every row to a requirement, so a missing or duplicate test shows up in the table, before the build. A SPEC scope boundary or audit instruction that steers the build instead of saying what the app does, such as "ask before adding a dependency", gets no row. The plan records it with what it directs instead. The [plan audit](/workflow/plan/#the-plan-audit) reviews the table, and approving the plan approves it, retired tests included. The plan's `README.md` shows it under `## Test design`.
-
-Each task's sub-agent writes the tests its rows give it, under the planned titles, and never edits the table.
+A test that passes may still check nothing. The [worthiness review](#the-worthiness-review) judges every test a change adds or changes, from a plan or not. Security tests are written apart from the code they test.
 
 ### Security tests
 
-A security row is a row whose test proves one of three things:
+A SPEC gives each [behavior](/workflow/spec/#behaviors) a kind, and three kinds are security kinds:
 
-- **Access**: who may act or see something. This includes signing in and its refusals, such as a wrong password, as well as roles, ownership, and account states such as a suspended account, and what a page offers only to those who may use it, such as an action, form, link, or menu item.
-- **Forgery**: a forged or edited value is refused. So is an untrusted destination the server would send the user or a request to, such as an off-site redirect target or an unregistered callback URL, or the server swaps in an allowed one.
-- **Secrets**: a secret never appears where it must not. Any value a requirement keeps on the server counts, even one that looks harmless, such as an API base URL.
+- **Access**: who may act or see something, such as signing in and its refusals, roles, ownership, and what a page offers only to those who may use it.
+- **Forgery**: the server refuses or ignores a forged or edited value. It also refuses a destination outside the allowed ones, such as an off-site redirect target or an unregistered callback URL, or swaps in an allowed one.
+- **Secret**: a value that must stay on the server never reaches the page, a cookie, returned data, or an outgoing request.
 
-The table marks each security row with a flag. A separate sub-agent, `security-test-writer`, writes these tests at the end of the phase that builds the code. It writes each one from the row and the plan's shared contracts, and reads the code only to find where to call it, so its test cannot repeat the code's mistake.
+The [test stage](/workflow/test-stage/) marks each test of such a behavior with its kind. A separate sub-agent, `security-test-writer`, writes these tests at the end of the phase that builds the code. It writes each one from the stated behavior and the plan's shared contracts, and reads the code only to find where to call it, so its test cannot repeat the code's mistake. A security test on a story, such as a check that a control is hidden from a user who may not use it, adds to the route or real-server test the guard needs and never replaces it.
 
-The flag is decided for each case a test checks, not for the test as a whole. When one test checks cases of different kinds, such as a signed-out redirect beside a signed-in page, each kind gets its own row, so the refusal is flagged and goes to the security writer. A test that runs one case per table entry keeps the cases together with a row for each. Any other test is split, one test per kind. Splitting a test never removes a flag.
+When a security test fails, a fresh sub-agent fixes the code, never the test. If it fails again, the plan stops and asks you what to do. Only you can rule a security test wrong or retire one. When a [Code Audit Team](/workflow/code-audit-team/) fix adds or changes a security behavior, `security-test-writer` writes its test before that round's checks run.
 
-A security row can sit on a story, such as a check that a control is hidden from a user who may not use it. It adds to the route or real-server test the guard needs, never replaces it. A forgery check goes on a story only as a change to an existing story test, beside its server-side test.
-
-A row that retires or changes an existing test is a security row too when that test is one, or when a security requirement forbids what the old test checked, such as a value the plan now keeps on the server that the old test showed reaching the browser. It takes that requirement's kind. So does a row that retires a test a security row for the same requirement now covers; it takes that row's kind. Retiring either counts as retiring a security test. Any other row that cites a security requirement only because that work deletes or rewrites the tested code keeps the old test's own kind.
-
-When a security test fails, a fresh sub-agent fixes the code, never the test. If it fails again, the plan stops and asks you what to do. Only you can rule a security row wrong or retire a security test. Approving a plan approves retiring the security test of code the plan deletes, and no other. Any other security test retire is held for you to decide before merge, and so is that one if the code is still there at merge. A run no one approved, such as [auto mode](/workflow/plan/#auto-mode) or a headless run, holds every security test retire.
-
-Before merge, a gate stops the merge while an approved security row has no test from the writer. See [the security test gate](/reference/gates/#security-test-missing).
-
-### The drift check
-
-Drift is any gap between the branch's tests and the approved table. After the last phase, a script compares the two and GAIA routes each gap:
-
-- **A test that matches its row** gets an honesty read. A separate checker confirms the test really checks its row's case. A hollow test is fixed and read again.
-- **A planned test that is missing** is written from its row. A security row's test goes back to the security writer.
-- **A planned test that was only renamed** keeps its row, which GAIA retitles.
-- **A test no row names, or one moved to another file,** gets the [worthiness review](#the-worthiness-review). A test it keeps gains a row with a reason. GAIA asks you before any delete.
-- **A test the branch deleted that no row retires** comes to you. GAIA recommends keeping it, which restores the test.
-
-A test is hollow when its check can never fail. A guard test that never makes the guard refuse counts. So does a test that checks the app's own copy of a string instead of the wording you stated, one that tests a mock instead of the app, and one whose check sits in a story's play function. A skipped, to-do, or empty test counts as no test.
-
-An unchanged test no row names is not drift. The [Code Audit Team](/workflow/code-audit-team/) runs the same check after each round that commits a fix, on the tests that round changed, and once more after the audit clears. Those runs ask you nothing. A delete becomes a residual, and a test deleted without a retire row is restored.
+Skipping the test stage skips these tests too.
 
 ### The worthiness review
 
-Work without a test-design table gets this review on every test it changes in the React app, flow tests included, once the tests pass. A plan uses it only for the tests its table does not name. A separate reviewer with no shared context reads each test, plus the test files next to it and, for a test of a shared helper, the tests of the helper's other callers. The session that wrote the tests never judges them, since it would share their blind spots.
+Every piece of work gets this review on every test it changes in the React app, flow tests included, once the tests pass. A separate reviewer with no shared context reads each test, plus the test files next to it and, for a test of a shared helper, the tests of the helper's other callers. The session that wrote the tests never judges them, since it would share their blind spots.
 
 Nothing checks mechanically that a test can fail, so this review is what judges it. Each test is judged on two questions:
 
-- **Can it fail for a real reason?** It must check what a user can see and do (roles, accessible names, visible text), not internal details, and must not assert something that is always true, such as a constant checked against its own value. A test whose only check is how many times a function or an API was called fails too, unless the count is the behavior, as in a cache or a retry.
+- **Can it fail for a real reason?** It must check what a user can see and do (roles, accessible names, visible text), not internal details, and must not assert something that is always true, such as a constant checked against its own value. A test whose only check is how many times a function or an API was called fails too, unless the count is the behavior, as in a cache or a retry. So does a test whose check sits in a story's play function, one that checks the app's own copy of a string instead of the wording you stated, and one that tests a mock instead of the app. A skipped, to-do, or empty test counts as no test.
 - **Is it worth keeping?** It should test your code, not a library's. A parent component's test should cover how its children work together, not repeat what each child's tests already check. A test of formatted output checks your logic (the conversion, the locale chosen), not the exact characters `Intl` produces. A unit test fails this question when a route or story test already checks the same thing, when it proves what the type checker or lint already proves, or when its logic is neither important nor likely to fail. Several tests of one function that could share one table of cases should be one test. When several routes turn an API failure into the same response through one shared helper, one test of that helper's mapping is enough, unless a route maps it differently.
 
 When a component's own code handles keys or moves focus (a menu's arrow keys, or focus moved when a dialog opens or closes or when an error appears), the reviewer also expects its story tests to drive it from the keyboard and check where focus lands. Without that, the verdict is a fix. An accessibility scan of a rendered component tests neither. Native form controls in their normal order get this from the browser and need no keyboard test. The reviewer gives a delete verdict to a test that only checks their tab order, or a `required` attribute set as a plain prop. A `required` attribute your form's schema sets is yours to test.
@@ -133,7 +107,7 @@ Each test gets a keep, fix, or delete verdict. The reviewer edits no test or sou
 
 ### The worthiness step
 
-A plain request, `/gaia-debt`, and a plan without a test-design table each finish this review once the draft pull request is open and before the first audit round. If no changed test needs a verdict, the step ends with no commit.
+A plain request, `/gaia-debt`, and a plan each finish this review once the draft pull request is open and before the first audit round. If no changed test needs a verdict, the step ends with no commit.
 
 - **Keep**: nothing more happens. A test that already has a keep for its current content is not reviewed again.
 - **Fix**: a fresh sub-agent fixes the test, GAIA commits the fix, and the reviewer judges the changed test once more. If it still gets a fix verdict, or the fixer cannot fix it, it becomes an [accepted residual](/maintenance/residue/#what-a-residual-is). If it now gets a delete verdict, the delete steps below apply. A fix for a test this branch did not change goes to [tech debt](/workflow/tech-debt/) instead.
@@ -143,7 +117,7 @@ The [Code Audit Team](/workflow/code-audit-team/) runs this step again after eac
 
 ### What you see at the end
 
-The summary at the end of the work lists what the drift check or the worthiness step decided, such as accepted residuals, deletes you refused, and fixes filed as tech debt.
+The summary at the end of the work lists what the worthiness step decided, such as accepted residuals, deletes you refused, and fixes filed as tech debt.
 
 Before merging, a hook checks that every changed test has a verdict on record for its current content. See [the worthiness verdict gate](/reference/gates/#worthiness-verdict).
 

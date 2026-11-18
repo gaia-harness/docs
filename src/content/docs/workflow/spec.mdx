@@ -5,7 +5,7 @@ description: Settle what to build through a guided conversation, save a locked S
 
 import { Aside } from '@astrojs/starlight/components';
 
-`/gaia-spec` turns a feature idea into a SPEC through a guided conversation. A SPEC is a written description of what to build and how to test it, locked once saved. GAIA then plans it in the same session with [`/gaia-plan`](/workflow/plan/) and stops at the plan's KICKOFF prompt. The building starts in a fresh session.
+`/gaia-spec` turns a feature idea into a SPEC through a guided conversation. A SPEC is a written description of what to build, with every rule stated case by case, locked once saved. GAIA then plans it in the same session with [`/gaia-plan`](/workflow/plan/), offers the [test stage](/workflow/test-stage/) that decides its tests, and stops at the plan's KICKOFF prompt. The building starts in a fresh session.
 
 The SPEC and its plan are saved in the [Notebook](/workflow/notebook/).
 
@@ -29,7 +29,7 @@ Claude asks you questions to settle what you want. A question with fixed answers
 /gaia-spec auto your feature description
 ```
 
-Claude answers its own questions with the recommended option, checks both gates itself, and plans with [`/gaia-plan auto`](/workflow/plan/#auto-mode), so the run finishes without asking you anything. It always starts a new SPEC and skips the model check. Anything it could not settle is saved as an open question for you to review.
+Claude answers its own questions, checks both gates itself, and plans with [`/gaia-plan auto`](/workflow/plan/#auto-mode), test stage included, so the run finishes without asking you anything. It always starts a new SPEC and skips the model check. Anything it could not settle is saved as an open question for you to review.
 
 Use it when your description is already complete. A description whose first word is "auto" is read as auto mode, so reword it.
 
@@ -39,8 +39,9 @@ Everything lands in `.notebook/specs/SPEC-NNN/`:
 
 | File | Purpose |
 | --- | --- |
-| `SPEC.md` | The locked SPEC: intent, success criteria, [critical flows](#critical-flows), scope rules (always, ask first, never), and the decisions settled along the way with their reasons. |
-| `AUDIT.md` | The [SPEC audit](#the-spec-audit)'s report: instructions the plan must follow, fixes folded into the SPEC, and findings that were disproved. |
+| `SPEC.md` | The locked SPEC: intent, success criteria, [critical flows](#critical-flows), [behaviors](#behaviors), scope rules (always, ask first, never), and the decisions settled along the way with their reasons. |
+| `REQUIREMENTS.md` | Your description and every question and answer, word for word. Every later step reads it as what you asked for, and nothing edits it. |
+| `AUDIT.md` | The [SPEC review](#the-spec-review)'s report: instructions the plan must follow, the fixes made to the draft, and what the review decided about each critical finding. |
 | `plan/` | The plan, written by [`/gaia-plan`](/workflow/plan/#what-gets-produced). |
 
 Each SPEC number is reserved by pushing a `spec/NNN` git tag, so teammates never get the same number. See [Numbers do not travel](/workflow/notebook/#why-it-stays-on-your-machine) for a repository with no remote.
@@ -49,9 +50,23 @@ Each SPEC number is reserved by pushing a `spec/NNN` git tag, so teammates never
 
 A critical flow is a path through the feature that, if it broke, would block a user's main task or put data, money, or security at risk. A SPEC has as many as the feature needs, with no set number. Each flow has an id such as `FLOW-001`, a short kebab-case name that becomes its test's file name, a one-line title, and why it is critical. A web flow also lists the app folders it covers. A command-line flow names its test file instead.
 
-A flow names a path, never a list of cases. The rules the feature must follow go in the intent and the success criteria.
+A flow names a path, never a list of cases. The rules the feature must follow go in its behaviors.
 
-Once the SPEC is saved, the plan must test every flow. [`/gaia-plan`](/workflow/plan/) builds the feature first, then writes one test per flow. A flow whose every step the build's tests already check needs no test of its own (see [Flow tests](/workflow/plan/#flow-tests)).
+Once the SPEC is saved, the [test stage](/workflow/test-stage/) gives every flow one test, written in a closing phase after the build (see [Flow tests](/workflow/plan/#flow-tests)), unless you [skip it](/workflow/test-stage/#skipping-it).
+
+### Behaviors
+
+The `## Behaviors` section states every rule the feature has, error cases, refusals, and security rules included. Each behavior has an id that never changes, one kind, and its cases. Each case names who acts, the state, the input, and the outcome by value: a status, a message, a redirect, or the exact text shown, never "an error".
+
+```markdown
+- **B1** (access): Only the order's owner can open its receipt page.
+  - Case: a signed-in user who owns order 7, opening /orders/7/receipt -> the page shows "Receipt for order 7".
+  - Case: a signed-in user who does not own order 7, opening /orders/7/receipt -> 403 and the text "You cannot view this order".
+```
+
+The kind is `access`, `forgery`, `secret`, `refusal`, `data-loss`, or `other`. The first three are [security kinds](/workflow/testing/#security-tests), and their tests are written by a separate sub-agent. Where your description already lists values, such as a table of actions or a set of labels, the SPEC points to that part of `REQUIREMENTS.md` instead of copying it.
+
+The SPEC plans no tests. The [test stage](/workflow/test-stage/) reads the behaviors and decides how each is proven.
 
 ## Before it starts
 
@@ -63,60 +78,60 @@ GAIA also clears out [notebook entries it no longer needs](/workflow/notebook/#h
 
 ## The flow
 
-1. **Draft.** Claude reserves the SPEC number and writes a first draft.
-2. **Gate 1: shape.** Before asking anything, Claude shows in plain language what it thinks you want and proposes the critical flows, with its recommended set marked. You confirm, or drop, add, or edit flows. Later steps check the SPEC against what you confirmed here.
-3. **Questions.** One at a time, each built on your last answer, until every topic is settled or after 10 questions (5 in auto mode). When Claude needs facts, it researches them itself.
-4. **Self-review.** A sub-agent checks that the draft matches gate 1 and does not contradict itself. It flags a flow that names no path a user would see or that lists cases, and a critical path with no flow. A layout word such as "beside" or "above" is flagged when it only stands for a relationship, with the testable requirement proposed instead (an error message linked to its field, for example). It fixes minor problems. Critical and major ones come to you as one list with recommended fixes: accept all, or revise the ones you name.
-5. **SPEC audit.** Independent reviewers check the draft against your code. See [The SPEC audit](#the-spec-audit).
-6. **Gate 2: the brief.** Claude shows what the SPEC changes, why, what success looks like, every flow with the folders it covers or its test file, what the plan will do because of the audit, the costs and risks you accept, and anything still open. Revise until it is right.
+1. **Gate 1: shape.** GAIA reserves the SPEC number. Before asking anything, it shows in plain language what it thinks you want and proposes the critical flows, with its recommended set marked. You confirm, or drop, add, or edit flows.
+2. **Questions.** One at a time, each built on your last answer, until every topic is settled or after 10 questions (5 in auto mode). When Claude needs facts, it researches them itself.
+3. **Requirements.** Your description and every question and answer are saved, word for word, to `REQUIREMENTS.md`.
+4. **Draft.** Claude writes the whole SPEC in one pass, stating every behavior with its cases. A question still open is settled now or left open with a reason. In an interactive run, Claude asks you about each one.
+5. **Review.** Independent reviewers check the draft, and one sub-agent applies their findings. See [The SPEC review](#the-spec-review).
+6. **Gate 2: the brief.** Claude shows what the SPEC changes, why, what success looks like, every flow with the folders it covers or its test file, what the plan will do because of the review, the costs and risks you accept, and anything still open. Revise until it is right.
 7. **Save.** The SPEC is saved and locked.
-8. **Plan.** GAIA runs `/gaia-plan` on the SPEC in the same session. The run ends with a [cost box](/models-and-context/cost/) and the KICKOFF prompt to paste into a fresh session.
+8. **Plan.** GAIA runs `/gaia-plan` on the SPEC in the same session, then offers its test stage. The run ends with a [cost box](/models-and-context/cost/) and the KICKOFF prompt to paste into a fresh session.
 
 <Aside type="caution">
 Confirming gate 2 locks the SPEC, and nothing edits it after that. Get it right before you confirm.
 </Aside>
 
-## The SPEC audit
+## The SPEC review
 
-Before gate 2, a team of sub-agents reviews the draft. Each one reads your code for itself, so the SPEC is checked against what is really there, not what the conversation assumed. It runs on every SPEC.
-
-A low-stakes, narrow SPEC gets the **Standard** audit. A high-stakes one, or one that touches security or a data migration, gets the **Deep** audit.
+Before gate 2, a team of sub-agents reviews the draft, all at once. Each one reads your code for itself, so the SPEC is checked against what is really there, not what the conversation assumed. It runs on every SPEC.
 
 ### The lenses
 
-Each reviewer looks through one lens. Its short code, such as `COV`, appears in each finding's id. Four lenses run on every SPEC:
+Each reviewer looks through one lens. Its short code, such as `COV`, appears in each finding's id. Five lenses run on every SPEC:
 
 | Lens | What it checks |
 | --- | --- |
+| (TST) Testability | Each behavior, flow, and success criterion can fail, with no way to pass while the feature is broken. Each behavior states its cases clearly enough to write a test from the text alone, never by example or "etc.". In every behavior it looks for three gaps. One is what happens when a value the user sends is forged or edited. One is the form the user sees for a stored value, such as a date or a status. One is what is left when an operation that makes several writes fails partway. |
+| (COV) Coverage and consistency | Every promise in the intent has a flow, no critical flow is missing, the scope rules agree with the flows, no flow needs a control, step, or value the SPEC's own rules allow only in another state, every requirement in `REQUIREMENTS.md` reaches a behavior, and the SPEC follows your conventions. |
+| (SEC) Security | Injection, server-side request forgery, open redirects, leaked tokens or secrets, missing authorization, and unsafe deserialization. A credential the app holds for another service needs a rule keeping it out of the browser, and a signed-only cookie does not do that. For every grant, it checks the SPEC says who is refused. |
+| (BRIEF-FIT) Brief fit | Checks the draft against your description, never the other way around. It flags a decision or default your description contradicts, access the draft gives to someone your description does not name, scope you did not ask for, and anything you said that the draft drops or changes. When you list who may do something, everyone else is refused. |
 | (FG) Factual grounding | Every claim about your code, dependencies, file paths, and conventions is true. A new dependency is justified and pinned. |
-| (TST) Flow and criteria testability | Each flow and success criterion can fail: no way to pass while the feature is broken. |
-| (COV) Coverage and consistency | Every promise in the intent has a flow, no critical flow is missing, the scope rules agree with the flows, no flow needs a control, step, or value the SPEC's own rules allow only in another state, and the SPEC follows your conventions. |
-| (RT) Red team and feasibility | A way every flow passes yet the feature is not delivered, a check that cannot run, a missed file or caller, an assumption the plan would take as fact. |
 
 Specialist lenses join when the draft touches their area:
 
 | Lens | Joins when the SPEC touches |
 | --- | --- |
-| (SEC) Security | Sign-in, tokens or secrets, redirects, uploads, permissions, personal data, raw user input, headers, cookies |
 | (MIG) Migration | Data formats or schemas, renamed or removed fields, breaking API changes |
 | (A11Y) Accessibility | Anything that renders on screen |
 | (DOC) Documentation | Wiki or docs deliverables |
 | (PERF) Performance | Data volume, loops over collections, network calls, caching, rendering |
 
-### Refutation
+### Critical findings
 
-A separate reviewer tries to disprove each critical or major finding, and drops it unless the problem shows in the code or the draft. On the Deep audit, three reviewers try, and the finding stays only if two of them fail. A completeness reviewer then looks for what every lens missed.
+When any lens raises a critical finding, one more sub-agent tries to disprove the critical findings, without asking you anything. It drops a finding only when every gap the finding names turns out to be wrong, and lowers one whose harm is overstated. A finding that a value the app must keep on the server has no rule keeping it there is never dropped, or lowered below major, because of who owns the value or a cookie setting. Major and minor findings go straight to the fixer.
 
-With more than 24 critical or major findings on Standard, or more than 8 on Deep, one reviewer per lens checks all of that lens's findings instead, and the completeness review is skipped. This keeps the audit's cost from growing with the number of findings.
+### The fixer
 
-### Findings that survive
+One sub-agent applies every finding that stands:
 
-- **The SPEC is wrong** (a flow or success criterion that could pass on broken code, a rule nothing in the SPEC states, a wrong intent): the fix goes into the draft. A rule on a path an existing flow already covers goes into the intent or a success criterion, never into the flow as a case. Only a critical path no flow names gets a new flow. Critical and major fixes come to you as one list. Minor ones are folded in.
-- **The SPEC is right, but the build needs steering** (for example, a file the change must also update): it becomes an instruction in `AUDIT.md` that the plan must follow. The instruction says what a test must prove or what the code must meet. It never asks for a new test or names which kind of test to write, so the [plan](/workflow/plan/) still picks how each one is tested. The plan meets it in the code or inside a test the plan already names, with a refusal or validation going in the test of the task that builds it. An instruction that would need any other test is listed as a follow-up in the plan's `README.md` instead.
+- **The SPEC is wrong** (a behavior, flow, or success criterion is wrong, can pass on broken code, or is missing): the fix goes into the draft as a behavior, such as a rule, a refusal, or an error state. A fix never adds a test.
+- **The SPEC is right, but the build needs steering** (for example, a file the change must also update): it becomes an instruction in `AUDIT.md` that the plan must follow. It states what the code must meet, never which test to write.
 
-In auto mode, a clear fix is applied, and a finding with more than one reasonable fix is left open for you.
+When two findings conflict, the more severe one wins. When your description can be read two ways, the fixer takes the narrower reading of who may do what and marks it as an assumption in the SPEC.
 
-If your session cannot start sub-agents, the audit is skipped and gate 2's brief says so.
+A fix that removes, narrows, or rewrites a behavior must say where each case it removed now lives in the SPEC: still stated, restored, turned into a refusal, moved out of scope, corrected, or left open. A script checks each answer against the draft and sends back a fix that loses a case without one. Security and refusal behaviors are stricter. A case of an access, forgery, secret, or refusal behavior can only stay stated, be restored, become a narrower refusal, or be left open. If the fix is sent back twice, its lost cases are saved as open questions, shown at gate 2 under **Not settled**.
+
+You see the result at gate 2. If your session cannot start sub-agents, the review is skipped and gate 2's brief says so.
 
 ## While it runs
 

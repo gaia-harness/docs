@@ -1,0 +1,65 @@
+---
+title: /gaia-test
+description: Decide the tests of a saved plan, at most one per behavior the SPEC states, plus one test for each critical flow.
+---
+
+`/gaia-test` runs the test stage. It decides which tests a plan's builders write: a short list in each task, at most one test for each behavior the [SPEC](/workflow/spec/) states, plus a closing phase that writes one test for each [critical flow](/workflow/spec/#critical-flows). It lists the tests and writes none of them. The sub-agents that build each task write them when the plan runs.
+
+The plan itself names no tests. [`/gaia-plan`](/workflow/plan/) splits the work into tasks, and this stage decides how each task is proven.
+
+## When to use it
+
+You rarely type it. `/gaia-plan` offers the test stage as its last step, with **Run the test stage** recommended, and its auto mode runs it without asking.
+
+Type `/gaia-test` yourself to add tests to a plan whose test stage you skipped, or to redo a plan's tests. Run it before you paste the plan's kickoff prompt, since those sub-agents read the lists it writes.
+
+## How to invoke
+
+```
+/gaia-test
+```
+
+With no argument, it takes your most recent saved plan. To pick one, name its SPEC or its plan folder:
+
+```
+/gaia-test SPEC-005
+```
+
+`/gaia-test auto` asks you nothing, and stops with the reason if a check fails twice.
+
+## What gets produced
+
+- **A test list in each task.** Each task file gets a `## Tests` section with one line per test. Each line names the behavior the test proves, its [layer](/workflow/testing/#where-tests-go), its [security kind](/workflow/testing/#security-tests) or `none`, and the test's file and title.
+
+  ```
+  - Test (B3, route, access): app/route-tests/orders/tests/receipt.test.ts › refuses a user who does not own the order
+  ```
+
+  `B3` is the behavior's id in the SPEC. For a plan with no SPEC, a task's acceptance criteria are its behaviors, named by the task and the criterion's number.
+- **A closing flow-test phase**, for a plan from a SPEC. It runs after every build phase, with one task per critical flow, each writing that flow's test. See [Flow tests](/workflow/plan/#flow-tests).
+- **Security test steps.** A phase whose list holds an access, forgery, or secret test gets a step that has a separate sub-agent write those tests. See [Security tests](/workflow/testing/#security-tests).
+- **`TEST-STAGE`**, a small file in the plan folder that records whether the stage ran or was skipped. Later checks read it.
+
+## The limit
+
+A behavior gets at most one test, on the cheapest [layer](/workflow/testing/#where-tests-go) that proves it. A test that runs over a table of cases counts as one, so a behavior with several cases is still one test holding all of them. Flow tests sit outside the limit, and every flow gets one.
+
+The stage never lists a test of something the SPEC does not state, or a second test of one behavior on a costlier layer. Which cases a test must hold, and where each kind of test goes, follow GAIA's [testing rules](/workflow/testing/#what-gets-a-test).
+
+## The flow
+
+1. **Read.** The stage reads the SPEC's [behaviors](/workflow/spec/#behaviors) and flows, your words in `REQUIREMENTS.md`, and every task file. It works from what the SPEC states, not from the code.
+2. **List.** It writes each task's test list and, for a plan from a SPEC, the closing flow-test phase.
+3. **Check.** A script refuses a malformed line, a behavior the SPEC does not have, a security, refusal, or data-loss behavior with no test, a flow with no flow test, two tests of one behavior on the same layer, and a test marked with the wrong security kind. If a check fails, the stage fixes its lists and runs the checks once more, then stops with the reason if one still fails.
+4. **Review.** One more reviewer confirms that every listed test proves a behavior the SPEC states and that the limit holds. Its findings are applied and the checks run again.
+5. **Record.** Only once the checks pass does the stage record that it ran.
+
+The stage's cost is counted on its own. A plan from a SPEC ends with a [cost box](/models-and-context/cost/) with **Spec**, **Plan**, and **Test** rows.
+
+Running the stage again on the same plan replaces its earlier lists and closing phase.
+
+## Skipping it
+
+At `/gaia-plan`'s question, **Skip** plans no tests. The security tests are skipped with it, because the stage is what lists them. The plan's report says so.
+
+The build still runs. When GAIA [checks the flows](/workflow/plan/#flow-tests) after the last phase, each flow with no test is reported as a gap, not a failure. The [worthiness review](/workflow/testing/#the-worthiness-review) still judges every test the work changes.

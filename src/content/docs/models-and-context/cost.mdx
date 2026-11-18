@@ -54,7 +54,7 @@ Spend recorded without activity data has no active time. A row that mixes both r
 ### Where it prints
 
 - **Every merge Claude runs** prints a `PR #<N> Cost` box: **Execute** (the work on the branch), **Audit** (what the Code Audit Team spent), and **Total**.
-- **`/gaia-plan`** from a SPEC ends with a box of **Spec**, **Plan**, and **Total** rows; `/gaia-spec`'s run is the Spec row. A plan without a SPEC ends with a Cost line. When the plan's work merges, it prints the whole cost from SPEC to merge, with an **Execute** row.
+- **`/gaia-plan`** from a SPEC ends with a box of **Spec**, **Plan**, **Test**, and **Total** rows; `/gaia-spec`'s run is the Spec row, and the [test stage](/workflow/test-stage/)'s run is the Test row when it ran. A plan without a SPEC ends with a Cost line. When the plan's work merges, it prints the whole cost from SPEC to merge, with an **Execute** row.
 - **`/gaia-fitness`, `/gaia-cleanse`, `/gaia-codify`, `/gaia-debt`, `/gaia-residue`, `/gaia-forensics`, `/gaia-wiki`, `/update-deps`, and `/update-gaia`** end with a Cost line. `/gaia-wiki`'s includes the wait for its pull request to merge.
 
 A box with only one row that cost anything prints as a single line.

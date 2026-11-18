@@ -37,14 +37,15 @@ The `/gaia-*` commands are for specific moments, not everyday driving:
 | --- | --- | --- |
 | Starting a feature whose shape isn't settled | [`/gaia-spec`](/workflow/spec/) | Pins down intent and the critical user flows, saves a SPEC, and plans it in the same session. |
 | Turning a big feature into parallel work | [`/gaia-plan`](/workflow/plan/) | Splits it into phases, defines the shared types and interfaces the phases build on, and writes a kickoff prompt you paste to start the work. |
+| Redoing a plan's tests, or adding them after you skipped the test stage | [`/gaia-test`](/workflow/test-stage/) | Lists each task's tests, at most one per behavior the SPEC states, plus a test for each critical flow. |
 | Tech-debt issues have piled up | [`/gaia-debt`](/workflow/debt/) | Fixes the backlog, highest severity first, through the audit gate. |
 
 Small, clear changes do not need a spec or a plan. When your request would benefit from one, GAIA [recommends](/workflow/work-lifecycle/#spec-plan-or-just-do-it) it, even if you didn't name a command.
 
 ## A feature, start to finish
 
-1. **Define what to build.** Run `/gaia-spec add saved-search filters`. It asks a few questions, confirms the intent and the critical user flows in plain language, and saves a SPEC. Then it plans the SPEC in the same session and ends with a kickoff prompt.
-2. **Build it.** Run `/clear` and paste the kickoff prompt. GAIA builds each phase, commits it through the Quality Gate, and opens a draft pull request. A final phase then writes a [test for each critical flow](/workflow/plan/#flow-tests) the SPEC names, except a flow the build's tests already cover.
+1. **Define what to build.** Run `/gaia-spec add saved-search filters`. It asks a few questions, confirms the intent and the critical user flows in plain language, and saves a SPEC. Then it plans the SPEC in the same session, offers to decide its tests with the [test stage](/workflow/test-stage/), and ends with a kickoff prompt.
+2. **Build it.** Run `/clear` and paste the kickoff prompt. GAIA builds each phase, commits it through the Quality Gate, and opens a draft pull request. A final phase then writes a [test for each critical flow](/workflow/plan/#flow-tests) the SPEC names, unless you skipped the test stage.
 3. **Audit and merge.** The [Code Audit Team](/workflow/code-audit-team/) reviews the pull request and GAIA fixes what it finds. Once the review passes, GAIA posts the `GAIA-Audit` check and asks whether to merge.
 
 [Onboarding, as you build](/getting-started/onboarding/) walks through when each of these first steps in.
