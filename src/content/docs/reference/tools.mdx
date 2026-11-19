@@ -15,6 +15,16 @@ Install these yourself before running `npx create-gaia`. See [Quick Start](/#pre
 
 Node 26 or later. Check with `node --version`.
 
+[`/setup-gaia`](/getting-started/setup-gaia/) and [`/update-gaia`](/maintenance/update-gaia/) check it too, and `/update-gaia` checks against the new release's Node. When yours is too old, GAIA gives you commands to run in your own terminal, since a new Node only takes effect in a new terminal. The commands install the Node version the release needs, not the newest, make it your default, and reinstall pnpm, which otherwise stays with the old Node. Run this for Node 26 with [fnm](https://github.com/Schniz/fnm).
+
+```
+fnm install 26 && fnm use 26 && fnm default 26 && npm install -g pnpm@latest
+```
+
+With [nvm](https://github.com/nvm-sh/nvm), the first three are `nvm install 26`, `nvm use 26`, and `nvm alias default 26`. On Windows, use fnm. With neither installed, install one first, or install Node 26 another way.
+
+Then open a fresh terminal in the project folder. If your terminal switches Node per folder (fnm `--use-on-cd`, nvm auto-use, asdf, or mise), select Node 26 there first, such as with `fnm use 26`, or it picks the project's old Node again. Then start Claude Code from that terminal.
+
 ### Claude Code
 
 Claude Code 2.1.287 or later, run in a terminal. Run `claude update` to update it. The [Code Audit Team](/workflow/code-audit-team/) needs 2.1.287 because its reviewers start reviewers of their own, which older versions cannot do.
@@ -25,9 +35,9 @@ The [GitHub CLI](https://cli.github.com/), `gh`, logged in with `gh auth login`.
 
 ## Checked on every setup and update
 
-`/setup-gaia` checks these at the start of every run. [`/update-gaia`](/maintenance/update-gaia/) checks them against the new release's minimums before it changes anything. When one is missing or too old, the command goes no further until it passes. See the [Tool versions gate](/reference/gates/#tool-versions).
+`/setup-gaia` checks these, and [Node](#node), at the start of every run. [`/update-gaia`](/maintenance/update-gaia/) checks them against the new release's minimums before it changes anything. When one is missing or too old, the command goes no further until it passes. See the [Tool versions gate](/reference/gates/#tool-versions).
 
-GAIA walks you through the update in the same run, always to the latest release, not just the minimum. How it goes depends on the install:
+GAIA walks you through the update in the same run, always to the latest release, not just the minimum. Node is the one exception, since it goes to the version the release needs. How it goes depends on the install:
 
 - **Claude can run it**, for example `brew install git` on macOS with Homebrew. GAIA asks once, then runs it.
 - **It needs `sudo`.** Claude cannot type your password, so GAIA gives you the command as `! <command>` to type in the Claude Code prompt, and waits for you to say it ran.
