@@ -32,7 +32,7 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 | `block-handrolled-pr-poll` | A shell loop that checks `gh pr view` or `gh pr checks` over and over without reading `mergeable`. Claude uses GAIA's merge wait instead. |
 | `pr-merge-audit-check` | `gh pr merge` until every Code Audit Team member responsible for the changed files has approved it, and an audited merge until the pull request's summary is [re-checked](/reference/gates/#pull-request-summary-not-re-checked) for its latest commit. For a pull request outside the audit's scope, or a `chore(deps)` pull request that only changes dependency manifests, it posts the `skipped:` status itself. |
 | `worthiness-presence-check` | `gh pr merge` when a changed test has no worthiness record for its current content. It covers every test in the React app, including stories, [Playwright](https://playwright.dev/) tests, route tests, and utility, service, and hook tests. It checks only that the record exists, not its verdict. |
-| `block-audit-loop-write` | Writes to the audit loop's protected state and context readings, running by hand the scripts that record your grant, and running the local-state cleanup scripts that only a hook may start. |
+| `block-audit-loop-write` | Writes to the audit loop's protected state, context readings, and the shared [usage limit](/workflow/statusline/#usage-limits) figures, running by hand the scripts that record your grant or write those figures, and running the local-state cleanup scripts that only a hook may start. |
 
 ### Edit, Write, and MultiEdit
 
@@ -42,7 +42,7 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 | `block-eslint-config-edit` | **Asks** you to confirm any edit to an `eslint.config.*` file, and explains why: a config edit can silence a rule just as easily as it can make an approved migration. |
 | `block-manifest-write` | Writes to `.gaia/manifest.json`. |
 | `block-worktree-path-mismatch` | An edit whose path points into a different checkout than the worktree the session is working in. Writes to the main checkout's `.notebook/` are exempt. |
-| `block-audit-loop-write` | Writes to the audit loop's protected state. |
+| `block-audit-loop-write` | Writes to the audit loop's protected state and the shared usage limit figures. |
 
 ### Agent and Task dispatches
 
@@ -66,6 +66,7 @@ These hooks never turn anything back. They record what happened (grants, usage) 
 | `workflow-doctrine-inject` | SessionStart, PostToolUse (EnterWorktree, `git`, `gh pr checkout`) | Adds GAIA's working rules to the session when it works on a branch or in a worktree (the roles are described in [Who does what](/workflow/work-lifecycle/#who-does-what)), and redirects a plain `git worktree add` under `.claude/worktrees/` to `EnterWorktree`. |
 | `context-checkpoint-inject` | PostToolUse | When context use reaches the red, fire, or skull level on the statusline, tells the main session to save its place and ask whether to continue or clear. |
 | `context-checkpoint-subagent` | PostToolUse | The same checkpoint for a sub-agent that was given a file to save its place in. |
+| `rate-limit-checkpoint-inject` | PreToolUse (Agent, Task, Workflow) | When a [usage limit](/workflow/statusline/#when-a-limit-runs-high) reaches 75% or 90%, tells the main session the figures before it hands work to agents, once per session for each level until the limit resets. |
 | `provision-worktree` | SessionStart, PostToolUse (EnterWorktree) | Links shared files into a worktree, gives it its own set of ports and a port file, and installs dependencies and typed routes. After `/clear` or compaction it repairs only a worktree that was never set up, so a set-up worktree costs nothing. |
 | `ports-session-start` | SessionStart | Records which session started which dev server, and stops servers left behind by ended sessions and removed worktrees. |
 | `wiki-session-start` | SessionStart | Cleans up after a `/gaia-wiki` run whose session ended before its merge finished (deletes the leftover local wiki branch and updates the base branch), and lists merged worktrees with the commands to remove them. |

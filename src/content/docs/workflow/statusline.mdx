@@ -48,13 +48,33 @@ The statusline also saves each reading, which is how GAIA [tells Claude](/models
 
 ### Usage limits
 
-`🕔` and `📅` each appear only when Claude Code reports that limit. A limit it doesn't report shows nothing, not 0%. The color shows how close you are, and the time in brackets is how long until the limit resets. The 5-hour limit shows that time from 75%, since its reset is near enough to plan around. The 7-day limit shows it from 90%, since at 75% its reset can still be days away.
+`🕔` and `📅` each appear once Claude Code has reported that limit to any session of the project. A limit it has never reported shows nothing, not 0%. The color shows how close you are, and the time in brackets is how long until the limit resets. The 5-hour limit shows that time from 75%, since its reset is near enough to plan around. The 7-day limit shows it from 90%, since at 75% its reset can still be days away.
 
 | Used | 5-hour | 7-day |
 | --- | --- | --- |
 | Below 75% | <code style={{ background: '#1a1b26' }}>🕔 <S c="#4ade80">23%</S></code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#4ade80">41%</S></code> |
 | 75% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#facc15">78%</S> (1h40m)</code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#facc15">80%</S></code> |
 | 90% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#f87171">92%</S> (1h2m)</code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#f87171">93%</S> (1d6h)</code> |
+
+Every session of the project shows the same figures, including sessions in linked worktrees. Each shows the highest figure any of them has seen for the current window. Once a window has passed, its limit shows `reset`.
+
+To see each limit with its reset time and how fast it is climbing, ask Claude:
+
+```text
+Show me the current usage limit reading.
+```
+
+GAIA stops Claude from changing or deleting the shared figures. If they are ever wrong, delete the file that holds them, `.gaia/local/cache/shared/rate-limits.json` in the main checkout, from your own terminal outside Claude Code. The statusline writes fresh figures on its next refresh.
+
+### When a limit runs high
+
+Before the main session hands work to agents, GAIA checks the limits. The first time a limit reaches 75% in a session, and again at 90%, GAIA tells Claude the figures and when they reset. The agents it was about to start still start. The figures shape what Claude does next.
+
+- **When you are at the session**, a 5-hour limit at 75% or more makes Claude ask how to go on. Claude offers to split the work when it divides at the next step, to wait when the limit would run out before the reset, and always to push through, which draws on paid usage. When pushing through is the only option, Claude goes on without asking.
+- **When you are away**, Claude splits the work at 75%. At 90% Claude saves its place and stops, leaving a prompt you can paste to resume after the reset.
+- **The 7-day limit** never holds up the work at hand. At 75% or more, Claude puts off optional heavy work, such as a [`/gaia-fitness`](/maintenance/fitness/) run or a batch of [`/gaia-debt`](/workflow/debt/) fixes.
+
+GAIA also checks the limits before each phase of a [`/gaia-plan`](/workflow/plan/) plan and each time it starts the [Code Audit Team](/workflow/code-audit-team/), not only the first time a limit reaches a level.
 
 ### Using your own statusline
 
