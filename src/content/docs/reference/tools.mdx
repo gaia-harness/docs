@@ -13,7 +13,7 @@ Install these yourself before running `npx create-gaia`. See [Quick Start](/#pre
 
 ### Node
 
-Node 22.22.2 or a later 22, 24.15.0 or a later 24, or 26 and later. Check with `node --version`.
+Node 26 or later. Check with `node --version`.
 
 ### Claude Code
 
@@ -54,7 +54,7 @@ GAIA installs, tests, and builds with [pnpm](https://pnpm.io/) 12 or later. The 
 
 - **A missing pnpm** is installed with `npm install -g pnpm@latest`, and Claude tells you it is doing so. pnpm then switches itself to the pinned version.
 - **An older pnpm** is updated only after you confirm. The command stops if you say no.
-- **Corepack is never used.** [Corepack](https://nodejs.org/api/corepack.html), the package-manager launcher that comes with most Node versions, never switches pnpm to the pinned version, and stops with `ERR_PNPM_BAD_PM_VERSION` when it runs a different one. When Corepack is installed, only its `pnpm` command is removed.
+- **Corepack is never used.** [Corepack](https://nodejs.org/api/corepack.html), a package-manager launcher that older Node versions came with, never switches pnpm to the pinned version, and stops with `ERR_PNPM_BAD_PM_VERSION` when it runs a different one. When Corepack is installed, only its `pnpm` command is removed.
 - **npm cannot write to its global folder** (an `EACCES` or `EPERM` error). The command stops and shows the fix, which never needs `sudo`: point npm at a folder you own, or install Node with a version manager such as nvm, fnm, or Volta. Then run the command again.
 - **An older pnpm installed another way**, such as Homebrew or the standalone installer, still comes first on your `PATH`. The command stops and shows its path, so you can update or remove it.
 
