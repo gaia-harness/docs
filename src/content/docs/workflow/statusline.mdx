@@ -44,6 +44,8 @@ A model's answers get worse as its context fills, and Claude cannot see how full
 
 The examples use a 1M-token window. Where each band starts is on [Token efficiency](/models-and-context/token-efficiency/#context-bands); what happens at each is on [Work lifecycle](/workflow/work-lifecycle/#resuming-long-work).
 
+A yellow `⚠ override` after the percentage means your [checkpoint override](/models-and-context/token-efficiency/#context-bands) is out of range or unusable. With the checkpoint turned off, the bar stays green.
+
 The statusline also saves each reading, which is how GAIA [tells Claude](/models-and-context/token-efficiency/#context-bands) when the context reaches a band. Without GAIA's statusline, Claude gets no band warnings, and the [audit checkpoint](/reference/gates/#audit-checkpoint) counts rounds instead.
 
 ### Usage limits

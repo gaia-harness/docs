@@ -131,14 +131,14 @@ Claude cannot see how full its own context is. Claude Code reports it only to th
 	]}
 />
 
-The red band sits at 300,000 tokens or half the window, whichever is smaller. 🔥 is 1.25 times red and 💀 is 1.5 times red. To ask even earlier, you can lower the red band for your machine. The setting lives in `.gaia/local/protected/checkpoint-override.json`, and **Claude cannot edit it**, so only you can set it. Run this yourself in a terminal from the root of your main copy of the repo (this example sets red at 100,000 tokens):
+The red band sits at 300,000 tokens or half the window, whichever is smaller. 🔥 is 1.25 times red and 💀 is 1.5 times red. You can move the red band for your machine to anywhere from 200,000 to 400,000 tokens. Half the window still caps it, so on a 200K-token window it stays at 100,000. The setting lives in `.gaia/local/protected/checkpoint-override.json`, and **Claude cannot edit it**, so only you can set it. Run this yourself in a terminal from the root of your main copy of the repo (this example sets red at 350,000 tokens):
 
 ```bash
 mkdir -p .gaia/local/protected
-echo '{"version":1,"context_checkpoint":{"ask_tokens":100000}}' > .gaia/local/protected/checkpoint-override.json
+echo '{"version":1,"context_checkpoint":{"ask_tokens":350000}}' > .gaia/local/protected/checkpoint-override.json
 ```
 
-The file can only lower the band, never raise it.
+A value outside the range is moved to the nearer end, and a file GAIA cannot use (the wrong shape, or `jq` not installed) falls back to 300,000. Either way, GAIA warns at the start of each session and the statusline shows `⚠ override` until you fix the file. Setting `ask_tokens` to `0` turns the checkpoint off, so only Claude Code's automatic compaction limits the context. That is not recommended. If an audit has already started on your branch, a higher value or `0` takes effect on your next branch; a lower one applies right away.
 
 What Claude does at each band, and how to clear and pick up where you left off, is on [Resuming long work](/workflow/work-lifecycle/#resuming-long-work).
 
