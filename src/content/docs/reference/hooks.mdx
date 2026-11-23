@@ -44,6 +44,12 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 | `block-worktree-path-mismatch` | An edit whose path points into a different checkout than the worktree the session is working in. Writes to the main checkout's `.notebook/` are exempt. |
 | `block-audit-loop-write` | Writes to the audit loop's protected state and the shared usage limit figures. |
 
+### Scheduling and messaging tools
+
+| Hook | Turns back Claude's |
+|---|---|
+| `block-scheduled-audit-line` | `ScheduleWakeup`, `CronCreate`, `RemoteTrigger`, and `SendMessage` calls whose prompt or message is exactly an audit checkpoint answer (`audit-grant <n>`, `audit-accept`, or `audit-accept-finding <n>`). Only you type those. A prompt Claude schedules for its own session would reach the recorder as if you had typed it. |
+
 ### Agent and Task dispatches
 
 | Hook | Limits |
