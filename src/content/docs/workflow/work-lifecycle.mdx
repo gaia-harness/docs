@@ -40,7 +40,7 @@ When a task is big enough to hand off, GAIA splits it across sub-agents: separat
 | Executor | A sub-agent | Edits files, and nothing else. |
 | Verifier | A check after the executors | Compares the changes with the plan before anything is committed. |
 
-Sub-agents never commit, push, or create branches. Your session does that, and runs the [Quality Gate](/workflow/code-audit-team/#quality-gate) once per commit, after the verifier passes.
+Sub-agents that share your working tree never commit, push, or create branches, and GAIA [turns back their git that changes state](/reference/gates/#sub-agents-running-git-that-changes-state). A sub-agent in its own isolated worktree may commit and push there. Otherwise your session does that, and runs the [Quality Gate](/workflow/code-audit-team/#quality-gate) once per commit, after the verifier passes.
 
 **Why:**
 
