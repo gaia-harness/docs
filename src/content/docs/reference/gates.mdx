@@ -74,7 +74,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 - **Stops:** a [sub-agent](/workflow/work-lifecycle/#who-does-what) running `git commit`, `push`, `reset`, `checkout`, `switch`, `restore`, `rebase`, `merge`, `pull`, `clean`, `cherry-pick`, `revert`, `am`, or a `git stash` that writes, in your repository. Read-only git, such as `status`, `diff`, `log`, and `stash list`, and git in another repository stay allowed.
 - **Why:** sub-agents working side by side share one working tree, so one stray checkout, reset, or stash discards a sibling's edits.
-- **When:** before the `git` command runs (`block-main-destructive-git`). The audit's own fix rounds are exempt. A sub-agent working in its own isolated worktree may run `commit` and `push` there, which is how an isolated [`/gaia-plan`](/workflow/plan/) or [`/gaia-debt`](/workflow/debt/) run commits.
+- **When:** before the `git` command runs (`block-main-destructive-git`). The audit's own fix rounds are exempt. A sub-agent working in its own isolated worktree may run `commit` and `push` there, which is how an isolated [`/gaia-plan`](/workflow/plan/) or [`/gaia-debt`](/workflow/debt/) run commits. It may also catch up when `main` moved while it worked, with `git merge` or `git rebase` of `origin/main` alone, or `--abort` or `--continue` for a conflicted one. Any other branch, extra option, or other worktree stays denied. Catching up needs the clone's `origin/HEAD` set, or it stays denied.
 - **Who acts:** Claude. Nothing for you to do.
 - **Clear it:** the sub-agent leaves its changes in the working tree and reports them, and your session commits them.
 
