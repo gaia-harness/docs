@@ -41,6 +41,7 @@ Everything lands in `.notebook/specs/SPEC-NNN/`:
 | --- | --- |
 | `SPEC.md` | The locked SPEC: intent, success criteria, [critical flows](#critical-flows), [behaviors](#behaviors), scope rules (always, ask first, never), and the decisions settled along the way with their reasons. |
 | `REQUIREMENTS.md` | Your description and every question and answer, word for word. Every later step reads it as what you asked for, and nothing edits it. |
+| `CODE-MAP.json` | The files Claude found while researching your questions, kept as an index of where to look first. Later SPEC reviews, plan reviews, the [test stage](/workflow/test-stage/), and the planner use it to find files faster, then open the file itself before relying on it. A SPEC whose questions needed no research has none. |
 | `AUDIT.md` | The [SPEC review](#the-spec-review)'s report: instructions the plan must follow, the fixes made to the draft, and what the review decided about each critical finding. |
 | `plan/` | The plan, written by [`/gaia-plan`](/workflow/plan/#what-gets-produced). |
 
