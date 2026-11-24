@@ -15,7 +15,7 @@ A gate is not a judgment of you or of Claude. Each one exists because the proble
 
 | Group | What its gates do |
 |---|---|
-| [Commits and branches](#commits-and-branches) | Keep Claude's work off `main`, keep Claude from skipping the git hooks or dropping commits, and check each commit's code, tests, and message before it lands. |
+| [Commits and branches](#commits-and-branches) | Keep Claude's work off `main`, keep Claude from skipping the git hooks, dropping commits, or running destructive git commands, and check each commit's code, tests, and message before it lands. |
 | [Pull requests and merge](#pull-requests-and-merge) | Claim the issue, open every pull request as a draft with a checked title, leave pull requests from forks to you, and allow a merge only after the Code Audit Team approves the change. |
 | [Secrets and protected files](#secrets-and-protected-files) | Keep secrets out of what Claude reads and writes, protect the files GAIA generates and the records of audit approvals, and keep Claude from destructive deletes. |
 | [Worktrees and parallel work](#worktrees-and-parallel-work) | Keep each session in its own checkout and on its own ports, keep maintenance commands in the main checkout, and pause new work while your GAIA version is behind. |
@@ -34,7 +34,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
   - **Commit:** work reaches `main` only through a pull request, where the audit reviews it before it merges.
   - **Plain push:** it would land your local commits on the shared branch without the pull request and audit every change goes through.
   - **Force-push:** the branch's history is shared, so rewriting it pulls commits out from under every clone and branch built on it.
-  - **A push that targets `main`, `master`, or `HEAD`:** stopped from any branch. A `main` or `master` source would land that branch's commits on the remote without the pull request and audit. A bare `HEAD` pushes whatever happens to be checked out, which the guard cannot vouch for. The refusal tells Claude to push the feature branch by its own name and open a pull request.
+  - **A push that targets `main`, `master`, or `HEAD`:** stopped from any branch. A `main` or `master` source would land that branch's commits on the remote without the pull request and audit. A bare `HEAD` pushes whatever happens to be checked out, which the guard cannot vouch for. A branch pushed onto `main` from another branch (`feature:main`) is stopped the same way. The refusal tells Claude to push the feature branch by its own name and open a pull request.
 - **When:** before the `git` command runs (`block-main-destructive-git`). The hook checks the branch names `main` and `master` themselves, so a main branch with any other name is not covered.
 - **Who acts:** Claude. Nothing for you to do.
 - **Clear it:** Claude creates a feature branch, pushes it by name, and opens a pull request as part of the [work lifecycle](/workflow/work-lifecycle/).
@@ -47,6 +47,28 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 - **Who acts:** You, and only when you really mean to drop commits.
 - **Clear it:** the refusal tells Claude the reset is yours, so Claude asks you instead of running it. To undo a commit and keep the history, Claude can use `git revert <commit>`. If you do want to drop the commits, run the reset yourself in a terminal or with the `!` prefix, since the guard acts only on Claude.
 
+### Git commands that destroy history or run programs
+
+- **Stops:** on any branch, Claude running a git command that reaches past the feature branch it works on:
+  - `git push --mirror`, `--all`, or `--branches`
+  - `git clean -x` or `-X`, which deletes ignored files
+  - deleting, renaming, copying over, or force-moving the local `main` or `master`, and `git update-ref` or `git symbolic-ref` writes that move them (`HEAD` counts in the main checkout)
+  - `git reflog expire`, `delete`, or `drop`, `git gc --prune`, `git prune`, `git filter-branch`, and `git filter-repo`
+  - setting a git config key that git runs as a command (an alias that starts with `!`, `core.sshCommand`, `core.pager`, and the like), with `git config`, `-c`, or `--config-env`
+  - pointing or unsetting `core.hooksPath` anywhere but `.githooks`
+- **Why:** GAIA lets ordinary git commands, such as a commit, push, rebase, or merge, run without a permission prompt (the `classify-git-command` [hook](/reference/hooks/#recorders-and-context) approves them). These are the commands that approval must never cover. They overwrite the shared remote, erase the means of recovery, delete ignored files git cannot restore, or turn a config setting into a command that runs unprompted.
+- **When:** before the `git` command runs (`block-main-destructive-git`).
+- **Who acts:** Claude. You, only when you really mean it.
+- **Clear it:** the refusal names the allowed form, such as pushing the feature branch by its own name, and Claude uses it. If you want the command run, run it yourself in a terminal or with the `!` prefix, since the guard acts only on Claude.
+
+### Git's own directory
+
+- **Stops:** Claude's Edit, Write, or MultiEdit on a file inside `.git/`, including `.git/config`, `.git/hooks/`, and a linked worktree's `.git` file.
+- **Why:** git runs the commands named in its config and the scripts in its hooks folder, and ordinary git commands run without a prompt. A file planted there would run on the next one.
+- **When:** before the edit runs (`block-git-internals-write`).
+- **Who acts:** Claude. Nothing for you to do.
+- **Clear it:** Claude changes a repository setting with `git config <key> <value>`, which the git guard checks, or edits GAIA's tracked hooks under `.githooks/`. A hand edit of a file in `.git/` is yours to make.
+
 ### Moving another session's checkout
 
 - **Stops:** a `git checkout` or `git switch` that would move the main checkout off a branch that another Claude session is using there, with an open pull request.
@@ -57,7 +79,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 ### No-verify
 
-- **Stops:** `git commit` or `git push` with `--no-verify`, `-n` on a commit, or `-c core.hooksPath=<path>`. Each of these skips the git hooks.
+- **Stops:** `git commit` or `git push` with `--no-verify`, `-n` on a commit, or `-c` or `--config-env` setting `core.hooksPath`. Each of these skips the git hooks.
 - **Why:** the pre-commit hook is the minimum check that keeps code that fails typecheck, lint, or its tests out of history. If Claude could skip it, it would only be a suggestion.
 - **When:** before the `git` command runs (`block-no-verify`).
 - **Who acts:** Claude. Nothing for you to do.
