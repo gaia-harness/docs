@@ -51,6 +51,12 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 |---|---|
 | `block-scheduled-audit-line` | `ScheduleWakeup`, `CronCreate`, `RemoteTrigger`, and `SendMessage` calls whose prompt or message is exactly an audit checkpoint answer (`audit-grant <n>`, `audit-accept`, or `audit-accept-finding <n>`). Only you type those. A prompt Claude schedules for its own session would reach the recorder as if you had typed it. |
 
+### Questions and self-governing files
+
+| Hook | Turns back Claude's |
+|---|---|
+| `autonomy-gate` | Only while you have turned on the autonomy switch (see `autonomy-session-start` under [Recorders and context](#recorders-and-context)). It answers each question Claude would ask you: a question with exactly one recommended option gets that option, written to a decision log Claude cannot edit. The audit checkpoint question, a question on a short human-only list, a question with no recommended option or several, and a recommended merge unless the switch allows merging, park the run instead. It also parks the run on any write to a file that governs the harness itself (settings, hooks, rules, agents, skills, commands, `CLAUDE.md`), so an unattended run cannot change its own guards. With the switch off it does nothing. |
+
 ### Agent and Task dispatches
 
 | Hook | Limits |
