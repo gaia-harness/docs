@@ -53,6 +53,7 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
   - `git push --mirror`, `--all`, or `--branches`
   - `git clean -x` or `-X`, which deletes ignored files
   - deleting, renaming, copying over, or force-moving the local `main` or `master`, and `git update-ref` or `git symbolic-ref` writes that move them (`HEAD` counts in the main checkout)
+  - a rebase that names `main` or `master` as the branch to rebase (`git rebase origin/main main`), which checks `main` out and rewrites it. Rebasing your feature branch onto `main` is fine.
   - `git reflog expire`, `delete`, or `drop`, `git gc --prune`, `git prune`, `git filter-branch`, and `git filter-repo`
   - setting a git config key that git runs as a command (an alias that starts with `!`, `core.sshCommand`, `core.pager`, and the like), with `git config`, `-c`, or `--config-env`
   - pointing or unsetting `core.hooksPath` anywhere but `.githooks`
