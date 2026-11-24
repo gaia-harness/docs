@@ -19,12 +19,13 @@ The Quality Gate is the full set of checks GAIA runs before Claude commits sourc
 
 ### When it runs
 
-Before any commit that stages source code (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, or `.css`) or a config that changes what the checks do: `package.json`, the lockfile, and the [TypeScript](https://www.typescriptlang.org/), [Vite](https://vite.dev/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/), and [ESLint](https://eslint.org/) configs. A commit of only Markdown, `.claude/` files, wiki pages, or images skips it.
+Before any commit that stages source code (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, or `.css`) or a config that changes what the checks do: `package.json`, the lockfile, and the [TypeScript](https://www.typescriptlang.org/), [Vite](https://vite.dev/), [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/), and [ESLint](https://eslint.org/) configs. A commit of only Markdown, `.claude/` files, wiki pages, or images skips it, except for its first step, Value sets, which runs on every commit.
 
 ### What it checks
 
 | Step | Passes when |
 |---|---|
+| Value sets (`gaia value-sets`) | No two lists of values in your TypeScript or shell hold the same three or more values, and no list is a hand-narrowed copy of another, unless a marker says it is meant. See [Duplicate value sets](/reference/gates/#duplicate-value-sets). It reads the whole project, so a copy of a list in a file the commit did not touch is still found. |
 | Simplify | Claude has run the `simplify` skill on the change and applied what it recommends. A plan's commits and an audit fix round's commit skip this step. A plan makes [one pass over the whole branch](/workflow/plan/#execution) after its last phase instead. |
 | Localization | No user-facing text is hardcoded, and no translation key is missing its value. |
 | Typecheck (`pnpm typecheck`) | Zero errors. |

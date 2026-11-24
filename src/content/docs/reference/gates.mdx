@@ -117,11 +117,27 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 ### Quality Gate
 
-- **Stops:** Claude committing source changes before every step of the gate passes with zero warnings. An audit fix round skips simplify. One of only Minor, non-security fixes also skips the end-to-end tests, the dev server check and the build, which then run once before the audit status posts.
+- **Stops:** Claude committing source changes before every step of the gate passes with zero warnings. The first step, [Duplicate value sets](#duplicate-value-sets), runs on every commit, even one that skips the rest of the gate. An audit fix round skips simplify. One of only Minor, non-security fixes also skips the end-to-end tests, the dev server check and the build, which then run once before the audit status posts.
 - **Why:** the commit hook checks only the files you staged. The full gate catches what breaks elsewhere, including warnings that would otherwise ship.
 - **When:** before any commit that touches source code or config that affects these checks. This is a rule Claude follows (`.claude/rules/quality-gate.md`), not a hook. The [pre-commit floor](#pre-commit-floor) is the part that runs no matter what.
 - **Who acts:** Claude. Nothing for you to do.
 - **Clear it:** Claude fixes what it reports and runs it again. See [Quality Gate](/workflow/code-audit-team/#quality-gate) for its steps and when it runs.
+
+### Duplicate value sets
+
+- **Stops:** a commit, and a pull request, where two lists of values in your TypeScript or shell hold the same three or more values, or one list is a hand-narrowed copy of another. TypeScript lists are arrays of string literals, unions of string literals, and `z.enum` calls. Shell lists are arrays of literal words and `case` arms of two or more words. Lists of numbers only, and lists a program builds from another, are never compared.
+- **Why:** a copied list drifts the first time its source changes, and nothing reports it. A pull request's audit sees only the branch's diff, so a copy made earlier in a file the branch did not touch goes unseen. This check reads the whole project.
+- **When:** as the first step of the Quality Gate on every commit, and as the `Value sets` job of the [Tests workflow](/workflow/git-conventions/#github-workflows-that-ship) on every pull request. It runs `gaia value-sets`, a rule Claude follows locally (`.claude/rules/quality-gate.md`) and a required check on GitHub.
+- **Who acts:** Claude. Nothing for you to do, except an update that adds the check (see below).
+- **Clear it:** Claude fixes a finding in this order:
+  1. Imports the list from its source.
+  2. Derives the other list from it (`.filter`, `.slice`, a spread), or in shell sources one library both scripts use.
+  3. Keeps a copy that must stay with a marker comment, `sanctioned copy of <path>#<name>` for an exact copy or `subset of <path>#<name>` for a deliberately narrower one. The check verifies the marker: a copy must equal its source, and a subset must hold only values its source holds.
+  4. Excludes a path of deliberate fixed data with a path and a reason in `.gaia/value-sets.json`.
+
+  A duplicate between two of GAIA's own files (`.claude/`, `.gaia/` and the like, not your app code) is not reported, since GAIA fixes those upstream. A copy of a GAIA list in your own files is reported. A pull request cannot excuse its own duplicate: on GitHub the check reads `.gaia/value-sets.json` and `.gaia/manifest.json` from the pull request's base, not its head.
+
+  A project updating to 2.4.0 may already hold duplicates. The update's own Quality Gate runs the check, so findings may show up there first. After the update, ask Claude to run the value-sets check once and fix each finding. A repository admin then adds `Value sets` to the required checks in the repository settings, or by re-running [`/setup-gaia`](/getting-started/setup-gaia/#recommended-defaults-admin-only).
 
 ## Pull requests and merge
 
@@ -204,11 +220,11 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 
 ### CI required checks
 
-- **Stops:** merging a pull request on GitHub until the [Tests workflow](/workflow/git-conventions/#github-workflows-that-ship)'s `Vitest and Playwright` and `Shellcheck and bats` checks pass on its latest commit.
-- **Why:** `GAIA-Audit` shows that the audit ran, not that the code passes. A commit that skipped the local [Quality Gate](/workflow/code-audit-team/#quality-gate) could otherwise merge with failing lint, typecheck, tests, or shellcheck.
+- **Stops:** merging a pull request on GitHub until the [Tests workflow](/workflow/git-conventions/#github-workflows-that-ship)'s `Vitest and Playwright`, `Shellcheck and bats`, and `Value sets` checks pass on its latest commit.
+- **Why:** `GAIA-Audit` shows that the audit ran, not that the code passes. A commit that skipped the local [Quality Gate](/workflow/code-audit-team/#quality-gate) could otherwise merge with failing lint, typecheck, tests, shellcheck, or a copied list of values.
 - **When:** on GitHub, at merge. Set up by [`/setup-gaia`](/getting-started/setup-gaia/#recommended-defaults-admin-only), from GAIA 2.3.1.
 - **Who acts:** Claude.
-- **Clear it:** when a check fails, Claude's merge wait stops and reports which check failed. The merge stays queued and lands once the check passes, so ask Claude to fix the failure and push. Each check passes when nothing it covers changed.
+- **Clear it:** when a check fails, Claude's merge wait stops and reports which check failed. The merge stays queued and lands once the check passes, so ask Claude to fix the failure and push. `Vitest and Playwright` and `Shellcheck and bats` pass when nothing they cover changed. `Value sets` always runs.
 
 ### Audit checkpoint
 

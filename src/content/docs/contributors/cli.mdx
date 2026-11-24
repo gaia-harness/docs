@@ -87,6 +87,10 @@ I changed .gaia/labels.json. Regenerate the label tables in wiki/concepts/GitHub
 
 `gaia packages sync-settings [--check]` generates `<package>/.claude/settings.json` from the root settings and the package's overlay. The pre-commit hook checks it.
 
+### `gaia value-sets`
+
+`gaia value-sets [--candidates] [--config <path> | --policy-from <dir>]` fails when two value sets in the project's TypeScript or shell hold the same three or more values, or one hand-narrows another, unless a `sanctioned copy of` or `subset of` marker declares it. Exit 0 is clean, 1 is findings, and 2 means the check cannot run. `--candidates` prints the weaker matches (two-value sets, same-file subsets) as JSON and exits 0. `--config` reads exclusions from another file than `.gaia/value-sets.json`, and `--policy-from` reads that file and `.gaia/manifest.json` from a folder, which the CI job points at the pull request's base commit. The Quality Gate and the `Value sets` CI job run it. What it checks and how Claude fixes a finding is on [Duplicate value sets](/reference/gates/#duplicate-value-sets).
+
 ### `gaia update`
 
 The merge steps behind [`/update-gaia`](/maintenance/update-gaia/): `merge-package`, `merge-workspace`, and `merge-audit-ci` (each merges its file field by field and reports what it applied and what conflicted), `merge-region` and `regen-regions` (for generated regions, below), and `lockfile-command`.

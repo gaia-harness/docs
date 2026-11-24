@@ -70,7 +70,7 @@ If `.github/CODEOWNERS` still has the placeholder owner from `/gaia-init`, setup
 If you are a repo admin, setup applies GAIA's recommended repo settings:
 
 - **Branch protection** on the default branch, if it has none. Approvals are not required, so you can merge your own pull requests.
-- **Required checks.** A pull request can merge only after it passes GAIA's [code review](/workflow/code-audit-team/) and its tests, even when someone merges it on github.com.
+- **Required checks.** A pull request can merge only after it passes GAIA's [code review](/workflow/code-audit-team/) and its tests, shell checks, and [duplicate value set check](/reference/gates/#duplicate-value-sets), even when someone merges it on github.com. The required checks are `GAIA-Audit`, `Vitest and Playwright`, `Shellcheck and bats`, and `Value sets`.
 - **Delete branches on merge.**
 - **Auto-merge**, so GitHub merges a pull request once its checks pass.
 - **Security fixes.** GAIA's [`/update-deps`](/maintenance/update-deps/#why-not-dependabot-pull-requests) fixes vulnerable packages and tests every fix before it merges. [Dependabot](https://docs.github.com/en/code-security/dependabot) alerts stay on, but Dependabot's fix pull requests are turned off to let GAIA handle them.
