@@ -55,7 +55,7 @@ Each file goes to the first member whose pattern matches, with the default membe
 
 `code-audit-frontend` also runs three tools and lists their findings as advice that never blocks approval: [React Doctor](https://github.com/millionco/react-doctor) when the change touches a `.ts` or `.tsx` file, [Knip](https://knip.dev/) (unused files, exports, and dependencies) when it touches one of those, a `package.json`, or the lockfile, and a dependency security advisory check on every review.
 
-Members only report. A separate fixer makes the repairs, and a script checks each repair before it is kept. A repair that adds a guard, refusal, or validation also adds a test that makes it refuse, unless no test can reach it, which the fixer then reports. The fixer adds a guard, refusal, or validation only when the SPEC, a decision page in the wiki, or your existing code or docs already call for it. Otherwise it refuses the fix, and the [branch checkpoint](#the-branch-checkpoint) lists it so you can state the rule, accept the finding, or file it.
+Members only report. A separate fixer makes the repairs, and a script checks each repair before it is kept. A repair that adds a guard, refusal, or validation also adds a test that makes it refuse, unless no test can reach it, which the fixer then reports. The fixer adds a guard, refusal, or validation only when the SPEC, a decision page in the wiki, or your existing code or docs already call for it. Otherwise it refuses the fix, and the [branch checkpoint](#the-branch-checkpoint) lists it so you can state the rule, accept the finding, or file it. The fixer also leaves alone a choice that the pull request description, a commit message on the branch, or a comment beside the line says was made on purpose. It refuses that fix the same way, quoting the statement, so you decide at the checkpoint whether the choice stands.
 
 ### Covering new code
 
@@ -174,7 +174,7 @@ To keep one refused fix as an accepted residual instead, dismiss the question an
 audit-accept-finding <n>
 ```
 
-Claude then asks the question again for you to answer. Later rounds can keep that finding as an accepted residual, and the pull request marks it `Human decision:`. This does not work on a Critical or security-related finding, which is always fixed.
+Claude then asks the question again for you to answer. Later rounds keep that finding as an accepted residual and never fix it, unless you later tell the audit to fix it. The pull request marks it `Human decision:`. This does not work on a Critical or security-related finding, which is always fixed.
 
 Only you can answer. If the question is not available, type one of these as the whole prompt:
 
