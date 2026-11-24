@@ -13,17 +13,17 @@ Install these yourself before running `npx create-gaia`. See [Quick Start](/#pre
 
 ### Node
 
-Node 26 or later. Check with `node --version`.
+Node 24.15.0 or later, or Node 26 or later. Check with `node --version`.
 
-[`/setup-gaia`](/getting-started/setup-gaia/) and [`/update-gaia`](/maintenance/update-gaia/) check it too, and `/update-gaia` checks against the new release's Node. When yours is too old, GAIA gives you commands to run in your own terminal, since a new Node only takes effect in a new terminal. The commands install the Node version the release needs, not the newest, make it your default, and reinstall pnpm, which otherwise stays with the old Node. Run this for Node 26 with [fnm](https://github.com/Schniz/fnm).
+[`/setup-gaia`](/getting-started/setup-gaia/) and [`/update-gaia`](/maintenance/update-gaia/) check it too, and `/update-gaia` checks against the new release's Node. When yours is too old, GAIA gives you commands to run in your own terminal, since a new Node only takes effect in a new terminal. The commands install the Node version the release needs, not the newest, make it your default, and reinstall pnpm, which otherwise stays with the old Node. Run this for Node 24 with [fnm](https://github.com/Schniz/fnm).
 
 ```
-fnm install 26 && fnm use 26 && fnm default 26 && npm install -g pnpm@latest
+fnm install 24 && fnm use 24 && fnm default 24 && npm install -g pnpm@latest
 ```
 
-With [nvm](https://github.com/nvm-sh/nvm), the first three are `nvm install 26`, `nvm use 26`, and `nvm alias default 26`. On Windows, use fnm. With neither installed, install one first, or install Node 26 another way and make it your default.
+With [nvm](https://github.com/nvm-sh/nvm), the first three are `nvm install 24`, `nvm use 24`, and `nvm alias default 24`. On Windows, use fnm. With neither installed, install one first, or install Node 24 another way and make it your default.
 
-Then open a fresh terminal in the project folder. If your terminal switches Node per folder (fnm `--use-on-cd`, nvm auto-use, asdf, or mise), select Node 26 there first, such as with `fnm use 26`, or it picks the project's old Node again. Then start Claude Code from that terminal.
+Then open a fresh terminal in the project folder. If your terminal switches Node per folder (fnm `--use-on-cd`, nvm auto-use, asdf, or mise), select Node 24 there first, such as with `fnm use 24`, or it picks the project's old Node again. Then start Claude Code from that terminal.
 
 ### Claude Code
 
