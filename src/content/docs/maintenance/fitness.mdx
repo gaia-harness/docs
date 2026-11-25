@@ -37,11 +37,11 @@ A run clears the blended-files and harness-commits reasons. The grade reason cle
 
 ## What it checks
 
-`/gaia-fitness` runs a fixed list of 57 rules over your project's own files. Each rule belongs to one category, and every category except `memory` gets its own grade.
+`/gaia-fitness` runs a fixed list of 62 rules over your project's own files. Each rule belongs to one category, and every category except `memory` gets its own grade.
 
 | Category | What its rules check |
 | --- | --- |
-| `authoring` | How skills, commands, and agents are written: a description that says what the file does and when to use it, in the third person; files under 500 lines; a table of contents on long files; links that resolve; reference files that something links to; no Windows-style paths. |
+| `authoring` | How skills, commands, and agents are written: a description that says what the file does and when to use it, in the third person; files under 500 lines; a table of contents on long files; links that resolve; reference files that something links to; no Windows-style paths. Every question Claude asks you with a choice of options has exactly one `(Recommended)` option, or says it recommends nothing, and a plain free-text question says what an unattended run does instead. |
 | `CLAUDE.md` | Your `CLAUDE.md` files (rule ids start `claudemd.`): a root `CLAUDE.md` exists, each file stays within its size budget, `@` imports and paths resolve, and no path names a folder on one person's machine (such as `/Users/<name>/`). |
 | `frontmatter` | The block at the top of each skill, command, and agent: it parses, has a valid `name` and a non-empty `description` within the length limits, and no two share a name. |
 | `hooks` | Hooks registered in your settings: each uses an event Claude Code knows, and each names a script that exists and can run, by a path that works from any folder. |
@@ -66,12 +66,13 @@ The run also reports whether Claude Code's built-in checks (`claude doctor`, `cl
 
 ### The judgment pass
 
-When there is something to judge, one Sonnet agent (`fitness-judge`) answers four questions no script can. It reads files but never changes them.
+When there is something to judge, one Sonnet agent (`fitness-judge`) answers five questions no script can. It reads files but never changes them.
 
 - **Description substance**: does a skill's or command's description say when to use it?
 - **Trigger overlap**: do two skills claim the same requests?
 - **Rule scope**: does a rule's content fit the files its `paths:` globs load it for?
 - **Terminology**: does one skill use one term for one thing?
+- **Recommendation authority**: does an option marked `(Recommended)` widen what Claude may do on its own?
 
 Its findings are advice only. They are not graded, and nothing is fixed from them.
 
