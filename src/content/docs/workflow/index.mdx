@@ -39,6 +39,7 @@ The `/gaia-*` commands are for specific moments, not everyday driving:
 | Turning a big feature into parallel work | [`/gaia-plan`](/workflow/plan/) | Splits it into phases, defines the shared types and interfaces the phases build on, and writes a kickoff prompt you paste to start the work. |
 | Redoing a plan's tests, or adding them after you skipped the test stage | [`/gaia-test`](/workflow/test-stage/) | Lists each task's tests, at most one per behavior the SPEC states, plus a test for each critical flow. |
 | Tech-debt issues have piled up | [`/gaia-debt`](/workflow/debt/) | Fixes the backlog, highest severity first, through the audit gate. |
+| You want GAIA to keep working through its queue | [`/gaia-next`](/workflow/autonomy/#run-it-in-a-loop) | Runs the next job (a running plan, an open pull request, a draft SPEC, then the top tech-debt issue). A bare `/loop` runs it again until no work remains. |
 
 Small, clear changes do not need a spec or a plan. When your request would benefit from one, GAIA [recommends](/workflow/work-lifecycle/#spec-plan-or-just-do-it) it, even if you didn't name a command.
 

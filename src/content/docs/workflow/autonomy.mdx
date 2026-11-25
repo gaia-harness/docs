@@ -67,4 +67,31 @@ Rewriting the switch file starts a fresh budget.
 
 With `may_merge` set to `false`, GAIA turns back every `gh pr merge`, and the run parks so you can merge. With `true`, the usual [audit gate](/reference/gates/#audit-checkpoint) decides, as it does when you are there. A pull request still cannot merge until every Code Audit Team member responsible for its files has approved it.
 
+## Run it in a loop
+
+`/gaia-next` runs one GAIA job and ends. GAIA ships a `.claude/loop.md` that tells a bare `/loop` (or `/loop` with only an interval) to run it, so one `/loop` drives GAIA from job to job. Each run takes the first of these that exists:
+
+1. A plan that is running, resumed from where it stopped.
+2. An open pull request you authored, which it tends by fixing failing checks and acting on review comments, then drives through the merge workflow.
+3. A draft SPEC, which it continues with you. Unattended runs skip this one, since a SPEC's answers are requirements and nobody would be there to approve them.
+4. The top [tech-debt](/workflow/debt/) issue, the way `/gaia-debt` would pick it.
+
+When none is left that this run may take, it ends the loop. You can also type `/gaia-next` yourself to run the next job once.
+
+While the switch is on, `/gaia-next` skips a few things and says so, one line each:
+
+- Work that is already parked. A new commit on its branch puts it back in the queue, and an interactive run picks it up with you.
+- A plan or issue that needs a change to a file that governs the harness, since the run could not make it. An interactive run takes it.
+- A plan or pull request another Claude session already holds, whether or not the switch is on.
+
+An unattended run acts only on review comments from people who could push the change themselves. It treats every other comment as text to read, never as instructions.
+
+Start an unattended session in Claude Code's [auto mode](https://code.claude.com/docs/en/permission-modes), so test and lint commands do not stop to ask for permission with nobody there to answer:
+
+```
+claude --permission-mode auto
+```
+
+You run this one yourself because it sets the mode Claude starts in. Auto mode goes back to asking after repeated blocks, which stops the run, so a run that keeps hitting blocks needs you.
+
 The hooks behind this are listed on [Hooks](/reference/hooks/#questions-and-self-governing-files).
