@@ -50,7 +50,7 @@ The statusline also saves each reading, which is how GAIA [tells Claude](/models
 
 ### Usage limits
 
-`🕔` and `📅` each appear once Claude Code has reported that limit to any session of the project. A limit it has never reported shows nothing, not 0%. The color shows how close you are, and the time in brackets is how long until the limit resets. The 5-hour limit shows that time from 75%, since its reset is near enough to plan around. The 7-day limit shows it from 90%, since at 75% its reset can still be days away.
+`🕔` and `📅` each appear once Claude Code has reported that limit. A limit it has never reported shows nothing, not 0%. The color shows how close you are, and the time in brackets is how long until the limit resets. The 5-hour limit shows that time from 75%, since its reset is near enough to plan around. The 7-day limit shows it from 90%, since at 75% its reset can still be days away.
 
 | Used | 5-hour | 7-day |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ The statusline also saves each reading, which is how GAIA [tells Claude](/models
 | 75% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#facc15">78%</S> (1h40m)</code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#facc15">80%</S></code> |
 | 90% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#f87171">92%</S> (1h2m)</code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#f87171">93%</S> (1d6h)</code> |
 
-Every session of the project shows the same figures, including sessions in linked worktrees. Each session saves its own reading, and each limit shows whichever session's figure changed most recently. A limit that falls, because it reset or you switched accounts, shows at once. Once a window has passed, its limit shows `reset`.
+Each session saves its own reading and, once it has one, shows only its own figures, so a limit your account does not report never shows another account's figure. Until then, a session shows each limit from whichever session of the project changed it most recently, including sessions in linked worktrees. A limit that falls, because it reset or you switched accounts, shows at once. Once a window has passed, its limit shows `reset`.
 
 To see each limit with its reset time and how fast it is climbing, ask Claude:
 

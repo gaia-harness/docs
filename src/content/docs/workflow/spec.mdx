@@ -49,7 +49,7 @@ Each SPEC number is reserved by pushing a `spec/NNN` git tag, so teammates never
 
 ### Critical flows
 
-A critical flow is a path through the feature that, if it broke, would block a user's main task or put data, money, or security at risk. A SPEC has as many as the feature needs, with no set number. Each flow has an id such as `FLOW-001`, a short kebab-case name that becomes its test's file name, a one-line title, and why it is critical. A web flow also lists the app folders it covers. A command-line flow names its test file instead.
+A critical flow is a path through the feature that, if it broke, would block a user's main task or put data, money, or security at risk. A SPEC has as many as the feature needs, with no set number. Each flow has an id such as `FLOW-001`, a short kebab-case name that becomes its test's file name, a one-line title, and why it is critical. A web flow also lists the app folders it covers. A command-line flow names its test file instead. It must be a [bats](https://github.com/bats-core/bats-core) or Vitest test, or one a runner in [`.gaia/flow-runners.json`](/reference/gaia-folder/#flow-runnersjson) runs. GAIA refuses a SPEC with a command-line flow that no runner can run.
 
 A flow names a path, never a list of cases. The rules the feature must follow go in its behaviors.
 
