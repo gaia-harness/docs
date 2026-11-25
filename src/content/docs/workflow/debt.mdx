@@ -39,7 +39,7 @@ Several numbers make your own batch, in one pull request. If it is over the size
 
 Add `worktree` or `branch` at the end to choose where the fix happens, for example `/gaia-debt 142 branch`. Your team's [isolation policy](/workflow/work-lifecycle/#3-isolate) can still override it.
 
-An issue number stops the run, with the reason, when it is not an open `tech-debt` issue in this repository, is already claimed, is parked for a SPEC, or is graded `severity:investigate`.
+An issue number stops the run, with the reason, when it is not an open `tech-debt` issue in this repository, is already claimed (a fix that [stopped before its pull request opened](#resuming-a-stopped-fix) resumes instead), is parked for a SPEC, or is graded `severity:investigate`.
 
 ## How the backlog is ordered
 
@@ -54,7 +54,7 @@ An offer marks an issue whose cited file no longer exists as `[stale: path gone]
 
 ## What one run does
 
-1. **Claims** every issue in the unit with the `in-progress` label as soon as you pick, so a teammate's session never starts the same issue. A claim left by a session that died is released by the next run.
+1. **Claims** every issue in the unit with the `in-progress` label as soon as you pick, so a teammate's session never starts the same issue. A claim left by a session that died is released by the next run, unless its fix branch still exists locally, which is [resumed](#resuming-a-stopped-fix) instead.
 2. **Re-checks each issue against your code.** Every `file:line` the issue cites must still say what the issue claims, and a newer comment that corrects the issue wins. If anything doesn't match, Claude releases the claim and stops, because only you can decide whether the issue or the code is wrong. In a batch, that issue is dropped and the rest continue.
 3. **Sets aside security issues.** On a public or internal repository, a security-sensitive issue is never fixed in a public pull request. Its claim is released, and you are told only how many there were.
 4. **Checks the size.** An issue big enough to need a design goes to [`/gaia-spec`](/workflow/spec/) instead: Claude prints what to run next and parks the issue under `debt:spec-pending`, then `debt:spec-active` once the SPEC is underway.
@@ -63,6 +63,10 @@ An offer marks an issue whose cited file no longer exists as `[stale: path gone]
 7. **Audits and merges** without asking you again, checks that the merge closed exactly the intended issues, and cleans up.
 
 The claim stays while the work is unfinished: the audit stopped at its branch checkpoint, a merge is queued, or a check failed. Closing the pull request without merging releases it.
+
+### Resuming a stopped fix
+
+A fix that stopped after its branch was cut and before its pull request opened keeps its claim. Give `/gaia-debt` the issue number and it continues the fix on that branch instead of refusing the claimed issue. If another session holds the branch, GAIA names the main checkout or the live session, releases nothing, and stops. [`/gaia-next`](/workflow/autonomy/#run-it-in-a-loop) offers such a fix too, so a loop finishes it.
 
 The run ends with a [cost line](/models-and-context/cost/).
 

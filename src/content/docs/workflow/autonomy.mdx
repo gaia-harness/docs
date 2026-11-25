@@ -73,8 +73,9 @@ With `may_merge` set to `false`, GAIA turns back every `gh pr merge`, and the ru
 
 1. A plan that is running, resumed from where it stopped.
 2. An open pull request you authored, which it tends by fixing failing checks and acting on review comments, then drives through the merge workflow.
-3. A draft SPEC, which it continues with you. Unattended runs skip this one, since a SPEC's answers are requirements and nobody would be there to approve them.
-4. The top [tech-debt](/workflow/debt/) issue, the way `/gaia-debt` would pick it.
+3. A [`/gaia-debt`](/workflow/debt/#resuming-a-stopped-fix) fix that stopped before its pull request opened, continued on its branch.
+4. A draft SPEC, which it continues with you. Unattended runs skip this one, since a SPEC's answers are requirements and nobody would be there to approve them.
+5. The top [tech-debt](/workflow/debt/) issue, the way `/gaia-debt` would pick it.
 
 When none is left that this run may take, it ends the loop. You can also type `/gaia-next` yourself to run the next job once.
 
@@ -82,7 +83,7 @@ While the switch is on, `/gaia-next` skips a few things and says so, one line ea
 
 - Work that is already parked. A new commit on its branch puts it back in the queue, and an interactive run picks it up with you.
 - A plan or issue that needs a change to a file that governs the harness, since the run could not make it. An interactive run takes it.
-- A plan or pull request another Claude session already holds, whether or not the switch is on.
+- A plan, pull request, or stopped fix that another Claude session already holds, whether or not the switch is on.
 
 An unattended run acts only on review comments from people who could push the change themselves. It treats every other comment as text to read, never as instructions.
 
