@@ -30,7 +30,7 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 | `block-pr-create-without-draft` | A `gh pr create` for this repository without `--draft`. |
 | `block-fork-pr-checkout` | `gh pr checkout` or a `git fetch` of `pull/<n>/head` or `pull/<n>/merge` for a pull request from a fork, or one that `gh` cannot identify as fork or not. |
 | `block-handrolled-pr-poll` | A shell loop that checks `gh pr view` or `gh pr checks` over and over without reading `mergeable`. Claude uses GAIA's merge wait instead. |
-| `pr-merge-audit-check` | `gh pr merge` until every Code Audit Team member responsible for the changed files has approved it, and an audited merge until the pull request's summary is [re-checked](/reference/gates/#pull-request-summary-not-re-checked) for its latest commit. For a pull request outside the audit's scope, or a `chore(deps)` pull request that only changes dependency manifests, it posts the `skipped:` status itself. |
+| `pr-merge-audit-check` | `gh pr merge` until every Code Audit Team member responsible for the changed files has approved it, and an audited merge until the pull request's summary is [re-checked](/reference/gates/#pull-request-summary-not-re-checked) for its latest commit. For a pull request outside the audit's scope, or a `chore(deps)` pull request that only changes dependency manifests, it posts the `skipped:` status itself. While you have turned on the autonomy switch, it also turns back every merge unless the switch allows merging, and logs each merge it allows. |
 | `worthiness-presence-check` | `gh pr merge` when a changed test has no worthiness record for its current content. It covers every test in the React app, including stories, [Playwright](https://playwright.dev/) tests, route tests, and utility, service, and hook tests. It checks only that the record exists, not its verdict. |
 | `block-audit-loop-write` | Writes to the audit loop's protected state, context readings, and the shared [usage limit](/workflow/statusline/#usage-limits) figures, running by hand the scripts that record your grant or write those figures, and running the local-state cleanup scripts that only a hook may start. |
 
@@ -55,13 +55,13 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 
 | Hook | Turns back Claude's |
 |---|---|
-| `autonomy-gate` | Only while you have turned on the autonomy switch (see `autonomy-session-start` under [Recorders and context](#recorders-and-context)). It answers each question Claude would ask you: a question with exactly one recommended option gets that option, written to a decision log Claude cannot edit. The audit checkpoint question, a question on a short human-only list, a question with no recommended option or several, and a recommended merge unless the switch allows merging, park the run instead. It also parks the run on any write to a file that governs the harness itself (settings, hooks, rules, agents, skills, commands, `CLAUDE.md`), so an unattended run cannot change its own guards. With the switch off it does nothing. |
+| `autonomy-gate` | Only while you have turned on the autonomy switch (see `autonomy-session-start` under [Recorders and context](#recorders-and-context)). It answers each question Claude would ask you: a question with exactly one recommended option gets that option, written to a decision log Claude cannot edit (budget spends and allowed merges go there too). The audit checkpoint question, a question on a short human-only list, a question with no recommended option or several, and a recommended merge unless the switch allows merging, park the run instead. It also parks the run on any write to a file that governs the harness itself (settings, hooks, rules, agents, skills, commands, `CLAUDE.md`), so an unattended run cannot change its own guards. With the switch off it does nothing. |
 
 ### Agent and Task dispatches
 
 | Hook | Limits |
 |---|---|
-| `audit-loop-bound` | Each start of the audit loop or of a Code Audit Team member, per branch. It checks the context checkpoint, whether rounds are still making progress, and the hard limit on rounds, and holds the loop at a checkpoint until you answer. |
+| `audit-loop-bound` | Each start of the audit loop or of a Code Audit Team member, per branch. It checks the context checkpoint, whether rounds are still making progress, and the hard limit on rounds, and holds the loop at a checkpoint until you answer. While you have turned on the autonomy switch, it can spend one unit of the switch's audit budget in place of your answer at some checkpoints. The hard round cap, the context checkpoint, an accept, and an empty budget still wait for you. |
 
 ## Recorders and context
 
