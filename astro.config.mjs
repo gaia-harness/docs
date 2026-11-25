@@ -159,6 +159,7 @@ export default defineConfig({
 						{ label: '/gaia-test', slug: 'workflow/test-stage', attrs: { class: 'sidebar-child' } },
 						{ label: 'Testing', slug: 'workflow/testing' },
 						{ label: 'Code Audit Team', slug: 'workflow/code-audit-team' },
+						{ label: 'Autonomy switch', slug: 'workflow/autonomy' },
 						{ label: 'Tech debt', slug: 'workflow/tech-debt' },
 						{ label: '/gaia-debt', slug: 'workflow/debt', attrs: { class: 'sidebar-child' } },
 						{ label: 'Notebook', slug: 'workflow/notebook' },

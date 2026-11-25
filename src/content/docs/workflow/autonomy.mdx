@@ -1,0 +1,70 @@
+---
+title: Autonomy switch
+description: Let Claude keep working while you are away. One file you write turns it on, and GAIA parks the run whenever a decision needs you.
+---
+
+By default Claude stops and asks you whenever a decision is yours. The autonomy switch is for the times you are not there, such as a long [`/loop`](https://code.claude.com/docs/en/scheduled-tasks) run. While it is on, GAIA answers the questions it safely can, spends only the audit allowance you set, and parks the run when something needs you. The switch is off until you turn it on.
+
+## Turn it on and off
+
+The switch is one file, `.gaia/local/protected/autonomy.json` in your main checkout. Only you can write it, from your own terminal. GAIA keeps Claude from writing it, so don't ask Claude, don't type it in the Claude prompt, and don't use `!`. A prompt that a loop or a schedule sends to Claude looks the same as one you typed, so GAIA never reads the switch from one.
+
+From the root of your main checkout, this turns it on for 8 hours (change `8` for another length):
+
+```
+mkdir -p .gaia/local/protected && jq -n --argjson hours 8 '{enabled: true, expires_at: (now + $hours * 3600 | todate), may_merge: false, audit_extra_units_per_pr: 1, audit_units_pool: 3}' > .gaia/local/protected/autonomy.json
+```
+
+To turn it off:
+
+```
+rm -f .gaia/local/protected/autonomy.json
+```
+
+The switch covers the whole checkout. While it is on, every session in your main checkout and in each of its [worktrees](/workflow/work-lifecycle/#isolation-policy) runs unattended, and each new session starts with a notice that says so, until when, and whether it may merge. Nothing counts the time down for you. When `expires_at` passes, the file reads as off. A missing, disabled, or malformed file reads as off too, for example one with an unknown field or a time in another format.
+
+## The fields
+
+| Field | What it sets |
+|---|---|
+| `enabled` | `true` turns the switch on. |
+| `expires_at` | When the switch stops counting, as a UTC time such as `2026-11-25T18:00:00Z`. |
+| `may_merge` | `true` lets an unattended run merge a pull request once the audit has cleared it. `false` stops it before every merge. |
+| `audit_extra_units_per_pr` | Optional. The most extra audit units one pull request may use. |
+| `audit_units_pool` | Optional. Audit units shared by every pull request while this file stands. |
+
+Leave out either audit field and its budget is zero. The switch still works, and the run parks at the first audit checkpoint instead.
+
+## What an unattended run does
+
+- **Takes the recommended answer.** When Claude would ask you a question with exactly one recommended option, GAIA picks that option and Claude carries on.
+- **Parks instead of guessing.** A question with no recommended option or several, a question on a short list GAIA keeps for humans only, and an [audit checkpoint](/workflow/code-audit-team/#the-branch-checkpoint) all park the run. So does a recommended merge while `may_merge` is `false`.
+- **Leaves GAIA's own rules alone.** A write to a file that governs the harness (settings, hooks, rules, agents, skills, commands, `CLAUDE.md`) parks the run, so an unattended run cannot loosen its own guards.
+
+To park, Claude saves its place, pushes the branch, and comments on the pull request, if there is one, with what is waiting and how to resume. Then it stops. What you do next depends on why it parked:
+
+| Parked on | What you do |
+|---|---|
+| A question | Answer it in an interactive Claude Code session on that branch. |
+| An audit checkpoint | In an interactive session on that branch, send any message first. Then type the grant line from the pull request comment as the whole prompt. |
+| A merge waiting for you | Review the pull request and merge it. GAIA turned the merge back because `may_merge` is `false`, and it did not check the audit. |
+
+## The decision log
+
+Every answer GAIA took for you, every audit unit it spent, and every merge it allowed goes into a log first, in `.gaia/local/protected/autonomy-log.jsonl`. Claude cannot edit it. Each entry has the time, session, branch, and the question header and option taken.
+
+The pull request shows its own slice. A `## Decided unattended` section lists each answer, audit unit, and merge GAIA took on that branch, one `header: option` line each. A branch with none has no section. An entry that would leak a secret or a path that exists on one machine is left out and counted. GAIA clears a branch's entries from the log once the branch is gone and the entries are more than a week old.
+
+## The audit budget
+
+The [Code Audit Team](/workflow/code-audit-team/#the-branch-checkpoint) stops at a checkpoint after enough rounds, and you normally answer it. While the switch is on, GAIA can spend one budget unit in place of your answer. Each pull request gets at most `audit_extra_units_per_pr` of them, and all pull requests together get at most `audit_units_pool`. Spend before a pull request exists counts toward its limit.
+
+Some checkpoints always wait for you, whatever the budget. These include the round limit, the context checkpoint, a finding that came back after it was fixed, a checkpoint after you accepted the remaining findings, and any case where the budget is empty. The `## Audit rounds` line of the pull request reports the units spent as `budget grants:`, apart from the rounds you granted.
+
+Rewriting the switch file starts a fresh budget.
+
+## Merging
+
+With `may_merge` set to `false`, GAIA turns back every `gh pr merge`, and the run parks so you can merge. With `true`, the usual [audit gate](/reference/gates/#audit-checkpoint) decides, as it does when you are there. A pull request still cannot merge until every Code Audit Team member responsible for its files has approved it.
+
+The hooks behind this are listed on [Hooks](/reference/hooks/#questions-and-self-governing-files).
