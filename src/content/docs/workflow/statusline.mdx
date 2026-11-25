@@ -58,7 +58,7 @@ The statusline also saves each reading, which is how GAIA [tells Claude](/models
 | 75% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#facc15">78%</S> (1h40m)</code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#facc15">80%</S></code> |
 | 90% or more | <code style={{ background: '#1a1b26' }}>🕔 <S c="#f87171">92%</S> (1h2m)</code> | <code style={{ background: '#1a1b26' }}>📅 <S c="#f87171">93%</S> (1d6h)</code> |
 
-Every session of the project shows the same figures, including sessions in linked worktrees. Each shows the highest figure any of them has seen for the current window. Once a window has passed, its limit shows `reset`.
+Every session of the project shows the same figures, including sessions in linked worktrees. Each session saves its own reading, and each limit shows whichever session's figure changed most recently. A limit that falls, because it reset or you switched accounts, shows at once. Once a window has passed, its limit shows `reset`.
 
 To see each limit with its reset time and how fast it is climbing, ask Claude:
 
@@ -66,15 +66,15 @@ To see each limit with its reset time and how fast it is climbing, ask Claude:
 Show me the current usage limit reading.
 ```
 
-GAIA stops Claude from changing or deleting the shared figures. If they are ever wrong, delete the file that holds them, `.gaia/local/cache/shared/rate-limits.json` in the main checkout, from your own terminal outside Claude Code. The statusline writes fresh figures on its next refresh.
+GAIA stops Claude from changing or deleting the saved figures. If one is ever wrong, delete the files in `.gaia/local/cache/shared/rate-limits/` in the main checkout from your own terminal outside Claude Code. Each session's statusline writes fresh figures on its next refresh.
 
 ### When a limit runs high
 
-Before the main session hands work to agents, GAIA checks the limits. The first time a limit reaches 75% in a session, and again at 90%, GAIA tells Claude the figures and when they reset. The agents it was about to start still start. The figures shape what Claude does next.
+Before the main session hands work to agents, GAIA checks that session's own reading of each limit. The first time a limit reaches its warning level in a session, and again at its critical level, GAIA tells Claude the figures and when they reset. If a figure falls and later climbs back, GAIA tells Claude again. The 5-hour limit warns at 75% and turns critical at 90%. The 7-day limit follows your plan: 75% and 90% on most plans, 80% and 92% on Max 5x, and 85% and 95% on Max 20x. If GAIA cannot read your plan, it uses 75% and 90%. The agents Claude was about to start still start. The figures shape what Claude does next.
 
-- **When you are at the session**, a 5-hour limit at 75% or more makes Claude ask how to go on. Claude offers to split the work when it divides at the next step, to wait when the limit would run out before the reset, and always to push through, which draws on paid usage. When pushing through is the only option, Claude goes on without asking.
-- **When you are away**, Claude splits the work at 75%. At 90% Claude saves its place and stops, leaving a prompt you can paste to resume after the reset.
-- **The 7-day limit** never holds up the work at hand. At 75% or more, Claude puts off optional heavy work, such as a [`/gaia-fitness`](/maintenance/fitness/) run or a batch of [`/gaia-debt`](/workflow/debt/) fixes.
+- **When you are at the session**, a 5-hour limit at its warning level makes Claude ask how to go on. Claude offers to split the work when it divides at the next step, to wait when the limit would run out before the reset, and always to push through, which draws on paid usage. When pushing through is the only option, Claude goes on without asking.
+- **When you are away**, Claude splits the work at the warning level. At the critical level Claude saves its place and stops, leaving a prompt you can paste to resume after the reset.
+- **The 7-day limit** never holds up the work at hand. At its warning level or higher, Claude puts off optional heavy work, such as a [`/gaia-fitness`](/maintenance/fitness/) run or a batch of [`/gaia-debt`](/workflow/debt/) fixes.
 
 GAIA also checks the limits before each phase of a [`/gaia-plan`](/workflow/plan/) plan and each time it starts the [Code Audit Team](/workflow/code-audit-team/), not only the first time a limit reaches a level.
 
