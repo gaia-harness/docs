@@ -53,7 +53,7 @@ The stage never lists a test of something the SPEC does not state, or a second t
 1. **Read.** The stage reads the SPEC's [behaviors](/workflow/spec/#behaviors) and flows, your words in `REQUIREMENTS.md`, and every task file. It works from what the SPEC states, not from the code.
 2. **List.** It writes each task's test list and, for a plan from a SPEC, the closing flow-test phase.
 3. **Check.** A script refuses a malformed line, a behavior the SPEC does not have, a security, refusal, or data-loss behavior with no test, a flow with no flow test, two tests of one behavior on the same layer, and a test marked with the wrong security kind. If a check fails, the stage fixes its lists and runs the checks once more, then stops with the reason if one still fails.
-4. **Review.** One more reviewer confirms that every listed test proves a behavior the SPEC states and that the limit holds. Its findings are applied and the checks run again.
+4. **Review.** One more reviewer confirms that every listed test proves a behavior the SPEC states and that the limit holds. It reads a short summary of the test lists that a script writes, not the whole plan, and reads the whole plan only when that summary is unavailable. Its findings are applied and the checks run again.
 5. **Record.** Only once the checks pass does the stage record that it ran.
 
 The stage's cost is counted on its own. A plan from a SPEC ends with a [cost box](/models-and-context/cost/) with **Spec**, **Plan**, and **Test** rows.

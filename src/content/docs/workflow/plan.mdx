@@ -55,8 +55,9 @@ Inside it:
 | File | Purpose |
 | --- | --- |
 | `README.md` | The overview: phase order, the tasks in each phase and their models, the shared contracts, and the source SPEC. |
-| `ORCHESTRATOR.md` | The orchestrator's step-by-step instructions: where the work runs, phases and quality gates, sub-agent prompts, the audit before merge, git steps, and when to stop. |
-| `KICKOFF.md` | The prompt a fresh session reads to start. |
+| `orchestrator-parts.md` | The parts that differ from plan to plan: the title, the phase order and entries, and the kickoff goal. The planner writes it, and the test stage adds its closing phase to it. |
+| `ORCHESTRATOR.md` | The orchestrator's step-by-step instructions: where the work runs, phases and quality gates, sub-agent prompts, the audit before merge, git steps, and when to stop. A script builds it from one shared template and `orchestrator-parts.md`, so every plan carries the same standard steps. |
+| `KICKOFF.md` | The prompt a fresh session reads to start. A script builds it the same way. |
 | `task-<name>.md` | One per task: the files to read first, contracts, files to change, acceptance criteria, dependencies, and the tests the [test stage](/workflow/test-stage/) lists for it. |
 | `TEST-STAGE` | Whether the test stage ran or was skipped. |
 | `PROGRESS.md` | Written during execution: one entry per completed or halted phase. |
