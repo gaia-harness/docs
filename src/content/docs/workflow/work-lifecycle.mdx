@@ -161,7 +161,7 @@ Every worktree gets its own ports for the app's dev server, [Storybook](https://
 
 ## 4. Commit and open the draft pull request
 
-Every commit passes the commit hooks, and one that touches source or build configuration also passes the [Quality Gate](/workflow/code-audit-team/#quality-gate). The pull request opens as a draft with a Conventional Commits title. `Closes #<n>` goes in the pull request body, never in a commit message, because a squash merge copies commit messages into the final commit and GitHub would close the issue from there.
+Every commit passes the commit hooks, and one that touches source or build configuration also passes the [Quality Gate](/workflow/code-audit-team/#quality-gate). The pull request opens as a draft with a Conventional Commits title. `Closes #<n>` goes at the end of the pull request body's `## Summary`, one line per issue, never in a commit message, because a squash merge copies commit messages into the final commit and GitHub would close the issue from there.
 
 <Aside type="note" title="Why draft?">
 A draft tells reviewers the pull request is still in progress. GAIA marks it ready for review once the audit passes. See the [gate reference](/reference/gates/#draft-pull-requests).
