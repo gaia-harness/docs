@@ -190,13 +190,25 @@ Claude never types any of these lines for you. In an unattended run, Claude save
 
 **Why:** a loop nobody watches keeps spending with no limit, and "is another round worth it?" should not be decided by the session least able to judge it. See the [gate reference](/reference/gates/#audit-checkpoint).
 
+### The PR review
+
+Once the audit finishes clean, a [`pr-reviewer`](/reference/agents/#pr-reviewer) agent reads the whole pull request once. It checks that the change does what its spec or issue asks, that its tests are worth having, and that its summary and CHANGELOG say what is true. It never sees the audit's findings, so it judges the pull request fresh. Every pull request gets it, small and docs-only ones included. One the audit skips gets it just before the merge. It costs about as much as one member review.
+
+Claude decides each finding. It is fixed by default, or else dismissed with evidence or filed as an issue. A fix to a file a member owns goes back through the audit loop, so that member reviews the repair. A wrong claim in the summary is corrected in place. A fix to a file no member owns stops for you to repair it. The review never runs again on its own fixes. To keep a finding as an [accepted residual](/maintenance/residue/#what-a-residual-is) instead, type this as the whole prompt, with the finding's id:
+
+```text
+pr-review-accept pr-<n>
+```
+
+A Critical or security-related finding cannot be accepted. If the reviewer returns nothing twice, Claude asks whether to hold the pull request or retry the review. The merge waits until every finding is decided and the pull request's `## PR review` section shows the result ([gate](/reference/gates/#pr-review-not-complete)).
+
 ## Posting GAIA-Audit
 
-Claude posts the `GAIA-Audit` success status last: once every involved member has approved the current change, every finding is fixed or recorded, the steps a [smaller gate](#what-it-checks) skipped have passed, and the last push has landed. Before it posts, Claude reads the pull request's summary against the branch's commits and final diff, and rewrites it only where a claim is false or a change that matters is missing. A commit pushed after that check sends the summary back to be checked again before the merge ([gate](/reference/gates/#pull-request-summary-not-re-checked)). If one of those steps fails, the loop reopens a round to fix it. Posting success also marks the draft pull request ready for review.
+Claude posts the `GAIA-Audit` success status last: once every involved member has approved the current change, every finding is fixed or recorded, the [PR review](#the-pr-review) is complete, the steps a [smaller gate](#what-it-checks) skipped have passed, and the last push has landed. Before it posts, Claude reads the pull request's summary against the branch's commits and final diff, and rewrites it only where a claim is false or a change that matters is missing. A commit pushed after that check sends the summary back to be checked again before the merge ([gate](/reference/gates/#pull-request-summary-not-re-checked)). If one of those steps fails, the loop reopens a round to fix it. Posting success also marks the draft pull request ready for review.
 
 A member's refusal posts a `GAIA-Audit` failure at once, so GitHub's auto-merge cannot merge the pull request.
 
-A pull request the audit does not need to review (every file outside its scope, or a manifest-only `chore(deps)` update from `/update-deps`) gets the check posted by the merge hook as `skipped`.
+A pull request the audit does not need to review (every file outside its scope, or a manifest-only `chore(deps)` update from `/update-deps`) gets the check posted by the merge hook as `skipped`, once its PR review is complete.
 
 <Aside type="note">
 A pull request merged from the GitHub UI without going through Claude (a raw [Dependabot](https://docs.github.com/en/code-security/dependabot) pull request, for example) never gets the check, so it waits on `GAIA-Audit` forever. Ask Claude to merge it once.
@@ -205,6 +217,7 @@ A pull request merged from the GitHub UI without going through Claude (a raw [De
 ## What lands in the pull request
 
 - **`## Audit rounds`**: total rounds, rounds per member, light reviews, rounds you granted, and the code review's outcome and cost.
+- **`## PR review`**: the PR review's findings and what was done with each. A security-related finding shows only its severity.
 - **`## Accepted residuals (recorded, not fixed)`**: accepted findings, which [`/gaia-residue`](/maintenance/residue/) reads later.
 - **A findings comment**, posted on merge, with every round's findings. Security and Critical findings appear only as a count.
 
@@ -217,6 +230,7 @@ If Claude tries to merge before the audit is done, the merge hook turns it back 
 | Claude sees | What it means | Next step |
 |---|---|---|
 | A member has no clearance for the current change | That member has not reviewed the latest commit to its files, or refused it | Claude runs the audit loop. A refusal clears only when the finding is fixed or you accept that Major finding at the [branch checkpoint](#the-branch-checkpoint), after which Claude runs that member again so its approval replaces the refusal. |
+| The PR review is not complete | The review has not run in this checkout, or a finding is undecided or not yet fixed | Claude runs or finishes the [PR review](#the-pr-review) and retries. |
 | The base tip is not a commit in this checkout | Your checkout has not fetched the base branch | Claude fetches it and retries. |
 | GitHub cannot be reached | The audit cannot read the pull request's base branch | Claude shows the `gh` error. If it is a sign-in problem, run `gh auth login` yourself, since it opens a browser sign-in. |
 | More than one merge base with the base tip | Git cannot tell what your branch changed | Claude merges the base branch into yours and retries. |

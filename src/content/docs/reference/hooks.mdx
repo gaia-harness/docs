@@ -23,6 +23,7 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 | `block-no-verify` | `git commit` or `git push` with `--no-verify`, `-n` on a commit, or `-c` or `--config-env` setting `core.hooksPath`. |
 | `block-rm-rf` | `rm -rf` of `/`, an absolute path outside the allowed scratch folders, `$HOME`, `.`, `*`, dotfile globs, `.git`, `.claude` and its children, and `node_modules`, plus `--no-preserve-root`. Scratch paths and the session scratchpad are allowed. |
 | `block-sensitive-read` | Reading dotenv files (`.env` and every `.env.<name>` except `.env.example`), keys (`.key`, `.pem`), files whose name contains `credential` (except TypeScript source), and anything under a `secrets` directory, through any Bash command that reads files, `source`, redirects, and filter flags such as `rg -g '*.key'`. Also plain `env` or `printenv`, which print every environment variable. Also registered on Read and Grep. |
+| `block-pr-reviewer-audit-read` | The `pr-reviewer` agent's reads of the audit's findings and state, so the [PR review](/workflow/code-audit-team/#the-pr-review) is not shaped by what the audit already found. Your session and every other agent pass untouched. Also registered on Read, Grep, and Glob. |
 | `block-manifest-write` | Writes to `.gaia/manifest.json`, which lists only the files GAIA ships. `/update-gaia` writes it through a specific exemption. |
 | `block-settings-write` | **Asks** you to confirm a command that writes a `.claude/settings.json` file through a redirect, `tee`, `sponge`, `sed -i`, or as a `cp` or `mv` destination. See [the gate](/reference/gates/#claude-settings-file). |
 | `block-invalid-pr-title` | A `gh pr create` or `gh pr edit` whose title would fail the PR Conventions lint once it becomes the squash-merge commit message (the title plus ` (#<n>)`), and `--fill` with no `--title`. |
@@ -30,7 +31,7 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 | `block-pr-create-without-draft` | A `gh pr create` for this repository without `--draft`. |
 | `block-fork-pr-checkout` | `gh pr checkout` or a `git fetch` of `pull/<n>/head` or `pull/<n>/merge` for a pull request from a fork, or one that `gh` cannot identify as fork or not. |
 | `block-handrolled-pr-poll` | A shell loop that checks `gh pr view` or `gh pr checks` over and over without reading `mergeable`. Claude uses GAIA's merge wait instead. |
-| `pr-merge-audit-check` | `gh pr merge` until every Code Audit Team member responsible for the changed files has approved it, and an audited merge until the pull request's summary is [re-checked](/reference/gates/#pull-request-summary-not-re-checked) for its latest commit. For a pull request outside the audit's scope, or a `chore(deps)` pull request that only changes dependency manifests, it posts the `skipped:` status itself. While you have turned on the autonomy switch, it also turns back every merge unless the switch allows merging, and logs each merge it allows. |
+| `pr-merge-audit-check` | `gh pr merge` until every Code Audit Team member responsible for the changed files has approved it and the [PR review](/workflow/code-audit-team/#the-pr-review) is complete, and an audited merge until the pull request's summary is [re-checked](/reference/gates/#pull-request-summary-not-re-checked) for its latest commit. For a pull request outside the audit's scope, or a `chore(deps)` pull request that only changes dependency manifests, it posts the `skipped:` status itself once the PR review is complete. While you have turned on the autonomy switch, it also turns back every merge unless the switch allows merging, and logs each merge it allows. |
 | `worthiness-presence-check` | `gh pr merge` when a changed test has no worthiness record for its current content. It covers every test in the React app, including stories, [Playwright](https://playwright.dev/) tests, route tests, and utility, service, and hook tests. It checks only that the record exists, not its verdict. |
 | `block-audit-loop-write` | Writes to the audit loop's protected state, context readings, and the saved [usage limit](/workflow/statusline/#usage-limits) figures and plan tier, running by hand the scripts that record your grant or write those figures, and running the local-state cleanup scripts that only a hook may start. |
 
@@ -49,7 +50,7 @@ Why each guard exists, and how to clear it, is in the [gate reference](/referenc
 
 | Hook | Turns back Claude's |
 |---|---|
-| `block-scheduled-audit-line` | `ScheduleWakeup`, `CronCreate`, `RemoteTrigger`, and `SendMessage` calls whose prompt or message is exactly an audit checkpoint answer (`audit-grant <n>`, `audit-accept`, or `audit-accept-finding <n>`). Only you type those. A prompt Claude schedules for its own session would reach the recorder as if you had typed it. |
+| `block-scheduled-audit-line` | `ScheduleWakeup`, `CronCreate`, `RemoteTrigger`, and `SendMessage` calls whose prompt or message is exactly an audit checkpoint answer (`audit-grant <n>`, `audit-accept`, `audit-accept-finding <n>`, or `pr-review-accept pr-<n>`). Only you type those. A prompt Claude schedules for its own session would reach the recorder as if you had typed it. |
 
 ### Questions and self-governing files
 
@@ -69,9 +70,9 @@ These hooks never turn anything back. They record what happened (grants, usage),
 
 | Hook | Event | What it does |
 |---|---|---|
-| `audit-loop-grant` | UserPromptSubmit | Records `audit-grant <n>`, `audit-accept`, or `audit-accept-finding <n>`, typed as your whole message in an interactive session. |
+| `audit-loop-grant` | UserPromptSubmit | Records `audit-grant <n>`, `audit-accept`, `audit-accept-finding <n>`, or `pr-review-accept pr-<n>`, typed as your whole message in an interactive session. |
 | `audit-loop-ask-grant` | PostToolUse (AskUserQuestion) | Records your answer to the audit checkpoint's question. |
-| `classify-git-command` | PreToolUse (Bash) | Approves a git command it can vouch for, so an ordinary commit, push, rebase, or merge runs without a permission prompt, including in an unattended `/loop`. It approves only `git` commands in this repository, from a list of safe subcommands and options, with no substitution, no redirect to a file, and no pipe other than into `head`, `tail`, or `wc -l`. Anything else still prompts you. It never turns a command back, and a refusal from a guard above still wins. |
+| `classify-git-command` | PreToolUse (Bash) | Approves a git command it can vouch for, so an ordinary commit, push, rebase, or merge runs without a permission prompt, including in an unattended `/loop`. It approves only `git` commands in this repository, from a list of safe subcommands and options, with no substitution and no redirect to a file. Git can share the command with an `echo`, a read-only program such as `grep`, `jq`, or `head` on files in this repository, or a command your settings already allow, and read-only git can name its folder through a variable (`R=<path>; git -C "$R" status`). Anything else still prompts you. It never turns a command back, and a refusal from a guard above still wins. |
 | `post-findings-block-on-merge` | PreToolUse (`gh pr merge`) | Posts one comment collecting the pull request's audit findings, which `/gaia-codify` later counts. Never blocks. |
 | `capture-gh-artifact` | PostToolUse (`gh pr create`) | Links the pull request to its branch in the usage ledger. |
 | `pr-merge-cost` | PostToolUse (`gh pr merge`) | Prints the pull request's cost box. |

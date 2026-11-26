@@ -33,7 +33,7 @@ It takes no arguments. It runs like every [maintenance command](/maintenance/#ho
 2. **Consolidate** finds redundant or contradicting pages and asks you about each one.
 3. **Lint** checks the wiki's health and fixes what it finds.
 4. **One commit** with all three stages' edits, titled `wiki: <date> <time> UTC`.
-5. **One pull request** with that title, outside the [code audit's](/workflow/code-audit-team/) scope and set to merge automatically.
+5. **One pull request** with that title, outside the [code audit's](/workflow/code-audit-team/) scope. It gets the [PR review](/workflow/code-audit-team/#the-pr-review), then is set to merge automatically.
 6. Claude **waits for the merge**, removes the worktree and branch, pulls `main`, and clears the nudge.
 
 When sync stops partway (a first run, a rewritten history, an interruption), consolidate and lint are skipped, and what sync finished still lands. A cancelled run commits nothing.

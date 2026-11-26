@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-GAIA ships ten [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.claude/agents/`. You never start one yourself: a workflow starts each one when it needs it. Each sub-agent starts with a fresh context, so a reviewer judges the work without the reasoning of the session that wrote it, and its reading stays out of your session's context. Each agent uses a [fixed model](/models-and-context/model-choice/) and runs at your session's [`/effort` level](/models-and-context/model-choice/#effort). Each agent can use only the tools listed in its definition, which keeps what it starts with small.
+GAIA ships eleven [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.claude/agents/`. You never start one yourself. A workflow starts each one when it needs it. Each sub-agent starts with a fresh context, so a reviewer judges the work without the reasoning of the session that wrote it, and its reading stays out of your session's context. Each agent uses a [fixed model](/models-and-context/model-choice/) and runs at your session's [`/effort` level](/models-and-context/model-choice/#effort). Each agent can use only the tools listed in its definition, which keeps what it starts with small.
 
 | Agent | Model | Started by | Edits files? |
 |---|---|---|---|
@@ -16,6 +16,7 @@ GAIA ships ten [sub-agents](https://code.claude.com/docs/en/sub-agents) in `.cla
 | [`audit-refuter`](#audit-refuter) | Sonnet | `code-audit-frontend` | No (read-only) |
 | [`audit-loop-unit`](#audit-loop-unit) | Opus | the merge workflow | Commits fix rounds |
 | [`audit-light-reviewer`](#audit-light-reviewer) | Sonnet | the audit loop, for a light review | No (read-only) |
+| [`pr-reviewer`](#pr-reviewer) | Opus | the merge workflow | No (read-only) |
 | [`worthiness-evaluator`](#worthiness-evaluator) | Opus | the worthiness step, the `tdd` skill | No |
 | [`security-test-writer`](#security-test-writer) | Sonnet | a plan run's security tests, the audit loop | Writes security tests only |
 | [`fitness-judge`](#fitness-judge) | Sonnet | `/gaia-fitness` | No (read-only) |
@@ -69,6 +70,10 @@ Turn on light review for the <member> Code Audit Team member, with a line cap of
 ```
 
 It also takes the first review of a small, purely presentational change, before any member has read the branch. A script admits only presentational shapes (static text, swapping one HTML tag for another, static class changes, translation text with the same keys and placeholders, story `args:` values). See [Light review](/workflow/code-audit-team/#light-review).
+
+### pr-reviewer
+
+Reads the whole pull request once before it merges, the way you would. It checks that the change does what its spec or issue asks, that its tests are worth having, and that its summary and CHANGELOG say what is true. It sees the changed files, the spec, the summary, and the rules for the changed paths, but none of the audit's findings, so it catches gaps that a member reviewing only its own files can miss. A [hook](/reference/hooks/) keeps it out of the audit's state. The only file it writes is its list of findings. See [The PR review](/workflow/code-audit-team/#the-pr-review).
 
 ## Tests
 

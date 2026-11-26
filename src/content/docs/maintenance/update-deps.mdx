@@ -79,7 +79,7 @@ A snooze ends after 14 days, or sooner when a newer version of the group ships.
 6. **Quality gate**: `pnpm typecheck`, `pnpm lint`, `pnpm test:ci`, `pnpm pw`, and `pnpm build`.
 7. **Publish**: one commit, `chore(deps): ...` (`chore(deps-dev):` when only devDependencies moved), a draft pull request, merged once checks are green, then local cleanup.
 
-A `chore(deps)` pull request that changes only dependency files (such as `package.json` and the lockfile) skips the `code-audit-frontend` review; any other member the change calls for still reviews it. One that also changes code for a migration gets the full [Code Audit Team](/workflow/code-audit-team/) audit.
+A `chore(deps)` pull request that changes only dependency files (such as `package.json` and the lockfile) skips the `code-audit-frontend` review; any other member the change calls for still reviews it. One that also changes code for a migration gets the full [Code Audit Team](/workflow/code-audit-team/) audit. Every one gets the [PR review](/workflow/code-audit-team/#the-pr-review) before it merges.
 
 The run also offers to upgrade the global `playwright-cli` binary when it is behind, and to move the fixed [React Doctor](/reference/tools/#react-doctor) version once a newer release is past the [release-age window](#release-age-window). A React Doctor move goes in the same pull request and gets the normal audit, with no dependency-only shortcut, since it changes more than dependency files. The run ends with a [cost line](/models-and-context/cost/).
 
