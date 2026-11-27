@@ -77,7 +77,7 @@ With `may_merge` set to `false`, GAIA turns back every `gh pr merge`, and the ru
 4. A draft SPEC, which it continues with you. Unattended runs skip this one, since a SPEC's answers are requirements and nobody would be there to approve them.
 5. The top [tech-debt](/workflow/debt/) issue, the way `/gaia-debt` would pick it.
 
-When none is left that this run may take, it ends the loop. You can also type `/gaia-next` yourself to run the next job once.
+When none is left that this run may take, it ends the loop. It also ends the loop once your session's context reaches the [red band](/models-and-context/token-efficiency/#context-bands). It then takes no new job, saves its place, and prints a prompt to paste after `/clear`. The prompt starts the loop again in a fresh session, and each job picks up from where it stopped. You can also type `/gaia-next` yourself to run the next job once.
 
 While the switch is on, `/gaia-next` skips a few things and says so, one line each:
 

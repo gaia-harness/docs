@@ -66,7 +66,7 @@ The run also reports whether Claude Code's built-in checks (`claude doctor`, `cl
 
 ### The judgment pass
 
-When there is something to judge, one Sonnet agent (`fitness-judge`) answers five questions no script can. It reads files but never changes them.
+When there is something to judge, Sonnet agents (`fitness-judge`) answer five questions no script can. They read files but never change them. On a large project GAIA splits the files among several judges that run at the same time, and each judge must show it read every file to the end. A judge that did not runs once more, then Claude judges those files itself, so a judgment pass that missed files is never reported clean.
 
 - **Description substance**: does a skill's or command's description say when to use it?
 - **Trigger overlap**: do two skills claim the same requests?
