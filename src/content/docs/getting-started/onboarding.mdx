@@ -21,7 +21,7 @@ Everything GAIA installs is on from your first session; nothing needs switching 
 
 - **Draft and title.** The pull request opens as a draft ([why](/reference/gates/#draft-pull-requests)) with a title in commit-message format, since a squash merge uses it as the commit message ([why](/reference/gates/#pull-request-title)).
 - **Code Audit Team.** AI reviewers, each owning certain files, review the change and GAIA fixes what they find until it passes ([why](/reference/gates/#merge-without-the-audit)). See [Code Audit Team](/workflow/code-audit-team/).
-- **The branch checkpoint.** If your session's context runs low, or the reviews keep finding new problems, GAIA stops and asks you whether to continue ([why](/reference/gates/#audit-checkpoint)).
+- **The branch checkpoint.** The audit keeps going on its own while another round is the clear next step. If your session's context runs low, Claude prints a prompt to continue in a fresh session. GAIA stops and asks you only when the decision is yours, such as at the round limit ([why](/reference/gates/#audit-checkpoint)).
 - **GAIA-Audit.** When the audit passes, GAIA posts a `GAIA-Audit` status check. After a repo admin runs [`/setup-gaia`](/getting-started/setup-gaia/), GitHub requires it to merge ([why](/reference/gates/#gaia-audit-required-check)).
 - **Merge**, when you ask. GAIA shows what the pull request [cost](/models-and-context/cost/).
 

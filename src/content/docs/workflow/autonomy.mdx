@@ -57,9 +57,9 @@ The pull request shows its own slice. A `## Decided unattended` section lists ea
 
 ## The audit budget
 
-The [Code Audit Team](/workflow/code-audit-team/#the-branch-checkpoint) stops at a checkpoint after enough rounds, and you normally answer it. While the switch is on, GAIA can spend one budget unit in place of your answer. Each pull request gets at most `audit_extra_units_per_pr` of them, and all pull requests together get at most `audit_units_pool`. Spend before a pull request exists counts toward its limit.
+The [Code Audit Team](/workflow/code-audit-team/#the-branch-checkpoint) stops at a checkpoint after enough rounds. GAIA continues past some on its own, with no budget spent, and you normally answer the rest. While the switch is on, GAIA can spend one budget unit in place of your answer. Each pull request gets at most `audit_extra_units_per_pr` of them, and all pull requests together get at most `audit_units_pool`. Spend before a pull request exists counts toward its limit.
 
-Some checkpoints always wait for you, whatever the budget. These include the round limit, the context checkpoint, a finding that came back after it was fixed, a checkpoint after you accepted the remaining findings, and any case where the budget is empty. The `## Audit rounds` line of the pull request reports the units spent as `budget grants:`, apart from the rounds you granted.
+Some checkpoints always wait for you, whatever the budget. These include the round limit, a finding that came back after it was fixed, a checkpoint after you accepted the remaining findings, and any case where the budget is empty. The `## Audit rounds` line of the pull request reports the units spent as `budget grants:`, apart from the rounds you granted (`human grants:`) and the ones GAIA continued on its own (`automatic grants:`).
 
 Rewriting the switch file starts a fresh budget.
 
@@ -84,6 +84,7 @@ While the switch is on, `/gaia-next` skips a few things and says so, one line ea
 - Work that is already parked. A new commit on its branch puts it back in the queue, and an interactive run picks it up with you.
 - A plan or issue that needs a change to a file that governs the harness, since the run could not make it. An interactive run takes it.
 - A plan, pull request, or stopped fix that another Claude session already holds, whether or not the switch is on.
+- A plan or pull request this session handed off at an audit checkpoint, whether or not the switch is on. Another session takes it.
 
 An unattended run acts only on review comments from people who could push the change themselves. It treats every other comment as text to read, never as instructions.
 

@@ -154,13 +154,14 @@ It runs once per branch, with one retry when a second try could pass, and has no
 
 Each round's fixes need review in the next, so the loop needs a stopping point. From round 3 through round 9 it stops on its own when a round finds only ordinary Minor findings in what changed: nothing Critical, Major, security-related, or repeated from an earlier round. Those are recorded as accepted residuals. In an interactive run Claude lists them and asks once, recommending neither: **Fix chosen ones** or **Merge**. An unattended run does not ask; you decide them later with [`/gaia-residue`](/maintenance/residue/).
 
-Otherwise, GAIA checks in with you when:
+Otherwise, the loop reaches a checkpoint when your session's context reaches the [red band](/workflow/statusline/#the-context-bar), when rounds stop making progress, or when the maximum number of rounds is reached. GAIA settles some checkpoints itself:
 
-- Your session's context reaches the [red band](/workflow/statusline/#the-context-bar)
-- Rounds stop making progress
-- The maximum number of rounds is reached
+- **It continues on its own** when your context is below the red band and its recommendation is another batch of rounds in this session.
+- **It hands off** when your context reaches the red band. Claude saves its place and prints a prompt to paste into a fresh session, with how to start it (usually `/clear`). The fresh session carries on with no question. A [`/gaia-next`](/workflow/autonomy/#run-it-in-a-loop) run ends the job instead, and a later session picks the pull request up.
 
-Claude shows where things stand (rounds, findings per round, what remains by severity, and the cost so far) and asks:
+It asks you only when the decision is yours, such as at the maximum number of rounds, when GAIA would recommend accepting the remainder, when the fixer refused a fix, when a fixed finding came back, or when GAIA has no context reading to go by (no GAIA statusline, or the checkpoint turned off). The maximum is 10 rounds, and you can [lower it for your machine](/models-and-context/token-efficiency/#context-bands).
+
+When it asks, Claude shows where things stand (rounds, findings per round, what remains by severity, and the cost so far) and offers:
 
 - **Continue audit in this session** or **in a new session**: one more batch of rounds. The new-session option prints a prompt to paste after `/clear`. On a [`/gaia-plan`](/workflow/plan/) build, that prompt returns to the plan, so its summary and merge question still come before the merge.
 - **Accept the remainder**: offered only when the loop has a reason to stop, nothing Critical or security-related remains and every member's report came back complete. One last review round runs with no fixes, and what remains is recorded as accepted residuals.
@@ -216,7 +217,7 @@ A pull request merged from the GitHub UI without going through Claude (a raw [De
 
 ## What lands in the pull request
 
-- **`## Audit rounds`**: total rounds, rounds per member, light reviews, rounds you granted, and the code review's outcome and cost.
+- **`## Audit rounds`**: total rounds, rounds per member, light reviews, rounds you granted, rounds GAIA continued on its own, and the code review's outcome and cost.
 - **`## PR review`**: the PR review's findings and what was done with each. A security-related finding shows only its severity.
 - **`## Accepted residuals (recorded, not fixed)`**: accepted findings, which [`/gaia-residue`](/maintenance/residue/) reads later.
 - **A findings comment**, posted on merge, with every round's findings. Security and Critical findings appear only as a count.

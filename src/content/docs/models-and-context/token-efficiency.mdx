@@ -140,6 +140,14 @@ echo '{"version":1,"context_checkpoint":{"ask_tokens":350000}}' > .gaia/local/pr
 
 A value outside the range is moved to the nearer end, and a file GAIA cannot use (the wrong shape, or `jq` not installed) falls back to 300,000. Either way, GAIA warns at the start of each session and the statusline shows `⚠ override` until you fix the file. Setting `ask_tokens` to `0` turns the checkpoint off, so only Claude Code's automatic compaction limits the context. That is not recommended. If an audit has already started on your branch, a higher value or `0` takes effect on your next branch; a lower one applies right away.
 
+The same file can lower the audit's [round limit](/workflow/code-audit-team/#the-branch-checkpoint) for your machine, anywhere from 10 down to 1, so the audit continues on its own for fewer rounds before it asks you. Keep both settings in the one file:
+
+```bash
+echo '{"version":1,"context_checkpoint":{"ask_tokens":350000},"audit_loop":{"round_cap":4}}' > .gaia/local/protected/checkpoint-override.json
+```
+
+A `round_cap` above 10 counts as 10. Any other value GAIA cannot use turns off the audit's automatic continue and hand-off, so every checkpoint asks you. GAIA warns about either at the start of each session.
+
 What Claude does at each band, and how to clear and pick up where you left off, is on [Resuming long work](/workflow/work-lifecycle/#resuming-long-work).
 
 ### Sub-agents
