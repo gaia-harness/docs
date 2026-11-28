@@ -189,7 +189,7 @@ GAIA squash-merges through GitHub's auto-merge, which completes once the require
 
 ## 7. Clean up
 
-After the merge, GAIA removes the worktree (or switches off the feature branch), deletes the local branch, and pulls `main`, reinstalling dependencies only when the lockfile changed.
+After the merge, GAIA removes the worktree (or switches off the feature branch), deletes the local branch and its stash entries, and pulls `main`, reinstalling dependencies only when the lockfile changed.
 
 Cleanup never forces a pull and never stashes. A worktree with uncommitted files or unpushed commits is kept, and GAIA tells you what is left. Kept worktrees whose work is merged are listed at every session start, and Claude removes one only when you name it.
 

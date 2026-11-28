@@ -86,6 +86,14 @@ The rest of this page lists every gate: what it stops, why, when it runs, who ac
 - **Who acts:** Claude, and you only when the branch is your own and you really want to switch.
 - **Clear it:** after a merge, Claude uses the worktree cleanup, which never runs `git checkout`. If the branch is your own, run the command yourself with the `!` prefix, since the guard acts only on Claude.
 
+### Another branch's stash
+
+- **Stops:** `git stash pop`, `apply`, `drop`, `branch`, or `clear` on an entry made on a different branch than the one Claude is on. `clear` runs only when every entry is the current branch's. Listing, showing, and creating stash entries stay allowed.
+- **Why:** every worktree shares one stash stack. A bare `git stash pop` takes the newest entry, whoever made it, so another session's uncommitted work would land in this tree or be deleted.
+- **When:** before the `git` command runs (`block-main-destructive-git`).
+- **Who acts:** Claude, and you only when you want another branch's entry.
+- **Clear it:** the refusal names the entry's branch. To set work aside, Claude makes a WIP commit instead. If you want that entry, run the command yourself with the `!` prefix.
+
 ### No-verify
 
 - **Stops:** `git commit` or `git push` with `--no-verify`, `-n` on a commit, or `-c` or `--config-env` setting `core.hooksPath`. Each of these skips the git hooks.
