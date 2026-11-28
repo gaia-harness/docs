@@ -38,6 +38,7 @@ Leave out either audit field and its budget is zero. The switch still works, and
 ## What an unattended run does
 
 - **Takes the recommended answer.** When Claude would ask you a question with exactly one recommended option, GAIA picks that option and Claude carries on.
+- **Repairs a failed phase gate once.** When a [plan run's](/workflow/plan/#execution) phase gate fails in a way that would stop the plan, Claude fixes the cause once per phase, and GAIA checks the edit before the whole gate runs again. GAIA turns back a repair that deletes a file or touches a file the phase's tasks do not name. A turned-back repair, or a gate that fails again, ends the run.
 - **Parks instead of guessing.** A question with no recommended option or several, a question on a short list GAIA keeps for humans only, and an [audit checkpoint](/workflow/code-audit-team/#the-branch-checkpoint) all park the run. So does a recommended merge while `may_merge` is `false`.
 - **Leaves GAIA's own rules alone.** A write to a file that governs the harness (settings, hooks, rules, agents, skills, commands, `CLAUDE.md`) parks the run, so an unattended run cannot loosen its own guards.
 
